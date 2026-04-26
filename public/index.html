@@ -640,7 +640,10 @@
     }
 
     // Init icons
-    document.addEventListener('DOMContentLoaded', safeLucideInit);
+    document.addEventListener('DOMContentLoaded', () => {
+      safeLucideInit();
+      switchTab('sell');
+    });
 
     function getSwitchAsset(symbol, network) {
       if (!symbol || !network) return '';
@@ -880,8 +883,8 @@
         sellTab.classList.add('text-velcro-navy');
         buyTab.classList.remove('text-velcro-navy');
         buyTab.classList.add('text-gray-500');
-        sellForm.style.display = '';
-        buyForm.style.display = 'none';
+        sellForm.classList.remove('hidden');
+        buyForm.classList.add('hidden');
         if (stepLabels) stepLabels.innerHTML = '<span>Asset</span><span>Network</span><span>Amount</span><span>Bank</span>';
       } else {
         indicator.style.left = 'calc(50% + 2px)';
@@ -889,8 +892,8 @@
         sellTab.classList.add('text-gray-500');
         buyTab.classList.remove('text-gray-500');
         buyTab.classList.add('text-velcro-navy');
-        sellForm.style.display = 'none';
-        buyForm.style.display = '';
+        sellForm.classList.add('hidden');
+        buyForm.classList.remove('hidden');
         if (stepLabels) stepLabels.innerHTML = '<span>Asset</span><span>Network</span><span>Amount</span><span>Wallet</span>';
       }
       updateNavRate();
