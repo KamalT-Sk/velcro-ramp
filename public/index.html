@@ -197,21 +197,15 @@
                     </div>
                   </div>
                 </div>
-                <div class="network-pill opacity-50 pointer-events-none" id="sell-network-wrap" onclick="toggleDropdown('sell-network-options')">
-                  <span id="sell-network-display" class="flex items-center gap-1.5">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/></svg>
-                    Select Network
-                  </span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
-                </div>
-              </div>
-            </div>
-            <div id="sell-amount-step" class="flex items-center gap-3 mt-3 opacity-50 pointer-events-none transition-opacity">
-              <span class="text-3xl font-bold text-gray-400" id="sell-currency-prefix">$</span>
-              <input type="number" id="sell-amount" placeholder="0.00" min="0" step="0.01" oninput="calculateSell()" 
-                class="display-input flex-1 text-3xl font-bold text-gray-900 bg-transparent outline-none w-full p-0 border-none focus:ring-0 amount-input">
-            </div>
-            <div class="custom-select-options" id="sell-network-options" style="position:absolute;z-index:50;">
+                <div class="custom-select">
+                  <div class="network-pill opacity-50 pointer-events-none" id="sell-network-wrap" onclick="toggleDropdown('sell-network-options')">
+                    <span id="sell-network-display" class="flex items-center gap-1.5">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/></svg>
+                      Select Network
+                    </span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
+                  </div>
+                  <div class="custom-select-options" id="sell-network-options">
               <div class="custom-option" onclick="selectSellNetwork('solana', '/logos/solana.png', 'Solana')">
                 <img src="/logos/solana.png" class="w-6 h-6" alt="Solana"><span class="font-medium">Solana</span>
               </div>
@@ -404,20 +398,15 @@
                     </div>
                   </div>
                 </div>
-                <div class="network-pill opacity-50 pointer-events-none" id="buy-network-wrap" onclick="toggleDropdown('buy-network-options')">
-                  <span id="buy-network-display" class="flex items-center gap-1.5">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/></svg>
-                    Select Network
-                  </span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
-                </div>
-              </div>
-            </div>
-            <div class="flex items-center gap-3 mt-3">
-              <input type="number" id="buy-receive" placeholder="0.00" min="0" step="0.01" oninput="calculateBuyFromCrypto()"
-                class="display-input flex-1 text-3xl font-bold text-gray-900 bg-transparent outline-none w-full p-0 border-none focus:ring-0 amount-input">
-            </div>
-            <div class="custom-select-options" id="buy-network-options" style="position:absolute;z-index:50;">
+                <div class="custom-select">
+                  <div class="network-pill opacity-50 pointer-events-none" id="buy-network-wrap" onclick="toggleDropdown('buy-network-options')">
+                    <span id="buy-network-display" class="flex items-center gap-1.5">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/></svg>
+                      Select Network
+                    </span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
+                  </div>
+                  <div class="custom-select-options" id="buy-network-options">
               <div class="custom-option" onclick="selectBuyNetwork('solana', '/logos/solana.png', 'Solana')">
                 <img src="/logos/solana.png" class="w-6 h-6" alt="Solana"><span class="font-medium">Solana</span>
               </div>
