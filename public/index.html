@@ -108,13 +108,19 @@
         <div class="mb-4 flex justify-end">
           <div class="custom-select" id="country-wrap">
             <div class="custom-select-trigger bg-white hover:bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 flex items-center gap-2 transition-colors text-sm" onclick="toggleDropdown('country-options')">
-              <span id="country-display" class="flex items-center gap-2 font-medium text-gray-900">🇳🇬 Nigeria</span>
+              <span id="country-display" class="flex items-center gap-2 font-medium text-gray-900"><img src="/flags/ng.png" class="w-5 h-auto rounded-sm" alt="NG"> Nigeria</span>
               <i data-lucide="chevron-down" class="w-3 h-3 text-gray-500"></i>
             </div>
             <div class="custom-select-options" id="country-options">
-              <div class="custom-option selected" onclick="selectCountry('NG', 'NGN', '🇳🇬 Nigeria')">🇳🇬 Nigeria</div>
-              <div class="custom-option" onclick="selectCountry('GH', 'GHS', '🇬🇭 Ghana')">🇬🇭 Ghana</div>
-              <div class="custom-option" onclick="selectCountry('KE', 'KES', '🇰🇪 Kenya')">🇰🇪 Kenya</div>
+              <div class="custom-option selected" onclick="selectCountry('NG', 'NGN', 'Nigeria', '/flags/ng.png')">
+                <img src="/flags/ng.png" class="w-5 h-auto rounded-sm" alt="NG"> Nigeria
+              </div>
+              <div class="custom-option" onclick="selectCountry('GH', 'GHS', 'Ghana', '/flags/gh.png')">
+                <img src="/flags/gh.png" class="w-5 h-auto rounded-sm" alt="GH"> Ghana
+              </div>
+              <div class="custom-option" onclick="selectCountry('KE', 'KES', 'Kenya', '/flags/ke.png')">
+                <img src="/flags/ke.png" class="w-5 h-auto rounded-sm" alt="KE"> Kenya
+              </div>
             </div>
           </div>
         </div>
@@ -830,10 +836,11 @@
       }
     }
 
-    function selectCountry(code, currency, label) {
+    function selectCountry(code, currency, label, flag) {
       currentCountry = code;
       currentCurrency = currency;
-      document.getElementById('country-display').innerHTML = `<span class="flex items-center gap-2 font-medium text-gray-900">${label}</span>`;
+      const flagHtml = flag ? `<img src="${flag}" class="w-5 h-auto rounded-sm" alt="${code}">` : '';
+      document.getElementById('country-display').innerHTML = `<span class="flex items-center gap-2 font-medium text-gray-900">${flagHtml} ${label}</span>`;
       document.querySelectorAll('#country-options .custom-option').forEach(o => o.classList.remove('selected'));
       event.currentTarget.classList.add('selected');
       document.getElementById('country-options').classList.remove('open');
