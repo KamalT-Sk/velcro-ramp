@@ -148,23 +148,24 @@
           </button>
         </div>
 
+        <!-- Shared Step Indicator -->
+        <div class="mb-6 px-1" id="step-indicator-wrap">
+          <div class="step-indicator">
+            <div class="step-dot active" id="step-1">1</div>
+            <div class="step-line" id="line-1"></div>
+            <div class="step-dot inactive" id="step-2">2</div>
+            <div class="step-line" id="line-2"></div>
+            <div class="step-dot inactive" id="step-3">3</div>
+            <div class="step-line" id="line-3"></div>
+            <div class="step-dot inactive" id="step-4">4</div>
+          </div>
+          <div class="flex justify-between text-[10px] text-gray-400 mt-1 px-0.5" id="step-labels">
+            <span>Asset</span><span>Network</span><span>Amount</span><span>Bank</span>
+          </div>
+        </div>
+
         <!-- Sell Crypto Form -->
         <div id="form-sell" class="animate-fade-in space-y-5">
-          <!-- Step Indicator -->
-          <div class="mb-6 px-1">
-            <div class="step-indicator" id="sell-steps">
-              <div class="step-dot active" id="sell-step-1">1</div>
-              <div class="step-line" id="sell-line-1"></div>
-              <div class="step-dot inactive" id="sell-step-2">2</div>
-              <div class="step-line" id="sell-line-2"></div>
-              <div class="step-dot inactive" id="sell-step-3">3</div>
-              <div class="step-line" id="sell-line-3"></div>
-              <div class="step-dot inactive" id="sell-step-4">4</div>
-            </div>
-            <div class="flex justify-between text-[10px] text-gray-400 mt-1 px-0.5">
-              <span>Asset</span><span>Network</span><span>Amount</span><span>Bank</span>
-            </div>
-          </div>
           
           <!-- You'll Send Panel -->
           <div id="sell-send-panel" class="input-panel">
@@ -378,21 +379,6 @@
 
         <!-- Buy Crypto Form -->
         <div id="form-buy" class="hidden animate-fade-in space-y-5">
-          <!-- Step Indicator -->
-          <div class="mb-6 px-1">
-            <div class="step-indicator" id="buy-steps">
-              <div class="step-dot active" id="buy-step-1">1</div>
-              <div class="step-line" id="buy-line-1"></div>
-              <div class="step-dot inactive" id="buy-step-2">2</div>
-              <div class="step-line" id="buy-line-2"></div>
-              <div class="step-dot inactive" id="buy-step-3">3</div>
-              <div class="step-line" id="buy-line-3"></div>
-              <div class="step-dot inactive" id="buy-step-4">4</div>
-            </div>
-            <div class="flex justify-between text-[10px] text-gray-400 mt-1 px-0.5">
-              <span>Asset</span><span>Network</span><span>Amount</span><span>Wallet</span>
-            </div>
-          </div>
           
           <!-- You'll Receive Panel -->
           <div id="buy-receive-panel" class="input-panel">
@@ -886,6 +872,7 @@
       const buyTab = document.getElementById('tab-buy');
       const sellForm = document.getElementById('form-sell');
       const buyForm = document.getElementById('form-buy');
+      const stepLabels = document.getElementById('step-labels');
 
       if (tab === 'sell') {
         indicator.style.left = '4px';
@@ -893,16 +880,18 @@
         sellTab.classList.add('text-velcro-navy');
         buyTab.classList.remove('text-velcro-navy');
         buyTab.classList.add('text-gray-500');
-        sellForm.classList.remove('hidden');
-        buyForm.classList.add('hidden');
+        sellForm.style.display = '';
+        buyForm.style.display = 'none';
+        if (stepLabels) stepLabels.innerHTML = '<span>Asset</span><span>Network</span><span>Amount</span><span>Bank</span>';
       } else {
         indicator.style.left = 'calc(50% + 2px)';
         sellTab.classList.remove('text-velcro-navy');
         sellTab.classList.add('text-gray-500');
         buyTab.classList.remove('text-gray-500');
         buyTab.classList.add('text-velcro-navy');
-        sellForm.classList.add('hidden');
-        buyForm.classList.remove('hidden');
+        sellForm.style.display = 'none';
+        buyForm.style.display = '';
+        if (stepLabels) stepLabels.innerHTML = '<span>Asset</span><span>Network</span><span>Amount</span><span>Wallet</span>';
       }
       updateNavRate();
       updateStepIndicators(tab === 'sell' ? 'OFFRAMP' : 'ONRAMP');
@@ -1373,7 +1362,6 @@
     }
 
     function updateStepIndicators(direction) {
-      const prefix = direction === 'OFFRAMP' ? 'sell' : 'buy';
       const asset = direction === 'OFFRAMP' ? currentSellAsset : currentBuyAsset;
       const network = direction === 'OFFRAMP' ? currentSellNetwork : currentBuyNetwork;
       const amount = direction === 'OFFRAMP' ? document.getElementById('sell-amount').value : document.getElementById('buy-amount').value;
@@ -1387,8 +1375,8 @@
       ];
 
       for (let i = 0; i < 4; i++) {
-        const dot = document.getElementById(`${prefix}-step-${i + 1}`);
-        const line = document.getElementById(`${prefix}-line-${i + 1}`);
+        const dot = document.getElementById(`step-${i + 1}`);
+        const line = document.getElementById(`line-${i + 1}`);
         if (dot) {
           dot.className = 'step-dot ' + (steps[i] ? 'active' : 'inactive');
         }
