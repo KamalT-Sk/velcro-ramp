@@ -48,6 +48,16 @@
     #sell-account-name.text-green-700 { color: #16a34a !important; }
     .step-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
     .step-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(13, 13, 89, 0.08); }
+    .step-indicator { display: flex; align-items: center; gap: 8px; }
+    .step-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; transition: all 0.3s ease; }
+    .step-dot.active { background: #A8CF45; color: #0D0D59; }
+    .step-dot.inactive { background: #e5e7eb; color: #9ca3af; }
+    .step-line { flex: 1; height: 2px; background: #e5e7eb; transition: background 0.3s; }
+    .step-line.active { background: #A8CF45; }
+    .copy-flash { animation: copyFlash 0.6s ease; }
+    @keyframes copyFlash { 0% { background: #A8CF45; } 100% { background: white; } }
+    .live-pulse { animation: livePulse 2s infinite; }
+    @keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -120,6 +130,22 @@
             <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
             Buy Crypto
           </button>
+        </div>
+
+        <!-- Step Indicator -->
+        <div class="mb-6 px-1">
+          <div class="step-indicator" id="sell-steps">
+            <div class="step-dot active" id="sell-step-1">1</div>
+            <div class="step-line" id="sell-line-1"></div>
+            <div class="step-dot inactive" id="sell-step-2">2</div>
+            <div class="step-line" id="sell-line-2"></div>
+            <div class="step-dot inactive" id="sell-step-3">3</div>
+            <div class="step-line" id="sell-line-3"></div>
+            <div class="step-dot inactive" id="sell-step-4">4</div>
+          </div>
+          <div class="flex justify-between text-[10px] text-gray-400 mt-1 px-0.5">
+            <span>Asset</span><span>Network</span><span>Amount</span><span>Bank</span>
+          </div>
         </div>
 
         <!-- Sell Crypto Form -->
@@ -205,7 +231,7 @@
           <div id="sell-receive-panel" class="bg-gray-50 border border-gray-200 rounded-2xl p-4">
             <div class="flex items-center justify-between mb-2">
               <label class="block text-xs font-medium text-gray-500">You'll receive</label>
-              <span class="text-xs text-gray-500" id="sell-rate-display">Rate: --</span>
+              <span class="text-xs text-gray-500 flex items-center gap-1.5" id="sell-rate-display"><span class="w-1.5 h-1.5 rounded-full bg-green-500 live-pulse"></span>Rate: --</span>
             </div>
             <div class="flex items-center gap-3">
               <span class="text-3xl font-bold text-gray-500" id="sell-receive-currency">&#8358;</span>
@@ -224,8 +250,8 @@
 
           <!-- Bank Details -->
           <div class="bg-gray-50 border border-gray-200 rounded-2xl p-4 space-y-4">
-            <div class="flex items-center gap-3">
-              <div class="custom-select flex-1" id="sell-bank-wrap">
+            <div class="flex flex-col sm:flex-row items-start gap-3">
+              <div class="custom-select flex-1 w-full" id="sell-bank-wrap">
                 <label class="block text-xs font-medium text-gray-500 mb-1.5">Choose bank</label>
                 <div class="custom-select-trigger w-full px-3 py-2.5 border border-gray-300 rounded-xl bg-white text-sm transition-all hover:bg-gray-50" onclick="toggleDropdown('sell-bank-options')">
                   <div class="flex items-center gap-2" id="sell-bank-display">
@@ -237,18 +263,20 @@
                   <div class="custom-option text-gray-400">Loading banks...</div>
                 </div>
               </div>
-              <div class="flex-1">
+              <div class="flex-1 w-full">
                 <label class="block text-xs font-medium text-gray-500 mb-1.5">Enter account number</label>
                 <input type="tel" id="sell-bank-number" placeholder="Enter account number" inputmode="numeric" pattern="[0-9]*"
                   class="w-full px-3 py-2.5 border border-gray-300 rounded-xl bg-white text-sm text-gray-900 outline-none transition-all focus:border-velcro-green placeholder-gray-400"
-                  oninput="validateAccount()">
+                  oninput="validateAccount(); updateStepIndicators('OFFRAMP');">
                 <p id="sell-bank-error" class="hidden text-xs text-red-500 mt-1"></p>
               </div>
             </div>
             <div>
               <label class="block text-xs font-medium text-gray-500 mb-1.5">Account Holder Name</label>
-              <input type="text" id="sell-account-name" placeholder="Auto-filled after account lookup" readonly
-                class="w-full px-3 py-2.5 border border-gray-200 rounded-xl bg-gray-50 text-sm text-gray-900 outline-none cursor-default placeholder-gray-400">
+              <input type="text" id="sell-account-name" placeholder="Enter account holder name"
+                class="w-full px-3 py-2.5 border border-gray-300 rounded-xl bg-white text-sm text-gray-900 outline-none transition-all focus:border-velcro-green placeholder-gray-400"
+                oninput="updateStepIndicators('OFFRAMP');">
+              <p class="text-xs text-gray-400 mt-1">Enter the name exactly as it appears on your bank account</p>
             </div>
           </div>
 
@@ -336,6 +364,22 @@
 
         </div>
 
+        <!-- Step Indicator -->
+        <div class="mb-6 px-1">
+          <div class="step-indicator" id="buy-steps">
+            <div class="step-dot active" id="buy-step-1">1</div>
+            <div class="step-line" id="buy-line-1"></div>
+            <div class="step-dot inactive" id="buy-step-2">2</div>
+            <div class="step-line" id="buy-line-2"></div>
+            <div class="step-dot inactive" id="buy-step-3">3</div>
+            <div class="step-line" id="buy-line-3"></div>
+            <div class="step-dot inactive" id="buy-step-4">4</div>
+          </div>
+          <div class="flex justify-between text-[10px] text-gray-400 mt-1 px-0.5">
+            <span>Asset</span><span>Network</span><span>Amount</span><span>Wallet</span>
+          </div>
+        </div>
+
         <!-- Buy Crypto Form -->
         <div id="form-buy" class="hidden animate-fade-in space-y-5">
           
@@ -343,7 +387,7 @@
           <div id="buy-receive-panel" class="bg-gray-50 border border-gray-200 rounded-2xl p-4">
             <div class="flex items-center justify-between mb-2">
               <label class="block text-xs font-medium text-gray-500">You'll receive</label>
-              <span class="text-xs text-gray-500" id="buy-rate-display">Rate: --</span>
+              <span class="text-xs text-gray-500 flex items-center gap-1.5" id="buy-rate-display"><span class="w-1.5 h-1.5 rounded-full bg-green-500 live-pulse"></span>Rate: --</span>
             </div>
             <div class="flex items-center gap-3">
               <input type="number" id="buy-receive" placeholder="0.00" min="0" step="0.01" oninput="calculateBuyFromCrypto()"
@@ -434,7 +478,8 @@
             <div>
               <label class="block text-xs font-medium text-gray-500 mb-1.5">Your Wallet Address</label>
               <input type="text" id="buy-wallet" placeholder="Enter your wallet address" 
-                class="w-full px-3 py-2.5 border border-gray-300 rounded-xl bg-white text-sm text-gray-900 outline-none transition-all focus:border-velcro-green placeholder-gray-400 font-mono">
+                class="w-full px-3 py-2.5 border border-gray-300 rounded-xl bg-white text-sm text-gray-900 outline-none transition-all focus:border-velcro-green placeholder-gray-400 font-mono"
+                oninput="updateStepIndicators('ONRAMP');">
               <p class="text-xs text-gray-500 mt-1.5">Crypto will be sent to this address once payment is confirmed.</p>
             </div>
             <span id="buy-amount-label" class="hidden">USDT</span>
@@ -613,9 +658,7 @@
         'USDC': { 'solana': 'solana:usdc', 'ethereum': 'ethereum:usdc', 'bsc': 'bsc:usdc', 'polygon': 'polygon:usdc', 'arbitrum': 'arbitrum:usdc', 'base': 'base:usdc' },
         'CNGN': { 'base': 'base:cngn', 'bsc': 'bsc:cngn' }
       };
-      const result = map[symbol]?.[network] || '';
-      console.log('[getSwitchAsset] symbol:', symbol, 'network:', network, '=>', result);
-      return result;
+      return map[symbol]?.[network] || '';
     }
 
     function formatCurrency(value) {
@@ -628,7 +671,6 @@
       const asset = direction === 'OFFRAMP' ? currentSellAsset : currentBuyAsset;
       const network = direction === 'OFFRAMP' ? currentSellNetwork : currentBuyNetwork;
       currentSwitchAsset = getSwitchAsset(asset, network);
-      console.log('[fetchRate] direction:', direction, 'asset:', asset, 'network:', network, 'currentSwitchAsset:', currentSwitchAsset, 'country:', currentCountry, 'currency:', currentCurrency);
       if (!currentSwitchAsset) return;
       try {
         const body = { 
@@ -638,7 +680,6 @@
           currency: currentCurrency, 
           channel: direction === 'ONRAMP' ? 'BLOCKCHAIN' : 'BANK' 
         };
-        console.log('[fetchRate] POST /api/rate body:', JSON.stringify(body));
         const res = await fetch(`${API_BASE}/api/rate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -646,10 +687,8 @@
         });
         if (!res.ok) throw new Error('Failed to fetch rate');
         const payload = await res.json();
-        console.log('[fetchRate] response:', payload);
         const data = payload.data || {};
         const rate = data.rate || data.data?.rate;
-        console.log('[fetchRate] extracted rate:', rate);
         if (rate) {
           if (direction === 'OFFRAMP') currentRate.sell = rate;
           else currentRate.buy = rate;
@@ -659,7 +698,6 @@
         if (direction === 'OFFRAMP') calculateSell();
         else calculateBuy();
       } catch (err) {
-        console.error('[fetchRate] error:', err.message);
         showToast(err.message || 'Failed to fetch rate', 'error');
       }
     }
@@ -677,18 +715,19 @@
     function updateRateDisplays() {
       const sellRateEl = document.getElementById('sell-rate-display');
       const buyRateEl = document.getElementById('buy-rate-display');
+      const pulse = '<span class="w-1.5 h-1.5 rounded-full bg-green-500 live-pulse"></span>';
       if (sellRateEl) {
         if (currentSellAsset && currentRate.sell) {
-          sellRateEl.textContent = `Rate: 1 ${currentSellAsset} = ${formatCurrency(currentRate.sell)}`;
+          sellRateEl.innerHTML = `${pulse}Rate: 1 ${currentSellAsset} = ${formatCurrency(currentRate.sell)}`;
         } else {
-          sellRateEl.textContent = 'Rate: --';
+          sellRateEl.innerHTML = `${pulse}Rate: --`;
         }
       }
       if (buyRateEl) {
         if (currentBuyAsset && currentRate.buy) {
-          buyRateEl.textContent = `Rate: 1 ${currentBuyAsset} = ${formatCurrency(currentRate.buy)}`;
+          buyRateEl.innerHTML = `${pulse}Rate: 1 ${currentBuyAsset} = ${formatCurrency(currentRate.buy)}`;
         } else {
-          buyRateEl.textContent = 'Rate: --';
+          buyRateEl.innerHTML = `${pulse}Rate: --`;
         }
       }
     }
@@ -718,21 +757,16 @@
           countryRequirements[r.path] = r;
         });
       } catch (e) {
-        console.error('Failed to fetch requirements:', e.message);
+        showToast('Failed to load bank list', 'error');
       }
     }
 
     let cachedBanks = [];
     async function fetchInstitutions() {
-      try {
-        const res = await fetch(`${API_BASE}/api/institutions?country=${currentCountry}&channel=BANK`);
-        if (!res.ok) return;
-        const payload = await res.json();
-        cachedBanks = payload.data || [];
-        populateBanks();
-      } catch (e) {
-        console.error('Failed to fetch institutions:', e.message);
-      }
+      // Banks come from requirements API, not a separate institutions endpoint
+      const bankReq = countryRequirements['bank_code'];
+      cachedBanks = bankReq?.option || [];
+      populateBanks();
     }
 
     const TOP_BANK_CODES = ['100004','000014','000013','000015','000016','000004','000007','000018','000017','000001','000010','000008','000003','000012','000002','000011'];
@@ -860,6 +894,7 @@
         buyForm.classList.remove('hidden');
       }
       updateNavRate();
+      updateStepIndicators(tab === 'sell' ? 'OFFRAMP' : 'ONRAMP');
       safeLucideInit();
     }
 
@@ -878,6 +913,7 @@
       currentSwitchAsset = getSwitchAsset(currentSellAsset, currentSellNetwork);
       if (currentSwitchAsset) fetchRate();
       calculateSell();
+      updateStepIndicators('OFFRAMP');
     }
 
     function selectSellNetwork(id, logo, name) {
@@ -891,6 +927,7 @@
       document.getElementById('sell-amount-step').classList.remove('opacity-50', 'pointer-events-none');
       currentSwitchAsset = getSwitchAsset(currentSellAsset, currentSellNetwork);
       if (currentSwitchAsset) fetchRate();
+      updateStepIndicators('OFFRAMP');
     }
 
     function selectSellBank(name, code) {
@@ -900,67 +937,26 @@
       event.currentTarget.classList.add('selected');
       document.getElementById('sell-bank-options').classList.remove('open');
       validateAccount();
+      updateStepIndicators('OFFRAMP');
     }
 
     let _resolveTimer = null;
     function validateAccount() {
       const bankNum = document.getElementById('sell-bank-number').value.trim();
       const errorEl = document.getElementById('sell-bank-error');
-      const accNameEl = document.getElementById('sell-account-name');
       const accReq = countryRequirements['account_number'];
       const regex = accReq?.regex ? new RegExp(accReq.regex) : /^[0-9]{10}$/;
 
-      clearTimeout(_resolveTimer);
-
       if (!bankNum) {
         errorEl.classList.add('hidden');
-        accNameEl.value = '';
-        accNameEl.placeholder = 'Enter account holder name';
         return;
       }
       if (!regex.test(bankNum)) {
         errorEl.textContent = accReq?.hint || 'Invalid account number format';
         errorEl.classList.remove('hidden');
-        accNameEl.value = '';
-        accNameEl.placeholder = 'Enter account holder name';
         return;
       }
-
       errorEl.classList.add('hidden');
-
-      if (!currentBankCode) return;
-
-      accNameEl.placeholder = 'Resolving name...';
-      _resolveTimer = setTimeout(() => resolveAccountName(bankNum, currentBankCode), 700);
-    }
-
-    async function resolveAccountName(accountNumber, bankCode) {
-      const accNameEl = document.getElementById('sell-account-name');
-      const errorEl = document.getElementById('sell-bank-error');
-      try {
-        const res = await fetch(`${API_BASE}/api/resolve`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            country: currentCountry,
-            beneficiary: { account_number: accountNumber, bank_code: bankCode }
-          })
-        });
-        const payload = await res.json();
-        if (payload.success && payload.data?.account_name) {
-          accNameEl.value = payload.data.account_name;
-          errorEl.classList.add('hidden');
-        } else {
-          errorEl.textContent = payload.message || 'Could not resolve account name. Enter it manually.';
-          errorEl.classList.remove('hidden');
-          accNameEl.value = '';
-        }
-      } catch (e) {
-        errorEl.textContent = 'Name lookup failed. Please enter account name manually.';
-        errorEl.classList.remove('hidden');
-      } finally {
-        accNameEl.placeholder = 'Enter account holder name';
-      }
     }
 
     // Buy Asset
@@ -977,6 +973,7 @@
       currentSwitchAsset = getSwitchAsset(currentBuyAsset, currentBuyNetwork);
       if (currentSwitchAsset) fetchRate();
       calculateBuy();
+      updateStepIndicators('ONRAMP');
     }
 
     function selectBuyNetwork(id, logo, name) {
@@ -990,6 +987,7 @@
       document.getElementById('buy-amount-step').classList.remove('opacity-50', 'pointer-events-none');
       currentSwitchAsset = getSwitchAsset(currentBuyAsset, currentBuyNetwork);
       if (currentSwitchAsset) fetchRate();
+      updateStepIndicators('ONRAMP');
     }
 
     function calculateSell() {
@@ -997,10 +995,12 @@
       const rate = Number(currentRate.sell);
       if (Number.isNaN(rate) || rate <= 0) {
         document.getElementById('sell-receive').value = '';
+        updateStepIndicators('OFFRAMP');
         return;
       }
       const receive = amount * rate;
       document.getElementById('sell-receive').value = receive.toFixed(2);
+      updateStepIndicators('OFFRAMP');
     }
 
     function calculateSellFromNgn() {
@@ -1011,19 +1011,20 @@
 
     function calculateBuy() {
       const amount = parseFloat(document.getElementById('buy-amount').value) || 0;
-      console.log('[calculateBuy] amount:', amount, 'currentRate.buy:', currentRate.buy);
       const rate = Number(currentRate.buy);
       if (Number.isNaN(rate) || rate <= 0) {
         document.getElementById('buy-receive').value = '';
+        updateStepIndicators('ONRAMP');
         return;
       }
       const receive = amount / rate;
-      console.log('[calculateBuy] result:', receive);
       if (Number.isNaN(receive)) {
         document.getElementById('buy-receive').value = '';
+        updateStepIndicators('ONRAMP');
         return;
       }
       document.getElementById('buy-receive').value = receive.toFixed(2);
+      updateStepIndicators('ONRAMP');
     }
 
     function calculateBuyFromCrypto() {
@@ -1235,7 +1236,6 @@
           wallet_address: wallet
         }
       };
-      console.log('[generateBankAccount] request body:', JSON.stringify(reqBody));
       try {
         const res = await fetch(`${API_BASE}/api/initiate`, {
           method: 'POST',
@@ -1243,7 +1243,6 @@
           body: JSON.stringify(reqBody)
         });
         const responseBody = await res.text();
-        console.log('[generateBankAccount] response status:', res.status, 'body:', responseBody);
         if (!res.ok) throw new Error('Failed to initiate transaction: ' + responseBody);
         const payload = JSON.parse(responseBody);
         const data = payload.data || {};
@@ -1339,8 +1338,39 @@
     }
 
     function copyAddress(elementId) {
-      const text = document.getElementById(elementId).textContent;
-      navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!', 'success'));
+      const el = document.getElementById(elementId);
+      const text = el.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied to clipboard!', 'success');
+        el.parentElement.classList.add('copy-flash');
+        setTimeout(() => el.parentElement.classList.remove('copy-flash'), 600);
+      });
+    }
+
+    function updateStepIndicators(direction) {
+      const prefix = direction === 'OFFRAMP' ? 'sell' : 'buy';
+      const asset = direction === 'OFFRAMP' ? currentSellAsset : currentBuyAsset;
+      const network = direction === 'OFFRAMP' ? currentSellNetwork : currentBuyNetwork;
+      const amount = direction === 'OFFRAMP' ? document.getElementById('sell-amount').value : document.getElementById('buy-amount').value;
+      const details = direction === 'OFFRAMP' ? currentBankCode : document.getElementById('buy-wallet').value.trim();
+
+      const steps = [
+        !!asset,
+        !!network,
+        !!amount && parseFloat(amount) > 0,
+        !!details
+      ];
+
+      for (let i = 0; i < 4; i++) {
+        const dot = document.getElementById(`${prefix}-step-${i + 1}`);
+        const line = document.getElementById(`${prefix}-line-${i + 1}`);
+        if (dot) {
+          dot.className = 'step-dot ' + (steps[i] ? 'active' : 'inactive');
+        }
+        if (line) {
+          line.className = 'step-line ' + (steps[i] ? 'active' : '');
+        }
+      }
     }
 
     function showToast(message, type = 'info') {
