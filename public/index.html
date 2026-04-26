@@ -254,6 +254,7 @@
               <input type="number" id="sell-receive" placeholder="0.00" min="0" step="0.01" oninput="calculateSellFromNgn()"
                 class="display-input flex-1 text-3xl font-bold text-gray-900 bg-transparent outline-none w-full p-0 border-none focus:ring-0 amount-input">
               <div class="bg-gray-100 border border-gray-200 rounded-lg px-3 py-1.5 flex items-center gap-2">
+                <img id="sell-receive-flag" src="/flags/ng.png" class="w-4 h-auto rounded-sm" alt="">
                 <span class="text-gray-700 font-semibold text-sm" id="sell-receive-currency-code">NGN</span>
               </div>
             </div>
@@ -472,6 +473,7 @@
               <input type="number" id="buy-amount" placeholder="0.00" min="0" step="0.01" oninput="calculateBuy()" 
                 class="display-input flex-1 text-3xl font-bold text-gray-900 bg-transparent outline-none w-full p-0 border-none focus:ring-0 amount-input">
               <div class="bg-gray-100 border border-gray-200 rounded-lg px-3 py-1.5 flex items-center gap-2">
+                <img id="buy-send-flag" src="/flags/ng.png" class="w-4 h-auto rounded-sm" alt="">
                 <span class="text-gray-700 font-semibold text-sm" id="buy-send-currency-code">NGN</span>
               </div>
             </div>
@@ -744,11 +746,16 @@
       const buyConfirmSymbol = document.getElementById('buy-confirm-currency-symbol');
       const sellReceiveCode = document.getElementById('sell-receive-currency-code');
       const buySendCode = document.getElementById('buy-send-currency-code');
+      const sellReceiveFlag = document.getElementById('sell-receive-flag');
+      const buySendFlag = document.getElementById('buy-send-flag');
+      const flagMap = { 'NGN': '/flags/ng.png', 'GHS': '/flags/gh.png', 'KES': '/flags/ke.png' };
       if (sellReceiveCurrency) sellReceiveCurrency.innerHTML = symbol;
       if (buySendCurrency) buySendCurrency.innerHTML = symbol;
       if (buyConfirmSymbol) buyConfirmSymbol.innerHTML = symbol;
       if (sellReceiveCode) sellReceiveCode.textContent = currentCurrency;
       if (buySendCode) buySendCode.textContent = currentCurrency;
+      if (sellReceiveFlag) sellReceiveFlag.src = flagMap[currentCurrency] || '';
+      if (buySendFlag) buySendFlag.src = flagMap[currentCurrency] || '';
     }
 
     async function fetchRequirements() {
