@@ -283,7 +283,7 @@
                 <p id="sell-bank-error" class="hidden text-xs text-red-500 mt-1 font-medium"></p>
               </div>
             </div>
-            <div>
+            <div id="sell-name-wrap" class="hidden animate-fade-in">
               <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Account Holder Name</label>
               <input type="text" id="sell-account-name" placeholder="Enter account holder name"
                 class="w-full px-3 py-2.5 border border-gray-200 rounded-xl bg-white text-sm text-gray-900 outline-none transition-all focus:border-velcro-green amount-input"
@@ -949,25 +949,39 @@
       document.getElementById('sell-bank-options').classList.remove('open');
       validateAccount();
       updateStepIndicators('OFFRAMP');
+      const bankNum = document.getElementById('sell-bank-number').value.trim();
+      const accReq = countryRequirements['account_number'];
+      const regex = accReq?.regex ? new RegExp(accReq.regex) : /^[0-9]{10}$/;
+      if (regex.test(bankNum)) {
+        document.getElementById('sell-name-wrap')?.classList.remove('hidden');
+        setTimeout(() => document.getElementById('sell-account-name')?.focus(), 100);
+      }
     }
 
     let _resolveTimer = null;
     function validateAccount() {
       const bankNum = document.getElementById('sell-bank-number').value.trim();
       const errorEl = document.getElementById('sell-bank-error');
+      const nameWrap = document.getElementById('sell-name-wrap');
       const accReq = countryRequirements['account_number'];
       const regex = accReq?.regex ? new RegExp(accReq.regex) : /^[0-9]{10}$/;
 
       if (!bankNum) {
         errorEl.classList.add('hidden');
+        nameWrap?.classList.add('hidden');
         return;
       }
       if (!regex.test(bankNum)) {
         errorEl.textContent = accReq?.hint || 'Invalid account number format';
         errorEl.classList.remove('hidden');
+        nameWrap?.classList.add('hidden');
         return;
       }
       errorEl.classList.add('hidden');
+      if (currentBankCode && nameWrap) {
+        nameWrap.classList.remove('hidden');
+        document.getElementById('sell-account-name')?.focus();
+      }
     }
 
     // Buy Asset
