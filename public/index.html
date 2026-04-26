@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Velcro Convert - Crypto to Cash Instantly</title>
+  <link rel="icon" type="image/png" href="/velcro_logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="style.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.436.0/lucide.min.js"></script>
+
+
+  <style>
+    * { font-family: 'Inter', system-ui, sans-serif; }
+    .gradient-hero { background: linear-gradient(135deg, #0D0D59 0%, #141470 50%, #1a1a8c 100%); }
+    .card-shadow { box-shadow: 0 4px 24px rgba(13, 13, 89, 0.08); }
+    .nav-link { position: relative; transition: color 0.2s; }
+    .nav-link::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 2px; background: linear-gradient(90deg, #A8CF45, #C4E470); transition: width 0.3s ease; border-radius: 2px; }
+    .nav-link:hover::after { width: 100%; }
+    .btn-glow { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .btn-glow:hover { box-shadow: 0 8px 30px rgba(168, 207, 69, 0.35); transform: translateY(-2px); }
+    .btn-glow:active { transform: translateY(0); }
+    .tab-active { background: #A8CF45; color: #0D0D59; }
+    .tab-inactive { background: #F3F4F6; color: #6B7280; }
+    .tab-inactive:hover { background: #E5E7EB; }
+    .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .input-focus:focus { border-color: #A8CF45; box-shadow: 0 0 0 3px rgba(168, 207, 69, 0.15); }
+    .status-dot { animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .custom-select { position: relative; z-index: 10; }
+    .custom-select-options { display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 50; background: white; border: 1px solid #e5e7eb; border-radius: 0.75rem; margin-top: 4px; max-height: 300px; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.15); min-width: 180px; }
+    .custom-select-options.open { display: block; }
+    .custom-option { display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; transition: background 0.15s; }
+    .custom-option:hover { background: #f3f4f6; }
+    .custom-option:first-child { border-radius: 0.75rem 0.75rem 0 0; }
+    .custom-option:last-child { border-radius: 0 0 0.75rem 0.75rem; }
+    .custom-option.selected { background: #f0fdf4; }
+    .custom-select-trigger { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+    #convert { scroll-margin-top: 80px; }
+    .display-input::-webkit-inner-spin-button, .display-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    .display-input { -moz-appearance: textfield; }
+    .custom-select-options .custom-option { color: #1f2937; }
+    .custom-select-options .custom-option:hover { background: #f3f4f6; }
+    .custom-select-options .custom-option.selected { background: #f0fdf4; }
+    #sell-network-display img, #buy-network-display img { width: 24px; height: 24px; }
+    #sell-account-name.text-green-700 { color: #16a34a !important; }
+    .step-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .step-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(13, 13, 89, 0.08); }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- Navigation -->
+  <nav id="main-nav" class="bg-transparent border-none transition-all duration-300">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center gap-3">
+          <img src="/velcro_logo.png" alt="Velcro" class="h-8 w-auto">
+          <span class="text-sm text-gray-400">|</span>
+          <span class="text-lg font-bold bg-gradient-to-r from-velcro-green to-lime-400 bg-clip-text text-transparent tracking-tight">Convert</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full">
+          </div>
+          <button onclick="showHistoryModal()" id="history-btn" class="text-sm text-gray-600 hover:text-velcro-navy transition-colors flex items-center gap-1.5">
+            <i data-lucide="history" class="w-4 h-4"></i>
+            History
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="gradient-hero text-white py-10 lg:py-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-2xl">
+        <h1 class="text-3xl lg:text-4xl font-bold mb-3 leading-tight">
+          Convert crypto to cash — <span class="text-velcro-green">instantly.</span>
+        </h1>
+        <p class="text-base text-white/70 mb-5 leading-relaxed">
+          Sell USDT, USDC, or CNGN and receive Naira directly in your bank account. 
+          Buy stablecoins with Naira and receive them in your wallet.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="convert" class="py-12 lg:py-16">
+    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Conversion Card -->
+      <div class="bg-white rounded-3xl card-shadow p-6 lg:p-8 border border-gray-200 hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-500">
+        
+        <!-- Country Selector -->
+        <div class="mb-4 flex justify-end">
+          <div class="custom-select" id="country-wrap">
+            <div class="custom-select-trigger bg-white hover:bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 flex items-center gap-2 transition-colors text-sm" onclick="toggleDropdown('country-options')">
+              <span id="country-display" class="flex items-center gap-2 font-medium text-gray-900">🇳🇬 Nigeria</span>
+              <i data-lucide="chevron-down" class="w-3 h-3 text-gray-500"></i>
+            </div>
+            <div class="custom-select-options" id="country-options">
+              <div class="custom-option selected" onclick="selectCountry('NG', 'NGN', '🇳🇬 Nigeria')">🇳🇬 Nigeria</div>
+              <div class="custom-option" onclick="selectCountry('GH', 'GHS', '🇬🇭 Ghana')">🇬🇭 Ghana</div>
+              <div class="custom-option" onclick="selectCountry('KE', 'KES', '🇰🇪 Kenya')">🇰🇪 Kenya</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex gap-1 mb-8 p-1 bg-gray-100 rounded-xl relative border border-gray-200">
+          <div id="tab-indicator" class="absolute top-1 bottom-1 w-[calc(50%-2px)] rounded-lg bg-velcro-green shadow-sm transition-all duration-300 ease-out" style="left: 4px;"></div>
+          <button id="tab-sell" onclick="switchTab('sell')" class="flex-1 py-2.5 px-4 rounded-lg font-semibold text-sm transition-colors duration-300 relative z-10 flex items-center justify-center gap-2 text-velcro-navy">
+            <i data-lucide="arrow-down-left" class="w-4 h-4"></i>
+            Sell Crypto
+          </button>
+          <button id="tab-buy" onclick="switchTab('buy')" class="flex-1 py-2.5 px-4 rounded-lg font-semibold text-sm transition-colors duration-300 relative z-10 flex items-center justify-center gap-2 text-gray-500">
+            <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+            Buy Crypto
+          </button>
+        </div>
+
+        <!-- Sell Crypto Form -->
+        <div id="form-sell" class="animate-fade-in space-y-5">
+          
+          <!-- You'll Send Panel -->
+          <div id="sell-send-panel" class="bg-gray-50 border border-gray-200 rounded-2xl p-4">
+            <label class="block text-xs font-medium text-gray-500 mb-2">You'll send</label>
+            <div class="flex items-center gap-3">
+              <div id="sell-amount-step" class="flex-1 flex items-center gap-3 opacity-50 pointer-events-none transition-opacity">
+                <span class="text-3xl font-bold text-gray-500" id="sell-currency-prefix">$</span>
+                <input type="number" id="sell-amount" placeholder="0.00" min="0" step="0.01" oninput="calculateSell()" 
+                  class="display-input flex-1 text-3xl font-bold text-gray-900 bg-transparent outline-none w-full p-0 border-none focus:ring-0 placeholder-gray-400">
+              </div>
+              <!-- Asset Pill -->
+              <div class="custom-select" id="sell-asset-wrap">
+                <div class="custom-select-trigger bg-white hover:bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 flex items-center gap-2 transition-colors" onclick="toggleDropdown('sell-asset-options')">
+                  <div class="flex items-center gap-2" id="sell-asset-display">
+                    <span class="text-gray-500 text-sm">Select</span>
+                  </div>
+                  <i data-lucide="chevron-down" class="w-3 h-3 text-gray-500"></i>
+                </div>
+                <div class="custom-select-options" id="sell-asset-options">
+                  <div class="custom-option" onclick="selectSellAsset('USDT', '/logos/usdt.png', 'Tether')">
+                    <img src="/logos/usdt.png" class="w-6 h-6" alt="USDT">
+                    <span class="font-medium">USDT</span>
+                    <span class="text-gray-400 text-xs">Tether</span>
+                  </div>
+                  <div class="custom-option" onclick="selectSellAsset('USDC', '/logos/usdc.png', 'USD Coin')">
+                    <img src="/logos/usdc.png" class="w-6 h-6" alt="USDC">
+                    <span class="font-medium">USDC</span>
+                    <span class="text-gray-400 text-xs">USD Coin</span>
+                  </div>
+                  <div class="custom-option" onclick="selectSellAsset('CNGN', '/logos/cngn.png?v=2', 'Naira Token')">
+                    <img src="/logos/cngn.png?v=2" class="w-6 h-6" alt="CNGN">
+                    <span class="font-medium">CNGN</span>
+                    <span class="text-gray-400 text-xs">Naira Token</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-2 flex justify-end">
+              <div class="custom-select opacity-50 pointer-events-none transition-opacity" id="sell-network-wrap">
+                <div class="custom-select-trigger bg-white border border-gray-300 rounded-xl px-3 py-2 flex items-center gap-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 min-w-[140px]" onclick="toggleDropdown('sell-network-options')">
+                  <span id="sell-network-display" class="flex items-center gap-2">Select Network</span>
+                  <i data-lucide="chevron-down" class="w-3 h-3 text-gray-500"></i>
+                </div>
+                <div class="custom-select-options" id="sell-network-options">
+                  <div class="custom-option" onclick="selectSellNetwork('solana', '/logos/solana.png', 'Solana')">
+                    <img src="/logos/solana.png" class="w-6 h-6" alt="Solana"><span class="font-medium">Solana</span>
+                  </div>
+                  <div class="custom-option" onclick="selectSellNetwork('ethereum', '/logos/ethereum.png', 'Ethereum')">
+                    <img src="/logos/ethereum.png" class="w-6 h-6" alt="Ethereum"><span class="font-medium">Ethereum</span>
+                  </div>
+                  <div class="custom-option" onclick="selectSellNetwork('bsc', '/logos/bsc.png', 'BSC')">
+                    <img src="/logos/bsc.png" class="w-6 h-6" alt="BSC"><span class="font-medium">BSC</span>
+                  </div>
+                  <div class="custom-option" onclick="selectSellNetwork('polygon', '/logos/polygon.png', 'Polygon')">
+                    <img src="/logos/polygon.png" class="w-6 h-6" alt="Polygon"><span class="font-medium">Polygon</span>
+                  </div>
+                  <div class="custom-option" onclick="selectSellNetwork('arbitrum', '/logos/arbitrum.png', 'Arbitrum')">
+                    <img src="/logos/arbitrum.png" class="w-6 h-6" alt="Arbitrum"><span class="font-medium">Arbitrum</span>
+                  </div>
+                  <div class="custom-option" onclick="selectSellNetwork('base', '/logos/base.png', 'Base')">
+                    <img src="/logos/base.png" class="w-6 h-6" alt="Base"><span class="font-medium">Base</span>
+                  </div>
+                  <div class="custom-option" onclick="selectSellNetwork('tron', '/logos/tron.png', 'Tron')">
+                    <img src="/logos/tron.png" class="w-6 h-6" alt="Tron"><span class="font-medium">Tron</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Swap Button -->
+          <div class="flex justify-center -my-3 relative z-10">
+            <button onclick="swapPanels('sell', this)" class="w-10 h-10 bg-velcro-green rounded-full flex items-center justify-center shadow-lg border-4 border-white hover:scale-105 transition-transform group">
+              <i data-lucide="arrow-up-down" class="w-5 h-5 text-velcro-navy transition-transform duration-300"></i>
+            </button>
+          </div>
+
+          <!-- You'll Receive Panel -->
+          <div id="sell-receive-panel" class="bg-gray-50 border border-gray-200 rounded-2xl p-4">
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-xs font-medium text-gray-500">You'll receive</label>
+              <span class="text-xs text-gray-500" id="sell-rate-display">Rate: --</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-3xl font-bold text-gray-500" id="sell-receive-currency">&#8358;</span>
+              <input type="number" id="sell-receive" placeholder="0.00" min="0" step="0.01" oninput="calculateSellFromNgn()"
+                class="display-input flex-1 text-3xl font-bold text-gray-900 bg-transparent outline-none w-full p-0 border-none focus:ring-0 placeholder-gray-400">
+              <div class="bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 flex items-center gap-2">
+                <span class="text-gray-900 font-semibold text-sm" id="sell-receive-currency-code">NGN</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Info Row -->
+          <div class="flex items-center justify-between text-xs text-gray-500 px-1">
+            <span>Min: $1</span>
+          </div>
+
+          <!-- Bank Details -->
+          <div class="bg-gray-50 border border-gray-200 rounded-2xl p-4 space-y-4">
+            <div class="flex items-center gap-3">
+              <div class="custom-select flex-1" id="sell-bank-wrap">
+                <label class="block text-xs font-medium text-gray-500 mb-1.5">Choose bank</label>
+                <div class="custom-select-trigger w-full px-3 py-2.5 border border-gray-300 rounded-xl bg-white text-sm transition-all hover:bg-gray-50" onclick="toggleDropdown('sell-bank-options')">
+                  <div class="flex items-center gap-2" id="sell-bank-display">
+                    <span class="text-gray-500">Select your bank</span>
+                  </div>
+                  <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500"></i>
+                </div>
+                <div class="custom-select-options" id="sell-bank-options">
+                  <div class="custom-option text-gray-400">Loading banks...</div>
+                </div>
+              </div>
+              <div class="flex-1">
+                <label class="block text-xs font-medium text-gray-500 mb-1.5">Enter account number</label>
+                <input type="tel" id="sell-bank-number" placeholder="Enter account number" inputmode="numeric" pattern="[0-9]*"
+                  class="w-full px-3 py-2.5 border border-gray-300 rounded-xl bg-white text-sm text-gray-900 outline-none transition-all focus:border-velcro-green placeholder-gray-400"
+                  oninput="validateAccount()">
+                <p id="sell-bank-error" class="hidden text-xs text-red-500 mt-1"></p>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-gray-500 mb-1.5">Account Holder Name</label>
+              <input type="text" id="sell-account-name" placeholder="Auto-filled after account lookup" readonly
+                class="w-full px-3 py-2.5 border border-gray-200 rounded-xl bg-gray-50 text-sm text-gray-900 outline-none cursor-default placeholder-gray-400">
+            </div>
+          </div>
+
+          <!-- Warning -->
+          <div class="flex items-start gap-3 p-4 bg-gray-50 border-l-4 border-velcro-green rounded-r-xl">
+            <i data-lucide="alert-triangle" class="w-5 h-5 text-velcro-green flex-shrink-0 mt-0.5"></i>
+            <p class="text-sm text-gray-700">Only send the selected asset on the selected network. Sending wrong assets may result in permanent loss.</p>
+          </div>
+
+          <!-- Action Button -->
+          <button onclick="generateWalletAddress()" id="sell-btn" class="w-full bg-velcro-green hover:bg-velcro-green-dark text-velcro-navy py-4 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 btn-glow">
+            <i data-lucide="wallet" class="w-5 h-5"></i>
+            Generate Wallet Address
+          </button>
+
+          <!-- Generated Address -->
+          <div id="sell-generated-address" class="hidden space-y-4">
+            <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl text-center">
+              <div class="flex items-center justify-center gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-900">
+                  <img id="sell-confirm-asset-img" src="" class="w-4 h-4" alt="">
+                  <span id="sell-asset-name">USDT</span>
+                </span>
+                <span class="text-gray-400 text-sm">on</span>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-900">
+                  <img id="sell-confirm-network-img" src="" class="w-4 h-4" alt="">
+                  <span id="sell-network-name">Solana</span>
+                </span>
+              </div>
+              <div class="bg-velcro-navy/5 p-3 rounded-lg border border-velcro-navy/10 mb-3">
+                <p class="text-xs text-gray-500 mb-0.5">Amount to Send</p>
+                <p class="text-xl font-bold text-gray-900"><span id="sell-confirm-amount">0.00</span> <span id="sell-confirm-asset">USDT</span></p>
+              </div>
+              <div class="bg-white rounded-xl border border-gray-200 p-4 mb-3 text-left cursor-pointer hover:bg-gray-50 transition-colors group" onclick="copyAddress('sell-wallet-address')" title="Click to copy">
+                <div class="flex items-center justify-between mb-1">
+                  <p class="text-xs text-gray-500">Wallet Address</p>
+                  <i data-lucide="copy" class="w-3.5 h-3.5 text-gray-400 group-hover:text-velcro-green transition-colors"></i>
+                </div>
+                <code class="text-sm font-mono text-gray-900 break-all block" id="sell-wallet-address">-</code>
+              </div>
+              <div class="bg-white rounded-xl border border-gray-200 p-3 mb-3 text-left">
+                <p class="text-xs text-gray-500 mb-1">Reference</p>
+                <p class="text-sm font-mono text-gray-900" id="sell-reference">-</p>
+              </div>
+              <button onclick="copyAddress('sell-wallet-address')" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-xl text-sm font-medium transition-colors inline-flex items-center justify-center gap-2">
+                <i data-lucide="copy" class="w-4 h-4"></i>
+                Copy Address
+              </button>
+            </div>
+            
+            <!-- Status Tracker -->
+            <div class="space-y-3">
+              <h4 class="font-semibold text-sm text-gray-700">Transaction Status</h4>
+              <div class="space-y-2">
+                <div class="flex items-center gap-3 p-3 bg-amber-50 rounded-lg" id="status-1">
+                  <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center"><i data-lucide="clock" class="w-4 h-4 text-amber-600"></i></div>
+                  <div class="flex-1"><p class="text-sm font-medium text-amber-700">Waiting for payment</p><p class="text-xs text-gray-500">Send your crypto to the address above</p></div>
+                  <button onclick="showManualConfirm('sell')" class="text-xs bg-white border border-amber-300 text-amber-700 px-2.5 py-1.5 rounded-lg hover:bg-amber-100 transition-colors font-medium shrink-0">Confirm</button>
+                </div>
+                <div id="sell-manual-confirm" class="hidden p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+                  <div class="flex items-center gap-2 mb-2">
+                    <svg class="w-4 h-4 text-velcro-navy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    <label class="text-xs font-semibold text-gray-700">Paste Transaction Hash</label>
+                  </div>
+                  <div class="flex gap-2">
+                    <input type="text" id="sell-tx-hash" placeholder="0x..." class="flex-1 px-3 py-2.5 border border-gray-300 rounded-xl bg-gray-50 text-sm text-gray-900 outline-none focus:border-velcro-green focus:bg-white font-mono transition-all">
+                    <button onclick="confirmManual('sell')" class="bg-velcro-green hover:bg-velcro-green-dark text-velcro-navy px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shrink-0">Submit</button>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg opacity-50" id="status-2">
+                  <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center"><i data-lucide="search" class="w-4 h-4 text-gray-500"></i></div>
+                  <div><p class="text-sm font-medium text-gray-500">Payment detected</p></div>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg opacity-50" id="status-3">
+                  <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center"><i data-lucide="refresh-cw" class="w-4 h-4 text-gray-500"></i></div>
+                  <div><p class="text-sm font-medium text-gray-500">Processing payout</p></div>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg opacity-50" id="status-4">
+                  <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center"><i data-lucide="check-circle" class="w-4 h-4 text-gray-500"></i></div>
+                  <div><p class="text-sm font-medium text-gray-500">Completed</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Buy Crypto Form -->
+        <div id="form-buy" class="hidden animate-fade-in space-y-5">
+          
+          <!-- You'll Receive Panel -->
+          <div id="buy-receive-panel" class="bg-gray-50 border border-gray-200 rounded-2xl p-4">
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-xs font-medium text-gray-500">You'll receive</label>
+              <span class="text-xs text-gray-500" id="buy-rate-display">Rate: --</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <input type="number" id="buy-receive" placeholder="0.00" min="0" step="0.01" oninput="calculateBuyFromCrypto()"
+                class="display-input flex-1 text-3xl font-bold text-gray-900 bg-transparent outline-none w-full p-0 border-none focus:ring-0 placeholder-gray-400">
+              <!-- Asset Pill -->
+              <div class="custom-select" id="buy-asset-wrap">
+                <div class="custom-select-trigger bg-white hover:bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 flex items-center gap-2 transition-colors" onclick="toggleDropdown('buy-asset-options')">
+                  <div class="flex items-center gap-2" id="buy-asset-display">
+                    <span class="text-gray-500 text-sm">Select</span>
+                  </div>
+                  <i data-lucide="chevron-down" class="w-3 h-3 text-gray-500"></i>
+                </div>
+                <div class="custom-select-options" id="buy-asset-options">
+                  <div class="custom-option" onclick="selectBuyAsset('USDT', '/logos/usdt.png', 'Tether')">
+                    <img src="/logos/usdt.png" class="w-6 h-6" alt="USDT"><span class="font-medium">USDT</span><span class="text-gray-400 text-xs">Tether</span>
+                  </div>
+                  <div class="custom-option" onclick="selectBuyAsset('USDC', '/logos/usdc.png', 'USD Coin')">
+                    <img src="/logos/usdc.png" class="w-6 h-6" alt="USDC"><span class="font-medium">USDC</span><span class="text-gray-400 text-xs">USD Coin</span>
+                  </div>
+                  <div class="custom-option" onclick="selectBuyAsset('CNGN', '/logos/cngn.png?v=2', 'Naira Token')">
+                    <img src="/logos/cngn.png?v=2" class="w-6 h-6" alt="CNGN"><span class="font-medium">CNGN</span><span class="text-gray-400 text-xs">Naira Token</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-2 flex justify-end">
+              <div class="custom-select opacity-50 pointer-events-none transition-opacity" id="buy-network-wrap">
+                <div class="custom-select-trigger bg-white border border-gray-300 rounded-xl px-3 py-2 flex items-center gap-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 min-w-[140px]" onclick="toggleDropdown('buy-network-options')">
+                  <span id="buy-network-display" class="flex items-center gap-2">Select Network</span>
+                  <i data-lucide="chevron-down" class="w-3 h-3 text-gray-500"></i>
+                </div>
+                <div class="custom-select-options" id="buy-network-options">
+                  <div class="custom-option" onclick="selectBuyNetwork('solana', '/logos/solana.png', 'Solana')">
+                    <img src="/logos/solana.png" class="w-6 h-6" alt="Solana"><span class="font-medium">Solana</span>
+                  </div>
+                  <div class="custom-option" onclick="selectBuyNetwork('ethereum', '/logos/ethereum.png', 'Ethereum')">
+                    <img src="/logos/ethereum.png" class="w-6 h-6" alt="Ethereum"><span class="font-medium">Ethereum</span>
+                  </div>
+                  <div class="custom-option" onclick="selectBuyNetwork('bsc', '/logos/bsc.png', 'BSC')">
+                    <img src="/logos/bsc.png" class="w-6 h-6" alt="BSC"><span class="font-medium">BSC</span>
+                  </div>
+                  <div class="custom-option" onclick="selectBuyNetwork('polygon', '/logos/polygon.png', 'Polygon')">
+                    <img src="/logos/polygon.png" class="w-6 h-6" alt="Polygon"><span class="font-medium">Polygon</span>
+                  </div>
+                  <div class="custom-option" onclick="selectBuyNetwork('arbitrum', '/logos/arbitrum.png', 'Arbitrum')">
+                    <img src="/logos/arbitrum.png" class="w-6 h-6" alt="Arbitrum"><span class="font-medium">Arbitrum</span>
+                  </div>
+                  <div class="custom-option" onclick="selectBuyNetwork('base', '/logos/base.png', 'Base')">
+                    <img src="/logos/base.png" class="w-6 h-6" alt="Base"><span class="font-medium">Base</span>
+                  </div>
+                  <div class="custom-option" onclick="selectBuyNetwork('tron', '/logos/tron.png', 'Tron')">
+                    <img src="/logos/tron.png" class="w-6 h-6" alt="Tron"><span class="font-medium">Tron</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Swap Button -->
+          <div class="flex justify-center -my-3 relative z-10">
+            <button onclick="swapPanels('buy', this)" class="w-10 h-10 bg-velcro-green rounded-full flex items-center justify-center shadow-lg border-4 border-white hover:scale-105 transition-transform group">
+              <i data-lucide="arrow-up-down" class="w-5 h-5 text-velcro-navy transition-transform duration-300"></i>
+            </button>
+          </div>
+
+          <!-- You'll Send Panel (NGN) -->
+          <div id="buy-send-panel" class="bg-gray-50 border border-gray-200 rounded-2xl p-4">
+            <label class="block text-xs font-medium text-gray-500 mb-2">You'll send</label>
+            <div class="flex items-center gap-3">
+              <div id="buy-amount-step" class="flex-1 flex items-center gap-3 opacity-50 pointer-events-none transition-opacity">
+                <span class="text-3xl font-bold text-gray-500" id="buy-send-currency">&#8358;</span>
+                <input type="number" id="buy-amount" placeholder="0.00" min="0" step="0.01" oninput="calculateBuy()" 
+                  class="display-input flex-1 text-3xl font-bold text-gray-900 bg-transparent outline-none w-full p-0 border-none focus:ring-0 placeholder-gray-400">
+              </div>
+              <div class="bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 flex items-center gap-2">
+                <span class="text-gray-900 font-semibold text-sm" id="buy-send-currency-code">NGN</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Info Row -->
+          <div class="flex items-center justify-between text-xs text-gray-500 px-1">
+            <span>Min: &#8358;2,000</span>
+          </div>
+
+          <!-- Wallet Address -->
+          <div class="bg-gray-50 border border-gray-200 rounded-2xl p-4 space-y-4">
+            <div>
+              <label class="block text-xs font-medium text-gray-500 mb-1.5">Your Wallet Address</label>
+              <input type="text" id="buy-wallet" placeholder="Enter your wallet address" 
+                class="w-full px-3 py-2.5 border border-gray-300 rounded-xl bg-white text-sm text-gray-900 outline-none transition-all focus:border-velcro-green placeholder-gray-400 font-mono">
+              <p class="text-xs text-gray-500 mt-1.5">Crypto will be sent to this address once payment is confirmed.</p>
+            </div>
+            <span id="buy-amount-label" class="hidden">USDT</span>
+          </div>
+
+          <!-- Action Button -->
+          <button onclick="generateBankAccount()" id="buy-btn" class="w-full bg-velcro-green hover:bg-velcro-green-dark text-velcro-navy py-4 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 btn-glow">
+            <i data-lucide="landmark" class="w-5 h-5"></i>
+            Generate Bank Account
+          </button>
+
+          <!-- Generated Account -->
+          <div id="buy-generated-account" class="hidden space-y-4">
+            <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl text-center">
+              <div class="flex items-center justify-center gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-900">
+                  <img id="buy-confirm-asset-img" src="" class="w-4 h-4" alt="">
+                  <span id="buy-confirm-asset">USDT</span>
+                </span>
+                <span class="text-gray-400 text-sm">on</span>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-900">
+                  <img id="buy-confirm-network-img" src="" class="w-4 h-4" alt="">
+                  <span id="buy-confirm-network">Solana</span>
+                </span>
+              </div>
+              <div class="bg-velcro-navy/5 p-3 rounded-lg border border-velcro-navy/10 mb-3">
+                <p class="text-xs text-gray-500 mb-0.5">Amount to Pay</p>
+                <p class="text-xl font-bold text-gray-900"><span id="buy-confirm-currency-symbol">&#8358;</span><span id="buy-confirm-ngn">0.00</span></p>
+              </div>
+              <div class="bg-white rounded-xl border border-gray-200 p-4 mb-3 text-left space-y-3">
+                <div class="flex justify-between items-center">
+                  <span class="text-xs text-gray-500">Bank</span>
+                  <span class="text-sm font-semibold text-gray-900" id="buy-bank-name">-</span>
+                </div>
+                <div class="border-t border-gray-100"></div>
+                <div class="flex justify-between items-center">
+                  <span class="text-xs text-gray-500">Account Number</span>
+                  <code class="text-sm font-mono font-bold text-gray-900" id="buy-account-number">-</code>
+                </div>
+                <div class="border-t border-gray-100"></div>
+                <div class="flex justify-between items-center">
+                  <span class="text-xs text-gray-500">Account Name</span>
+                  <span class="text-sm font-semibold text-gray-900" id="buy-account-name">-</span>
+                </div>
+              </div>
+              <div class="bg-white rounded-xl border border-gray-200 p-3 mb-3 text-left">
+                <p class="text-xs text-gray-500 mb-1">Rate Used</p>
+                <p class="text-sm font-semibold text-gray-900" id="buy-rate-used">-</p>
+              </div>
+              <div class="bg-white rounded-xl border border-gray-200 p-3 mb-3 text-left">
+                <p class="text-xs text-gray-500 mb-1">Reference</p>
+                <p class="text-sm font-mono text-gray-900" id="buy-reference">-</p>
+              </div>
+              <button onclick="copyAddress('buy-account-number')" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-xl text-sm font-medium transition-colors inline-flex items-center justify-center gap-2">
+                <i data-lucide="copy" class="w-4 h-4"></i>
+                Copy Account Number
+              </button>
+            </div>
+            
+            <!-- Status Tracker -->
+            <div class="space-y-3">
+              <h4 class="font-semibold text-sm text-gray-700">Transaction Status</h4>
+              <div class="space-y-2">
+                <div class="flex items-center gap-3 p-3 bg-amber-50 rounded-lg" id="bstatus-1">
+                  <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center"><i data-lucide="clock" class="w-4 h-4 text-amber-600"></i></div>
+                  <div class="flex-1"><p class="text-sm font-medium text-amber-700">Waiting for payment</p><p class="text-xs text-gray-500">Transfer to the account above</p></div>
+                  <button onclick="showManualConfirm('buy')" class="text-xs bg-white border border-amber-300 text-amber-700 px-2.5 py-1.5 rounded-lg hover:bg-amber-100 transition-colors font-medium shrink-0">Confirm</button>
+                </div>
+                <div id="buy-manual-confirm" class="hidden p-4 bg-white rounded-xl border border-gray-200 shadow-sm text-center">
+                  <div class="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <svg class="w-5 h-5 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  </div>
+                  <p class="text-sm font-medium text-gray-800 mb-1">Have you completed the bank transfer?</p>
+                  <p class="text-xs text-gray-500 mb-3">Click below to confirm your payment</p>
+                  <button onclick="confirmManual('buy')" class="bg-velcro-green hover:bg-velcro-green-dark text-velcro-navy px-8 py-2.5 rounded-xl text-sm font-bold transition-colors w-full">I've Paid</button>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg opacity-50" id="bstatus-2">
+                  <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center"><i data-lucide="search" class="w-4 h-4 text-gray-500"></i></div>
+                  <div><p class="text-sm font-medium text-gray-500">Payment detected</p></div>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg opacity-50" id="bstatus-3">
+                  <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center"><i data-lucide="refresh-cw" class="w-4 h-4 text-gray-500"></i></div>
+                  <div><p class="text-sm font-medium text-gray-500">Processing crypto</p></div>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg opacity-50" id="bstatus-4">
+                  <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center"><i data-lucide="check-circle" class="w-4 h-4 text-gray-500"></i></div>
+                  <div><p class="text-sm font-medium text-gray-500">Completed</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+
+
+      </div>
+    </div>
+  </section>
+
+  <!-- History Modal -->
+  <div id="history-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-white/80 backdrop-blur-sm" onclick="hideHistoryModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden animate-fade-in flex flex-col">
+      <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+        <h2 class="text-lg font-bold text-velcro-navy flex items-center gap-2"><i data-lucide="history" class="w-5 h-5"></i> Transaction History</h2>
+        <button onclick="hideHistoryModal()" class="p-2 hover:bg-gray-100 rounded-lg"><i data-lucide="x" class="w-5 h-5 text-gray-500"></i></button>
+      </div>
+      <div class="overflow-y-auto p-6 space-y-3" id="history-list">
+        <div class="text-center py-8 text-gray-400">Loading transactions...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <!-- Support Widget -->
+  <div id="support-widget" class="fixed bottom-6 right-6 z-50">
+    <div id="support-menu" class="hidden mb-3 space-y-2">
+      <a href="https://wa.me/2347035428475" target="_blank" class="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-lg hover:shadow-xl transition-shadow text-sm text-gray-700">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp
+      </a>
+      <a href="mailto:support@usevelcro.com" class="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-lg hover:shadow-xl transition-shadow text-sm text-gray-700">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-velcro-navy"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+        Email Support
+      </a>
+    </div>
+    <button onclick="document.getElementById('support-menu').classList.toggle('hidden')" class="w-12 h-12 bg-velcro-green rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0D0D59" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+    </button>
+  </div>
+
+  <div id="toast-container" class="fixed top-4 right-4 z-[9999] space-y-3 pointer-events-none"></div>
+
+  <!-- Footer -->
+  <footer class="bg-gray-50 border-t-4 border-velcro-green py-10 mt-auto">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <img src="/velcro_logo.png" alt="Velcro" class="h-8 w-auto mx-auto mb-4">
+      <p class="text-sm text-gray-500 mb-6">© 2026 Velcro Technologies. All rights reserved.</p>
+      <div class="flex items-center justify-center gap-8 text-sm text-gray-500">
+        <a href="/terms.html" class="hover:text-velcro-navy transition-colors">Terms</a>
+        <a href="/privacy.html" class="hover:text-velcro-navy transition-colors">Privacy</a>
+        <a href="mailto:support@usevelcro.com" class="hover:text-velcro-navy transition-colors">Support</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    var API_BASE = window.location.origin.includes('localhost') ? 'http://localhost:3000' : '';
+    var currentCountry = 'NG';
+    var currentCurrency = 'NGN';
+    var currentRate = { sell: 0, buy: 0 };
+    var currentSwitchAsset = '';
+    var currentSellAsset = '';
+    var currentBuyAsset = '';
+    var currentSellNetwork = '';
+    var currentBuyNetwork = '';
+    var currentBankCode = '';
+    var countryRequirements = {};
+    var currentReference = '';
+    var statusPollInterval = null;
+
+    function safeLucideInit() {
+      if (typeof lucide !== 'undefined' && lucide.createIcons) {
+        lucide.createIcons();
+      }
+    }
+
+    // Init icons
+    document.addEventListener('DOMContentLoaded', safeLucideInit);
+
+    function getSwitchAsset(symbol, network) {
+      if (!symbol || !network) return '';
+      const map = {
+        'USDT': { 'solana': 'solana:usdt', 'ethereum': 'ethereum:usdt', 'bsc': 'bsc:usdt', 'polygon': 'polygon:usdt', 'arbitrum': 'arbitrum:usdt', 'base': 'base:usdt', 'tron': 'tron:usdt' },
+        'USDC': { 'solana': 'solana:usdc', 'ethereum': 'ethereum:usdc', 'bsc': 'bsc:usdc', 'polygon': 'polygon:usdc', 'arbitrum': 'arbitrum:usdc', 'base': 'base:usdc' },
+        'CNGN': { 'base': 'base:cngn', 'bsc': 'bsc:cngn' }
+      };
+      const result = map[symbol]?.[network] || '';
+      console.log('[getSwitchAsset] symbol:', symbol, 'network:', network, '=>', result);
+      return result;
+    }
+
+    function formatCurrency(value) {
+      const symbol = currentCurrency === 'NGN' ? '₦' : currentCurrency === 'GHS' ? '₵' : 'KSh';
+      return symbol + Number(value).toLocaleString();
+    }
+
+    async function fetchRate() {
+      const direction = document.getElementById('form-sell').classList.contains('hidden') ? 'ONRAMP' : 'OFFRAMP';
+      const asset = direction === 'OFFRAMP' ? currentSellAsset : currentBuyAsset;
+      const network = direction === 'OFFRAMP' ? currentSellNetwork : currentBuyNetwork;
+      currentSwitchAsset = getSwitchAsset(asset, network);
+      console.log('[fetchRate] direction:', direction, 'asset:', asset, 'network:', network, 'currentSwitchAsset:', currentSwitchAsset, 'country:', currentCountry, 'currency:', currentCurrency);
+      if (!currentSwitchAsset) return;
+      try {
+        const body = { 
+          direction, 
+          asset: currentSwitchAsset, 
+          country: currentCountry, 
+          currency: currentCurrency, 
+          channel: direction === 'ONRAMP' ? 'BLOCKCHAIN' : 'BANK' 
+        };
+        console.log('[fetchRate] POST /api/rate body:', JSON.stringify(body));
+        const res = await fetch(`${API_BASE}/api/rate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if (!res.ok) throw new Error('Failed to fetch rate');
+        const payload = await res.json();
+        console.log('[fetchRate] response:', payload);
+        const data = payload.data || {};
+        const rate = data.rate || data.data?.rate;
+        console.log('[fetchRate] extracted rate:', rate);
+        if (rate) {
+          if (direction === 'OFFRAMP') currentRate.sell = rate;
+          else currentRate.buy = rate;
+        }
+        updateNavRate();
+        updateRateDisplays();
+        if (direction === 'OFFRAMP') calculateSell();
+        else calculateBuy();
+      } catch (err) {
+        console.error('[fetchRate] error:', err.message);
+        showToast(err.message || 'Failed to fetch rate', 'error');
+      }
+    }
+
+    function updateNavRate() {
+      const ratePill = document.getElementById('nav-rate');
+      const isSell = !document.getElementById('form-sell').classList.contains('hidden');
+      const asset = isSell ? currentSellAsset : currentBuyAsset;
+      const rate = isSell ? currentRate.sell : currentRate.buy;
+      if (ratePill && asset && rate) {
+        ratePill.textContent = `1 ${asset} = ${formatCurrency(rate)}`;
+      }
+    }
+
+    function updateRateDisplays() {
+      const sellRateEl = document.getElementById('sell-rate-display');
+      const buyRateEl = document.getElementById('buy-rate-display');
+      if (sellRateEl) {
+        if (currentSellAsset && currentRate.sell) {
+          sellRateEl.textContent = `Rate: 1 ${currentSellAsset} = ${formatCurrency(currentRate.sell)}`;
+        } else {
+          sellRateEl.textContent = 'Rate: --';
+        }
+      }
+      if (buyRateEl) {
+        if (currentBuyAsset && currentRate.buy) {
+          buyRateEl.textContent = `Rate: 1 ${currentBuyAsset} = ${formatCurrency(currentRate.buy)}`;
+        } else {
+          buyRateEl.textContent = 'Rate: --';
+        }
+      }
+    }
+
+    function updateCurrencySymbols() {
+      const symbol = currentCurrency === 'NGN' ? '&#8358;' : currentCurrency === 'GHS' ? 'GH&#8373;' : 'KSh';
+      const sellReceiveCurrency = document.getElementById('sell-receive-currency');
+      const buySendCurrency = document.getElementById('buy-send-currency');
+      const buyConfirmSymbol = document.getElementById('buy-confirm-currency-symbol');
+      const sellReceiveCode = document.getElementById('sell-receive-currency-code');
+      const buySendCode = document.getElementById('buy-send-currency-code');
+      if (sellReceiveCurrency) sellReceiveCurrency.innerHTML = symbol;
+      if (buySendCurrency) buySendCurrency.innerHTML = symbol;
+      if (buyConfirmSymbol) buyConfirmSymbol.innerHTML = symbol;
+      if (sellReceiveCode) sellReceiveCode.textContent = currentCurrency;
+      if (buySendCode) buySendCode.textContent = currentCurrency;
+    }
+
+    async function fetchRequirements() {
+      try {
+        const res = await fetch(`${API_BASE}/api/requirements?direction=OFFRAMP&country=${currentCountry}&currency=${currentCurrency}&type=INDIVIDUAL&channel=BANK`);
+        if (!res.ok) return;
+        const payload = await res.json();
+        countryRequirements = {};
+        const reqs = payload.data || [];
+        reqs.forEach(r => {
+          countryRequirements[r.path] = r;
+        });
+      } catch (e) {
+        console.error('Failed to fetch requirements:', e.message);
+      }
+    }
+
+    let cachedBanks = [];
+    async function fetchInstitutions() {
+      try {
+        const res = await fetch(`${API_BASE}/api/institutions?country=${currentCountry}&channel=BANK`);
+        if (!res.ok) return;
+        const payload = await res.json();
+        cachedBanks = payload.data || [];
+        populateBanks();
+      } catch (e) {
+        console.error('Failed to fetch institutions:', e.message);
+      }
+    }
+
+    const TOP_BANK_CODES = ['100004','000014','000013','000015','000016','000004','000007','000018','000017','000001','000010','000008','000003','000012','000002','000011'];
+
+    function populateBanks(filter = '') {
+      const container = document.getElementById('sell-bank-options');
+      let banks = cachedBanks;
+      if (banks.length === 0) {
+        container.innerHTML = `<div class="custom-option text-gray-400">No banks available</div>`;
+        return;
+      }
+
+      // Sort: top banks first, then alphabetically
+      banks = [...banks].sort((a, b) => {
+        const aTop = TOP_BANK_CODES.indexOf(a.code);
+        const bTop = TOP_BANK_CODES.indexOf(b.code);
+        if (aTop !== -1 && bTop !== -1) return aTop - bTop;
+        if (aTop !== -1) return -1;
+        if (bTop !== -1) return 1;
+        return a.name.localeCompare(b.name);
+      });
+
+      // Filter by search text
+      const term = filter.trim().toLowerCase();
+      if (term) {
+        banks = banks.filter(b => b.name.toLowerCase().includes(term));
+      }
+
+      // Build HTML with search input + divider after top 15
+      let html = `<div class="sticky top-0 bg-white z-10 p-2 border-b border-gray-100">
+        <input type="text" id="bank-filter" placeholder="Search banks..." class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-velcro-green" oninput="populateBanks(this.value)" onclick="event.stopPropagation()">
+      </div>`;
+
+      let topCount = 0;
+      banks.forEach((b, i) => {
+        const isTop = TOP_BANK_CODES.includes(b.code);
+        if (isTop && topCount === 0 && i > 0 && !term) {
+          // divider before first top bank (shouldn't happen since top are first)
+        }
+        if (!isTop && topCount > 0 && topCount < 16 && !term) {
+          html += `<div class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50 border-y border-gray-100">More Banks</div>`;
+          topCount = 99; // mark as done
+        }
+        if (isTop) topCount++;
+        const safeName = b.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        html += `<div class="custom-option" data-bank-code="${b.code}" onclick="selectSellBank('${safeName}', '${b.code}')">${b.name}</div>`;
+      });
+
+      if (banks.length === 0) {
+        html += `<div class="custom-option text-gray-400">No banks found</div>`;
+      }
+
+      container.innerHTML = html;
+      // Restore search input focus and value after rebuild
+      const input = document.getElementById('bank-filter');
+      if (input && term) {
+        input.value = term;
+        input.focus();
+        const len = input.value.length;
+        input.setSelectionRange(len, len);
+      }
+    }
+
+    function selectCountry(code, currency, label) {
+      currentCountry = code;
+      currentCurrency = currency;
+      document.getElementById('country-display').innerHTML = `<span class="flex items-center gap-2 font-medium text-gray-900">${label}</span>`;
+      document.querySelectorAll('#country-options .custom-option').forEach(o => o.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      document.getElementById('country-options').classList.remove('open');
+      updateCurrencySymbols();
+      if (currentSwitchAsset) fetchRate();
+      fetchRequirements();
+      fetchInstitutions();
+    }
+
+    // Close dropdowns on outside click
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.custom-select')) {
+        document.querySelectorAll('.custom-select-options').forEach(el => {
+          el.classList.remove('open');
+          const p = el.closest('.custom-select');
+          if (p) p.style.zIndex = '';
+        });
+      }
+    });
+
+    function toggleDropdown(id) {
+      const el = document.getElementById(id);
+      const isOpen = el.classList.contains('open');
+      document.querySelectorAll('.custom-select-options').forEach(o => {
+        o.classList.remove('open');
+        const p = o.closest('.custom-select');
+        if (p) p.style.zIndex = '';
+      });
+      if (!isOpen) {
+        el.classList.add('open');
+        const parent = el.closest('.custom-select');
+        if (parent) parent.style.zIndex = '9999';
+      }
+    }
+
+    function switchTab(tab) {
+      const indicator = document.getElementById('tab-indicator');
+      const sellTab = document.getElementById('tab-sell');
+      const buyTab = document.getElementById('tab-buy');
+      const sellForm = document.getElementById('form-sell');
+      const buyForm = document.getElementById('form-buy');
+
+      if (tab === 'sell') {
+        indicator.style.left = '4px';
+        sellTab.classList.remove('text-gray-500');
+        sellTab.classList.add('text-velcro-navy');
+        buyTab.classList.remove('text-velcro-navy');
+        buyTab.classList.add('text-gray-500');
+        sellForm.classList.remove('hidden');
+        buyForm.classList.add('hidden');
+      } else {
+        indicator.style.left = 'calc(50% + 2px)';
+        sellTab.classList.remove('text-velcro-navy');
+        sellTab.classList.add('text-gray-500');
+        buyTab.classList.remove('text-gray-500');
+        buyTab.classList.add('text-velcro-navy');
+        sellForm.classList.add('hidden');
+        buyForm.classList.remove('hidden');
+      }
+      updateNavRate();
+      safeLucideInit();
+    }
+
+    // Sell Asset
+    function selectSellAsset(symbol, logo, name) {
+      currentSellAsset = symbol;
+      document.getElementById('sell-asset-display').innerHTML = `<img src="${logo}" class="w-6 h-6" alt="${symbol}"><span class="font-medium">${symbol}</span><span class="text-gray-500 text-xs">${name}</span>`;
+      document.getElementById('sell-currency-prefix').innerHTML = symbol === 'CNGN' ? '&#8358;' : '$';
+      document.getElementById('sell-asset-name').textContent = symbol;
+      document.getElementById('sell-confirm-asset').textContent = symbol;
+      document.getElementById('sell-confirm-asset-img').src = logo;
+      document.querySelectorAll('#sell-asset-options .custom-option').forEach(o => o.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      document.getElementById('sell-asset-options').classList.remove('open');
+      document.getElementById('sell-network-wrap').classList.remove('opacity-50', 'pointer-events-none');
+      currentSwitchAsset = getSwitchAsset(currentSellAsset, currentSellNetwork);
+      if (currentSwitchAsset) fetchRate();
+      calculateSell();
+    }
+
+    function selectSellNetwork(id, logo, name) {
+      currentSellNetwork = id;
+      document.getElementById('sell-network-display').innerHTML = `<img src="${logo}" class="w-6 h-6" alt="${name}"><span class="font-semibold">${name}</span>`;
+      document.getElementById('sell-network-name').textContent = name;
+      document.getElementById('sell-confirm-network-img').src = logo;
+      document.querySelectorAll('#sell-network-options .custom-option').forEach(o => o.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      document.getElementById('sell-network-options').classList.remove('open');
+      document.getElementById('sell-amount-step').classList.remove('opacity-50', 'pointer-events-none');
+      currentSwitchAsset = getSwitchAsset(currentSellAsset, currentSellNetwork);
+      if (currentSwitchAsset) fetchRate();
+    }
+
+    function selectSellBank(name, code) {
+      currentBankCode = code;
+      document.getElementById('sell-bank-display').innerHTML = `<span class="font-medium text-gray-900">${name}</span>`;
+      document.querySelectorAll('#sell-bank-options .custom-option').forEach(o => o.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      document.getElementById('sell-bank-options').classList.remove('open');
+      validateAccount();
+    }
+
+    let _resolveTimer = null;
+    function validateAccount() {
+      const bankNum = document.getElementById('sell-bank-number').value.trim();
+      const errorEl = document.getElementById('sell-bank-error');
+      const accNameEl = document.getElementById('sell-account-name');
+      const accReq = countryRequirements['account_number'];
+      const regex = accReq?.regex ? new RegExp(accReq.regex) : /^[0-9]{10}$/;
+
+      clearTimeout(_resolveTimer);
+
+      if (!bankNum) {
+        errorEl.classList.add('hidden');
+        accNameEl.value = '';
+        accNameEl.placeholder = 'Enter account holder name';
+        return;
+      }
+      if (!regex.test(bankNum)) {
+        errorEl.textContent = accReq?.hint || 'Invalid account number format';
+        errorEl.classList.remove('hidden');
+        accNameEl.value = '';
+        accNameEl.placeholder = 'Enter account holder name';
+        return;
+      }
+
+      errorEl.classList.add('hidden');
+
+      if (!currentBankCode) return;
+
+      accNameEl.placeholder = 'Resolving name...';
+      _resolveTimer = setTimeout(() => resolveAccountName(bankNum, currentBankCode), 700);
+    }
+
+    async function resolveAccountName(accountNumber, bankCode) {
+      const accNameEl = document.getElementById('sell-account-name');
+      const errorEl = document.getElementById('sell-bank-error');
+      try {
+        const res = await fetch(`${API_BASE}/api/resolve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            country: currentCountry,
+            beneficiary: { account_number: accountNumber, bank_code: bankCode }
+          })
+        });
+        const payload = await res.json();
+        if (payload.success && payload.data?.account_name) {
+          accNameEl.value = payload.data.account_name;
+          errorEl.classList.add('hidden');
+        } else {
+          errorEl.textContent = payload.message || 'Could not resolve account name. Enter it manually.';
+          errorEl.classList.remove('hidden');
+          accNameEl.value = '';
+        }
+      } catch (e) {
+        errorEl.textContent = 'Name lookup failed. Please enter account name manually.';
+        errorEl.classList.remove('hidden');
+      } finally {
+        accNameEl.placeholder = 'Enter account holder name';
+      }
+    }
+
+    // Buy Asset
+    function selectBuyAsset(symbol, logo, name) {
+      currentBuyAsset = symbol;
+      document.getElementById('buy-asset-display').innerHTML = `<img src="${logo}" class="w-6 h-6" alt="${symbol}"><span class="font-medium">${symbol}</span><span class="text-gray-500 text-xs">${name}</span>`;
+      document.getElementById('buy-amount-label').textContent = symbol;
+      document.getElementById('buy-confirm-asset').textContent = symbol;
+      document.getElementById('buy-confirm-asset-img').src = logo;
+      document.querySelectorAll('#buy-asset-options .custom-option').forEach(o => o.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      document.getElementById('buy-asset-options').classList.remove('open');
+      document.getElementById('buy-network-wrap').classList.remove('opacity-50', 'pointer-events-none');
+      currentSwitchAsset = getSwitchAsset(currentBuyAsset, currentBuyNetwork);
+      if (currentSwitchAsset) fetchRate();
+      calculateBuy();
+    }
+
+    function selectBuyNetwork(id, logo, name) {
+      currentBuyNetwork = id;
+      document.getElementById('buy-network-display').innerHTML = `<img src="${logo}" class="w-6 h-6" alt="${name}"><span class="font-semibold">${name}</span>`;
+      document.getElementById('buy-confirm-network').textContent = name;
+      document.getElementById('buy-confirm-network-img').src = logo;
+      document.querySelectorAll('#buy-network-options .custom-option').forEach(o => o.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      document.getElementById('buy-network-options').classList.remove('open');
+      document.getElementById('buy-amount-step').classList.remove('opacity-50', 'pointer-events-none');
+      currentSwitchAsset = getSwitchAsset(currentBuyAsset, currentBuyNetwork);
+      if (currentSwitchAsset) fetchRate();
+    }
+
+    function calculateSell() {
+      const amount = parseFloat(document.getElementById('sell-amount').value) || 0;
+      const rate = Number(currentRate.sell);
+      if (Number.isNaN(rate) || rate <= 0) {
+        document.getElementById('sell-receive').value = '';
+        return;
+      }
+      const receive = amount * rate;
+      document.getElementById('sell-receive').value = receive.toFixed(2);
+    }
+
+    function calculateSellFromNgn() {
+      const ngn = parseFloat(document.getElementById('sell-receive').value) || 0;
+      const crypto = ngn / currentRate.sell;
+      document.getElementById('sell-amount').value = crypto.toFixed(2);
+    }
+
+    function calculateBuy() {
+      const amount = parseFloat(document.getElementById('buy-amount').value) || 0;
+      console.log('[calculateBuy] amount:', amount, 'currentRate.buy:', currentRate.buy);
+      const rate = Number(currentRate.buy);
+      if (Number.isNaN(rate) || rate <= 0) {
+        document.getElementById('buy-receive').value = '';
+        return;
+      }
+      const receive = amount / rate;
+      console.log('[calculateBuy] result:', receive);
+      if (Number.isNaN(receive)) {
+        document.getElementById('buy-receive').value = '';
+        return;
+      }
+      document.getElementById('buy-receive').value = receive.toFixed(2);
+    }
+
+    function calculateBuyFromCrypto() {
+      const crypto = parseFloat(document.getElementById('buy-receive').value) || 0;
+      const ngn = crypto * currentRate.buy;
+      document.getElementById('buy-amount').value = ngn.toFixed(2);
+    }
+
+    function updateSellReminder() {
+      const asset = document.getElementById('sell-reminder-asset').textContent;
+      const network = document.getElementById('sell-reminder-network').textContent;
+      const el = document.getElementById('sell-reminder');
+      if (asset !== '-' && network !== '-') el.classList.remove('hidden');
+      else el.classList.add('hidden');
+    }
+
+    function updateBuyReminder() {
+      const asset = document.getElementById('buy-reminder-asset').textContent;
+      const network = document.getElementById('buy-reminder-network').textContent;
+      const el = document.getElementById('buy-reminder');
+      if (asset !== '-' && network !== '-') el.classList.remove('hidden');
+      else el.classList.add('hidden');
+    }
+
+    function showManualConfirm(type) {
+      document.getElementById(type + '-manual-confirm').classList.remove('hidden');
+      const input = document.getElementById(type + '-tx-hash');
+      if (input) input.focus();
+    }
+
+    async function confirmManual(type) {
+      let hash = '';
+      if (type === 'sell') {
+        hash = document.getElementById('sell-tx-hash').value.trim();
+        if (!hash) { showToast('Please enter a transaction hash', 'warning'); return; }
+      }
+
+      const btn = type === 'sell'
+        ? document.querySelector('#sell-manual-confirm button[onclick]')
+        : document.querySelector('#buy-manual-confirm button[onclick]');
+      if (btn) { btn.disabled = true; btn.textContent = 'Verifying...'; }
+
+      try {
+        const body = { reference: currentReference };
+        if (hash) body.hash = hash;
+
+        const res = await fetch(`${API_BASE}/api/confirm`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const payload = await res.json();
+        if (!res.ok) {
+          showToast(payload.message || 'Confirmation failed', 'error');
+          if (btn) { btn.disabled = false; btn.textContent = type === 'sell' ? 'Submit' : "I've Paid"; }
+          return;
+        }
+      } catch (err) {
+        showToast(err.message || 'Failed to confirm', 'error');
+        if (btn) { btn.disabled = false; btn.textContent = type === 'sell' ? 'Submit' : "I've Paid"; }
+        return;
+      }
+
+      const prefix = type === 'sell' ? '' : 'b';
+      const s1 = document.getElementById(prefix + 'status-1');
+      const s2 = document.getElementById(prefix + 'status-2');
+      s1.classList.replace('bg-amber-50', 'bg-gray-50');
+      s1.classList.add('opacity-50');
+      s1.querySelector('.bg-amber-100').classList.replace('bg-amber-100', 'bg-gray-200');
+      s1.querySelector('.text-amber-600').classList.replace('text-amber-600', 'text-gray-500');
+      const s1p = s1.querySelector('.text-amber-700');
+      if (s1p) s1p.classList.replace('text-amber-700', 'text-gray-500');
+      s2.classList.remove('opacity-50');
+      s2.classList.replace('bg-gray-50', 'bg-green-50');
+      s2.querySelector('.bg-gray-200').classList.replace('bg-gray-200', 'bg-green-100');
+      const s2icon = s2.querySelector('i');
+      if (s2icon) s2icon.classList.replace('text-gray-500', 'text-green-600');
+      const s2p = s2.querySelector('.text-gray-500');
+      if (s2p) s2p.classList.replace('text-gray-500', 'text-green-700');
+      document.getElementById(type + '-manual-confirm').classList.add('hidden');
+      showToast('Payment confirmed! Processing your payout...', 'success');
+    }
+
+    function swapPanels(type, btn) {
+      const icon = btn.querySelector('i, svg');
+      if (icon) icon.style.transform = 'rotate(180deg)';
+      const isSell = type === 'sell';
+      const container = document.getElementById(isSell ? 'form-sell' : 'form-buy');
+      const sendPanel = document.getElementById(isSell ? 'sell-send-panel' : 'buy-send-panel');
+      const receivePanel = document.getElementById(isSell ? 'sell-receive-panel' : 'buy-receive-panel');
+      const btnWrapper = btn.parentElement;
+      if (!sendPanel || !receivePanel) return;
+
+      const sendFirst = Array.from(container.children).indexOf(sendPanel) < Array.from(container.children).indexOf(receivePanel);
+
+      sendPanel.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+      receivePanel.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+      sendPanel.style.opacity = '0';
+      receivePanel.style.opacity = '0';
+      sendPanel.style.transform = sendFirst ? 'translateY(12px)' : 'translateY(-12px)';
+      receivePanel.style.transform = sendFirst ? 'translateY(-12px)' : 'translateY(12px)';
+
+      setTimeout(() => {
+        if (sendFirst) {
+          container.insertBefore(receivePanel, sendPanel);
+          container.insertBefore(btnWrapper, sendPanel);
+        } else {
+          container.insertBefore(sendPanel, receivePanel);
+          container.insertBefore(btnWrapper, receivePanel);
+        }
+        sendPanel.style.transform = sendFirst ? 'translateY(-12px)' : 'translateY(12px)';
+        receivePanel.style.transform = sendFirst ? 'translateY(12px)' : 'translateY(-12px)';
+        requestAnimationFrame(() => {
+          sendPanel.style.opacity = '1';
+          receivePanel.style.opacity = '1';
+          sendPanel.style.transform = 'translateY(0)';
+          receivePanel.style.transform = 'translateY(0)';
+        });
+        setTimeout(() => {
+          sendPanel.style.transition = '';
+          receivePanel.style.transition = '';
+          if (icon) icon.style.transform = '';
+        }, 300);
+      }, 280);
+    }
+
+    async function generateWalletAddress() {
+      if (!currentSellAsset) { showToast('Please select an asset', 'warning'); return; }
+      if (!currentSellNetwork || document.getElementById('sell-network-display').textContent.trim() === 'Select Network') { showToast('Please select a network', 'warning'); return; }
+      const amount = parseFloat(document.getElementById('sell-amount').value);
+      if (!amount || amount <= 0) { showToast('Please enter a valid amount', 'warning'); return; }
+      if (amount < 1) { showToast('Minimum amount is $1', 'warning'); return; }
+      const bankNum = document.getElementById('sell-bank-number').value.trim();
+      const accReq = countryRequirements['account_number'];
+      const accRegex = accReq?.regex ? new RegExp(accReq.regex) : /^[0-9]{10}$/;
+      if (!accRegex.test(bankNum)) { showToast(accReq?.hint || 'Please enter a valid account number', 'warning'); return; }
+      if (document.getElementById('sell-bank-display').textContent.trim() === 'Select your bank') { showToast('Please select a bank', 'warning'); return; }
+      const accName = document.getElementById('sell-account-name').value.trim();
+      if (!accName) { showToast('Please enter the account holder name', 'warning'); return; }
+      if (!currentSwitchAsset) { showToast('Please select a valid asset and network', 'warning'); return; }
+      const btn = document.getElementById('sell-btn');
+      document.getElementById('sell-confirm-amount').textContent = amount;
+      document.getElementById('sell-confirm-asset').textContent = currentSellAsset;
+      btn.innerHTML = '<svg class="animate-spin w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating...';
+      try {
+        const res = await fetch(`${API_BASE}/api/initiate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            direction: 'OFFRAMP',
+            amount,
+            country: currentCountry,
+            currency: currentCurrency,
+            asset: currentSwitchAsset,
+            channel: 'BANK',
+            reason: 'PERSONAL_TRANSFER',
+            narration: 'Crypto Offramp Settlement',
+            beneficiary: {
+              holder_type: 'INDIVIDUAL',
+              holder_name: accName,
+              account_number: bankNum,
+              bank_code: currentBankCode
+            }
+          })
+        });
+        if (!res.ok) throw new Error('Failed to initiate transaction');
+        const payload = await res.json();
+        const data = payload.data || {};
+        const deposit = data.deposit || {};
+        document.getElementById('sell-wallet-address').textContent = deposit.address || data.address || '-';
+        document.getElementById('sell-reference').textContent = data.reference || '-';
+        currentReference = data.reference || '';
+        document.getElementById('sell-generated-address').classList.remove('hidden');
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mr-2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg> Address Generated';
+        safeLucideInit();
+        startStatusPoll(data.reference, 'sell');
+      } catch (err) {
+        btn.innerHTML = '<i data-lucide="wallet" class="w-5 h-5"></i> Generate Wallet Address';
+        safeLucideInit();
+        showToast(err.message || 'Failed to generate address', 'error');
+      }
+    }
+
+    async function generateBankAccount() {
+      if (!currentBuyAsset) { showToast('Please select an asset', 'warning'); return; }
+      if (!currentBuyNetwork || document.getElementById('buy-network-display').textContent.trim() === 'Select Network') { showToast('Please select a network', 'warning'); return; }
+      const amount = parseFloat(document.getElementById('buy-amount').value);
+      const receive = parseFloat(document.getElementById('buy-receive').value) || 0;
+      if (!amount || amount <= 0) { showToast('Please enter a valid amount', 'warning'); return; }
+      if (receive < 1) { showToast('Minimum amount is $1', 'warning'); return; }
+      const wallet = document.getElementById('buy-wallet').value.trim();
+      if (!wallet) { showToast('Please enter your wallet address', 'warning'); return; }
+      if (!currentSwitchAsset) { showToast('Please select a valid asset and network', 'warning'); return; }
+      const btn = document.getElementById('buy-btn');
+      document.getElementById('buy-confirm-ngn').textContent = amount.toFixed(2);
+      btn.innerHTML = '<svg class="animate-spin w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating...';
+      const reqBody = {
+        direction: 'ONRAMP',
+        amount,
+        country: currentCountry,
+        currency: currentCurrency,
+        asset: currentSwitchAsset,
+        channel: 'BLOCKCHAIN',
+        reason: 'PERSONAL_TRANSFER',
+        narration: 'Crypto Onramp Settlement',
+        beneficiary: {
+          holder_type: 'INDIVIDUAL',
+          holder_name: 'Customer',
+          wallet_address: wallet
+        }
+      };
+      console.log('[generateBankAccount] request body:', JSON.stringify(reqBody));
+      try {
+        const res = await fetch(`${API_BASE}/api/initiate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(reqBody)
+        });
+        const responseBody = await res.text();
+        console.log('[generateBankAccount] response status:', res.status, 'body:', responseBody);
+        if (!res.ok) throw new Error('Failed to initiate transaction: ' + responseBody);
+        const payload = JSON.parse(responseBody);
+        const data = payload.data || {};
+        const deposit = data.deposit || {};
+        document.getElementById('buy-bank-name').textContent = deposit.bank_name || data.bank_name || '-';
+        document.getElementById('buy-account-number').textContent = deposit.account_number || data.account_number || '-';
+        document.getElementById('buy-account-name').textContent = 'Velcro Checkout';
+        document.getElementById('buy-rate-used').textContent = currentRate.buy ? `1 ${currentBuyAsset} = ${formatCurrency(currentRate.buy)}` : '-';
+        document.getElementById('buy-reference').textContent = data.reference || '-';
+        currentReference = data.reference || '';
+        document.getElementById('buy-generated-account').classList.remove('hidden');
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mr-2"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg> Account Generated';
+        safeLucideInit();
+        startStatusPoll(data.reference, 'buy');
+      } catch (err) {
+        btn.innerHTML = '<i data-lucide="landmark" class="w-5 h-5"></i> Generate Bank Account';
+        safeLucideInit();
+        showToast(err.message || 'Failed to generate account', 'error');
+      }
+    }
+
+    function startStatusPoll(reference, type) {
+      if (statusPollInterval) clearInterval(statusPollInterval);
+      statusPollInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`${API_BASE}/api/status?reference=${encodeURIComponent(reference)}`);
+          if (!res.ok) return;
+          const payload = await res.json();
+          const data = payload.data || {};
+          const status = data.status || payload.status;
+          updateStatusUI(status, type);
+          if (status === 'COMPLETED' || status === 'FAILED' || status === 'CANCELLED') {
+            clearInterval(statusPollInterval);
+            if (status === 'COMPLETED') {
+              showToast('Transaction Completed Successfully!', 'success');
+              setTimeout(() => window.location.reload(), 4000);
+            }
+          }
+        } catch (e) {
+          // silently ignore polling errors
+        }
+      }, 10000);
+    }
+
+    function updateStatusUI(status, type) {
+      const prefix = type === 'sell' ? '' : 'b';
+      const steps = [
+        document.getElementById(prefix + 'status-1'),
+        document.getElementById(prefix + 'status-2'),
+        document.getElementById(prefix + 'status-3'),
+        document.getElementById(prefix + 'status-4')
+      ];
+      const statusMap = { 'AWAITING_DEPOSIT': 1, 'PENDING': 1, 'INITIATED': 1, 'DETECTED': 2, 'CONFIRMED': 2, 'RECEIVED': 2, 'PROCESSING': 3, 'COMPLETED': 4, 'FAILED': 4 };
+      const step = statusMap[status] || 1;
+      steps.forEach((el, idx) => {
+        if (!el) return;
+        if (idx === 0) {
+          if (step > 1) {
+            el.classList.add('opacity-50');
+            el.classList.remove('bg-amber-50');
+            el.classList.add('bg-gray-50');
+            const badge = el.querySelector('.bg-amber-100');
+            if (badge) { badge.classList.remove('bg-amber-100'); badge.classList.add('bg-gray-200'); }
+            const icon = el.querySelector('.text-amber-600');
+            if (icon) { icon.classList.remove('text-amber-600'); icon.classList.add('text-gray-500'); }
+            const txt = el.querySelector('.text-amber-700');
+            if (txt) { txt.classList.remove('text-amber-700'); txt.classList.add('text-gray-500'); }
+          }
+          return;
+        }
+        if (idx < step) {
+          el.classList.remove('opacity-50');
+          el.classList.remove('bg-gray-50');
+          el.classList.add('bg-green-50');
+          const badge = el.querySelector('.bg-gray-200');
+          if (badge) { badge.classList.remove('bg-gray-200'); badge.classList.add('bg-green-100'); }
+          const icon = el.querySelector('i');
+          if (icon) { icon.classList.remove('text-gray-500'); icon.classList.add('text-green-600'); }
+          const txt = el.querySelector('.text-gray-500');
+          if (txt) { txt.classList.remove('text-gray-500'); txt.classList.add('text-green-700'); }
+        } else {
+          el.classList.add('opacity-50');
+          el.classList.remove('bg-green-50');
+          el.classList.add('bg-gray-50');
+          const badge = el.querySelector('.bg-green-100');
+          if (badge) { badge.classList.remove('bg-green-100'); badge.classList.add('bg-gray-200'); }
+          const icon = el.querySelector('i');
+          if (icon) { icon.classList.remove('text-green-600'); icon.classList.add('text-gray-500'); }
+          const txt = el.querySelector('.text-green-700');
+          if (txt) { txt.classList.remove('text-green-700'); txt.classList.add('text-gray-500'); }
+        }
+      });
+    }
+
+    function copyAddress(elementId) {
+      const text = document.getElementById(elementId).textContent;
+      navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!', 'success'));
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'pointer-events-auto translate-x-full opacity-0 transition-all duration-300 ease-out flex items-center gap-3 min-w-[280px] max-w-[400px] rounded-2xl shadow-xl border px-4 py-3.5';
+
+      const styles = {
+        success: 'bg-white border-green-200 text-gray-900',
+        error:   'bg-white border-red-200 text-gray-900',
+        info:    'bg-white border-gray-200 text-gray-900',
+        warning: 'bg-white border-amber-200 text-gray-900'
+      };
+      const iconColors = {
+        success: 'text-green-600',
+        error:   'text-red-500',
+        info:    'text-velcro-navy',
+        warning: 'text-amber-500'
+      };
+      const icons = {
+        success: '<svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+        error:   '<svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+        info:    '<svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+        warning: '<svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+      };
+
+      toast.classList.add(...styles[type].split(' '));
+      toast.innerHTML = `
+        <div class="${iconColors[type]}">${icons[type]}</div>
+        <p class="text-sm font-medium leading-snug flex-1">${message}</p>
+        <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600 transition-colors p-0.5">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <div class="absolute bottom-0 left-4 right-4 h-0.5 rounded-full overflow-hidden"><div class="h-full ${type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : type === 'warning' ? 'bg-amber-500' : 'bg-velcro-navy'} toast-progress"></div></div>
+      `;
+      toast.style.position = 'relative';
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-x-full', 'opacity-0');
+      });
+
+      const progress = toast.querySelector('.toast-progress');
+      if (progress) {
+        progress.style.width = '100%';
+        progress.style.transition = 'width 3.5s linear';
+        requestAnimationFrame(() => { progress.style.width = '0%'; });
+      }
+
+      const timer = setTimeout(() => {
+        toast.classList.add('translate-x-full', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+
+      toast.addEventListener('mouseenter', () => clearTimeout(timer));
+    }
+
+    // Auth Modal
+    // Init
+    fetchRequirements();
+    fetchInstitutions();
+
+    // Close dropdowns on scroll / resize
+    window.addEventListener('scroll', () => {
+      document.querySelectorAll('.custom-select-options.open').forEach(o => {
+        o.classList.remove('open');
+        const p = o.closest('.custom-select');
+        if (p) p.style.zIndex = '';
+      });
+    });
+    window.addEventListener('resize', () => {
+      document.querySelectorAll('.custom-select-options.open').forEach(o => {
+        o.classList.remove('open');
+        const p = o.closest('.custom-select');
+        if (p) p.style.zIndex = '';
+      });
+    });
+
+    async function showHistoryModal() {
+      const modal = document.getElementById('history-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      
+      const list = document.getElementById('history-list');
+      list.innerHTML = '<div class="text-center py-8 text-gray-400">Loading transactions...</div>';
+      
+      try {
+        const res = await fetch(`${API_BASE}/api/transactions`);
+        const payload = await res.json();
+        const txs = payload.data || [];
+        
+        if (txs.length === 0) {
+          list.innerHTML = '<div class="text-center py-8 text-gray-400">No transactions yet</div>';
+        } else {
+          list.innerHTML = txs.map(tx => {
+            const isBuy = tx.type === 'ONRAMP';
+            const statusClass = tx.status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 
+                               tx.status === 'FAILED' ? 'bg-red-100 text-red-700' : 
+                               'bg-amber-100 text-amber-700';
+            const date = new Date(tx.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const assetName = tx.asset.includes(':') ? tx.asset.split(':')[1].toUpperCase() : tx.asset.toUpperCase();
+            let beneficiaryData = {};
+            try { beneficiaryData = JSON.parse(tx.beneficiary || '{}'); } catch(e){}
+            
+            return `
+              <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors group" onclick="const d = this.querySelector('.tx-details'); d.classList.toggle('hidden'); this.querySelector('.chevron').style.transform = d.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm font-bold text-gray-900">${isBuy ? 'Buy' : 'Sell'} ${assetName}</span>
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] px-2 py-0.5 ${statusClass} rounded-full font-medium uppercase">${tx.status}</span>
+                    <i data-lucide="chevron-down" class="w-3 h-3 text-gray-400 chevron transition-transform"></i>
+                  </div>
+                </div>
+                <div class="flex justify-between items-end">
+                  <div>
+                    <p class="text-xs text-gray-600">${isBuy ? `₦${tx.amount.toLocaleString()} → ${tx.destination_amount?.toFixed(4) || ''} ${assetName}` : `${tx.amount} ${assetName} → ₦${tx.destination_amount?.toLocaleString() || ''}`}</p>
+                    <p class="text-[10px] text-gray-400 mt-1">${date}</p>
+                  </div>
+                  <div class="text-right">
+                    <p class="text-[10px] font-mono text-gray-400">Ref: ${tx.reference}</p>
+                  </div>
+                </div>
+                
+                <!-- Details Section -->
+                <div class="tx-details hidden mt-4 pt-4 border-t border-gray-200 space-y-2 animate-fade-in text-[10px]">
+                  <div class="flex justify-between">
+                    <span class="text-gray-500">Reference:</span>
+                    <span class="font-mono text-gray-700 select-all">${tx.reference}</span>
+                  </div>
+                  ${tx.hash ? `
+                  <div class="flex justify-between">
+                    <span class="text-gray-500">Transaction Hash:</span>
+                    <a href="${tx.explorer_url || '#'}" target="_blank" class="text-velcro-navy font-bold underline flex items-center gap-1" onclick="event.stopPropagation()">
+                      ${tx.hash.slice(0, 10)}...${tx.hash.slice(-10)}
+                      <i data-lucide="external-link" class="w-2.5 h-2.5"></i>
+                    </a>
+                  </div>
+                  ` : ''}
+                  <div class="flex justify-between">
+                    <span class="text-gray-500">Status:</span>
+                    <span class="text-gray-700 font-medium">${tx.status}</span>
+                  </div>
+                  ${isBuy ? `
+                  <div class="flex justify-between">
+                    <span class="text-gray-500">Deposit Bank:</span>
+                    <span class="text-gray-700">${tx.deposit_bank_name || '-'}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-500">Account Number:</span>
+                    <span class="text-gray-700">${tx.deposit_account_number || '-'}</span>
+                  </div>
+                  ` : `
+                  <div class="flex justify-between">
+                    <span class="text-gray-500">Bank Code:</span>
+                    <span class="text-gray-700">${beneficiaryData.bank_code || '-'}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-500">Account Number:</span>
+                    <span class="text-gray-700">${beneficiaryData.account_number || '-'}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-500">Holder Name:</span>
+                    <span class="text-gray-700">${beneficiaryData.holder_name || '-'}</span>
+                  </div>
+                  `}
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      } catch (err) {
+        list.innerHTML = '<div class="text-center py-8 text-red-400">Failed to load history</div>';
+      }
+      
+      safeLucideInit();
+    }
+
+    function hideHistoryModal() {
+      const modal = document.getElementById('history-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+  </script>
+</body>
+</html>

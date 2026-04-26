@@ -1,0 +1,14 @@
+node_modules/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.zip
+*.tar.gz
+.env
+all_in_one/
+deploy/
+staging/
+backend/
+ramp/
+v16/
+package-lock.json
