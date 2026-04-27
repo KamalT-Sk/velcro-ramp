@@ -170,12 +170,19 @@
           <!-- You'll Send Panel -->
           <div id="sell-send-panel" class="input-panel">
             <div class="flex items-center justify-between mb-3">
-              <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">You Send</label>
-              <div class="flex items-center gap-2">
+              <span class="text-sm text-gray-500 font-medium">You'll send</span>
+            </div>
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex items-center gap-2 flex-1 min-w-0 opacity-50 pointer-events-none transition-opacity" id="sell-amount-step">
+                <span class="text-3xl font-bold text-gray-300" id="sell-currency-prefix">$</span>
+                <input type="number" id="sell-amount" placeholder="0.00" min="0" step="0.01" oninput="calculateSell()" 
+                  class="display-input text-3xl font-bold text-gray-900 bg-transparent outline-none w-full p-0 border-none focus:ring-0 amount-input placeholder-gray-300">
+              </div>
+              <div class="flex flex-col items-end gap-2 shrink-0">
                 <div class="custom-select" id="sell-asset-wrap">
                   <div class="asset-pill" onclick="toggleDropdown('sell-asset-options')">
                     <div class="flex items-center gap-1.5" id="sell-asset-display">
-                      <span class="text-gray-400 text-sm">Select Asset</span>
+                      <span class="text-gray-400 text-sm">Select</span>
                     </div>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
                   </div>
@@ -203,35 +210,32 @@
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
                   </div>
                   <div class="custom-select-options" id="sell-network-options">
-              <div class="custom-option" onclick="selectSellNetwork('solana', '/logos/solana.png', 'Solana')">
-                <img src="/logos/solana.png" class="w-6 h-6" alt="Solana"><span class="font-medium">Solana</span>
-              </div>
-              <div class="custom-option" onclick="selectSellNetwork('ethereum', '/logos/ethereum.png', 'Ethereum')">
-                <img src="/logos/ethereum.png" class="w-6 h-6" alt="Ethereum"><span class="font-medium">Ethereum</span>
-              </div>
-              <div class="custom-option" onclick="selectSellNetwork('bsc', '/logos/bsc.png', 'BSC')">
-                <img src="/logos/bsc.png" class="w-6 h-6" alt="BSC"><span class="font-medium">BSC</span>
-              </div>
-              <div class="custom-option" onclick="selectSellNetwork('polygon', '/logos/polygon.png', 'Polygon')">
-                <img src="/logos/polygon.png" class="w-6 h-6" alt="Polygon"><span class="font-medium">Polygon</span>
-              </div>
-              <div class="custom-option" onclick="selectSellNetwork('arbitrum', '/logos/arbitrum.png', 'Arbitrum')">
-                <img src="/logos/arbitrum.png" class="w-6 h-6" alt="Arbitrum"><span class="font-medium">Arbitrum</span>
-              </div>
-              <div class="custom-option" onclick="selectSellNetwork('base', '/logos/base.png', 'Base')">
-                <img src="/logos/base.png" class="w-6 h-6" alt="Base"><span class="font-medium">Base</span>
-              </div>
-              <div class="custom-option" onclick="selectSellNetwork('tron', '/logos/tron.png', 'Tron')">
-                <img src="/logos/tron.png" class="w-6 h-6" alt="Tron"><span class="font-medium">Tron</span>
+                    <div class="custom-option" onclick="selectSellNetwork('solana', '/logos/solana.png', 'Solana')">
+                      <img src="/logos/solana.png" class="w-6 h-6" alt="Solana"><span class="font-medium">Solana</span>
+                    </div>
+                    <div class="custom-option" onclick="selectSellNetwork('ethereum', '/logos/ethereum.png', 'Ethereum')">
+                      <img src="/logos/ethereum.png" class="w-6 h-6" alt="Ethereum"><span class="font-medium">Ethereum</span>
+                    </div>
+                    <div class="custom-option" onclick="selectSellNetwork('bsc', '/logos/bsc.png', 'BSC')">
+                      <img src="/logos/bsc.png" class="w-6 h-6" alt="BSC"><span class="font-medium">BSC</span>
+                    </div>
+                    <div class="custom-option" onclick="selectSellNetwork('polygon', '/logos/polygon.png', 'Polygon')">
+                      <img src="/logos/polygon.png" class="w-6 h-6" alt="Polygon"><span class="font-medium">Polygon</span>
+                    </div>
+                    <div class="custom-option" onclick="selectSellNetwork('arbitrum', '/logos/arbitrum.png', 'Arbitrum')">
+                      <img src="/logos/arbitrum.png" class="w-6 h-6" alt="Arbitrum"><span class="font-medium">Arbitrum</span>
+                    </div>
+                    <div class="custom-option" onclick="selectSellNetwork('base', '/logos/base.png', 'Base')">
+                      <img src="/logos/base.png" class="w-6 h-6" alt="Base"><span class="font-medium">Base</span>
+                    </div>
+                    <div class="custom-option" onclick="selectSellNetwork('tron', '/logos/tron.png', 'Tron')">
+                      <img src="/logos/tron.png" class="w-6 h-6" alt="Tron"><span class="font-medium">Tron</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-          <div id="sell-amount-step" class="flex items-center gap-3 mt-3 opacity-50 pointer-events-none transition-opacity">
-            <span class="text-3xl font-bold text-gray-400" id="sell-currency-prefix">$</span>
-            <input type="number" id="sell-amount" placeholder="0.00" min="0" step="0.01" oninput="calculateSell()" 
-              class="display-input flex-1 text-3xl font-bold text-gray-900 bg-transparent outline-none w-full p-0 border-none focus:ring-0 amount-input">
-          </div>
-          <div class="mt-2 text-xs text-gray-400 font-medium">Min: $1</div>
 
           <!-- Swap Button -->
           <div class="flex justify-center -my-2 relative z-10">
@@ -243,56 +247,62 @@
           <!-- You'll Receive Panel -->
           <div id="sell-receive-panel" class="input-panel">
             <div class="flex items-center justify-between mb-3">
-              <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">You Receive</label>
+              <span class="text-sm text-gray-500 font-medium">You'll receive</span>
               <span class="text-xs font-medium text-gray-400 flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-full" id="sell-rate-display"><span class="w-1.5 h-1.5 rounded-full bg-green-500 live-pulse"></span>Rate: --</span>
             </div>
-            <div class="flex items-center gap-3">
-              <span class="text-3xl font-bold text-gray-400" id="sell-receive-currency">₦</span>
-              <input type="number" id="sell-receive" placeholder="0.00" min="0" step="0.01" oninput="calculateSellFromNgn()"
-                class="display-input flex-1 text-3xl font-bold text-gray-900 bg-transparent outline-none w-full p-0 border-none focus:ring-0 amount-input">
-              <div class="bg-gray-100 border border-gray-200 rounded-lg px-3 py-1.5 flex items-center gap-2">
-                <img id="sell-receive-flag" src="/flags/ng.png" class="w-4 h-auto rounded-sm" alt="">
-                <span class="text-gray-700 font-semibold text-sm" id="sell-receive-currency-code">NGN</span>
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex items-center gap-2 flex-1 min-w-0">
+                <span class="text-3xl font-bold text-gray-300" id="sell-receive-currency">&#8358;</span>
+                <input type="number" id="sell-receive" placeholder="0.00" min="0" step="0.01" oninput="calculateSellFromNgn()"
+                  class="display-input text-3xl font-bold text-gray-900 bg-transparent outline-none w-full p-0 border-none focus:ring-0 amount-input placeholder-gray-300">
+              </div>
+              <div class="shrink-0">
+                <div class="bg-gray-100 border border-gray-200 rounded-lg px-3 py-1.5 flex items-center gap-2">
+                  <img id="sell-receive-flag" src="/flags/ng.png" class="w-4 h-auto rounded-sm" alt="">
+                  <span class="text-gray-700 font-semibold text-sm" id="sell-receive-currency-code">NGN</span>
+                </div>
               </div>
             </div>
           </div>
+          <div class="text-xs text-gray-400 font-medium -mt-3">Min: $1</div>
 
           <!-- Bank Details -->
           <div class="input-panel space-y-4">
-            <div class="flex flex-col sm:flex-row items-start gap-3">
-              <div class="custom-select flex-1 w-full" id="sell-bank-wrap">
-                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Bank</label>
-                <div class="custom-select-trigger w-full px-3 py-2.5 border border-gray-200 rounded-xl bg-white text-sm transition-all hover:border-velcro-green" onclick="toggleDropdown('sell-bank-options')">
-                  <div class="flex items-center gap-2" id="sell-bank-display">
-                    <span class="text-gray-400">Select your bank</span>
+            <div class="flex flex-col sm:flex-row gap-4">
+              <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-500 mb-2">Choose bank</label>
+                <div class="custom-select w-full" id="sell-bank-wrap">
+                  <div class="custom-select-trigger w-full px-3 py-2.5 border border-gray-200 rounded-xl bg-white text-sm transition-all hover:border-velcro-green" onclick="toggleDropdown('sell-bank-options')">
+                    <div class="flex items-center gap-2" id="sell-bank-display">
+                      <span class="text-gray-400">Select your bank</span>
+                    </div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
                   </div>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
-                </div>
-                <div class="custom-select-options" id="sell-bank-options">
-                  <div class="custom-option text-gray-400">Loading banks...</div>
+                  <div class="custom-select-options" id="sell-bank-options">
+                    <div class="custom-option text-gray-400">Loading banks...</div>
+                  </div>
                 </div>
               </div>
-              <div class="flex-1 w-full">
-                <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Account Number</label>
+              <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-500 mb-2">Enter account number</label>
                 <input type="tel" id="sell-bank-number" placeholder="Enter account number" inputmode="numeric" pattern="[0-9]*"
                   class="w-full px-3 py-2.5 border border-gray-200 rounded-xl bg-white text-sm text-gray-900 outline-none transition-all focus:border-velcro-green amount-input"
                   oninput="validateAccount(); updateStepIndicators('OFFRAMP');">
                 <p id="sell-bank-error" class="hidden text-xs text-red-500 mt-1 font-medium"></p>
               </div>
             </div>
-            <div id="sell-name-wrap" class="hidden animate-fade-in">
-              <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Account Holder Name</label>
+            <div id="sell-name-wrap" class="hidden">
+              <label class="block text-sm font-medium text-gray-500 mb-2">Account Holder Name</label>
               <input type="text" id="sell-account-name" placeholder="Enter account holder name"
                 class="w-full px-3 py-2.5 border border-gray-200 rounded-xl bg-white text-sm text-gray-900 outline-none transition-all focus:border-velcro-green amount-input"
                 oninput="updateStepIndicators('OFFRAMP');">
-              <p class="text-xs text-gray-400 mt-1.5">Enter the name exactly as it appears on your bank account</p>
             </div>
           </div>
 
           <!-- Warning -->
-          <div class="flex items-start gap-3 p-4 bg-amber-50/60 border border-amber-200 rounded-xl">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 mt-0.5"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            <p class="text-sm text-amber-800 leading-relaxed">Only send the selected asset on the selected network. Sending wrong assets may result in permanent loss.</p>
+          <div class="flex items-start gap-3 p-4 bg-white border border-gray-200 rounded-xl" style="border-left: 4px solid #fbbf24;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 mt-0.5"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <p class="text-sm text-gray-600 leading-relaxed">Only send the selected asset on the selected network. Sending wrong assets may result in permanent loss.</p>
           </div>
 
           <!-- Action Button -->
@@ -378,13 +388,20 @@
           
           <!-- You'll Receive Panel -->
           <div id="buy-receive-panel" class="input-panel">
-            <div class="flex items-start justify-between gap-4">
-              <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider mt-2">You Receive</label>
-              <div class="flex flex-col items-end gap-2">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-sm text-gray-500 font-medium">You'll receive</span>
+              <span class="text-xs font-medium text-gray-400 flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-full" id="buy-rate-display"><span class="w-1.5 h-1.5 rounded-full bg-green-500 live-pulse"></span>Rate: --</span>
+            </div>
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex items-center gap-2 flex-1 min-w-0">
+                <input type="number" id="buy-receive" placeholder="0.00" min="0" step="0.01" oninput="calculateBuyFromCrypto()"
+                  class="display-input text-3xl font-bold text-gray-900 bg-transparent outline-none w-full p-0 border-none focus:ring-0 amount-input placeholder-gray-300">
+              </div>
+              <div class="flex flex-col items-end gap-2 shrink-0">
                 <div class="custom-select" id="buy-asset-wrap">
                   <div class="asset-pill" onclick="toggleDropdown('buy-asset-options')">
                     <div class="flex items-center gap-1.5" id="buy-asset-display">
-                      <span class="text-gray-400 text-sm">Select Asset</span>
+                      <span class="text-gray-400 text-sm">Select</span>
                     </div>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
                   </div>
@@ -406,32 +423,31 @@
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
                   </div>
                   <div class="custom-select-options" id="buy-network-options">
-              <div class="custom-option" onclick="selectBuyNetwork('solana', '/logos/solana.png', 'Solana')">
-                <img src="/logos/solana.png" class="w-6 h-6" alt="Solana"><span class="font-medium">Solana</span>
-              </div>
-              <div class="custom-option" onclick="selectBuyNetwork('ethereum', '/logos/ethereum.png', 'Ethereum')">
-                <img src="/logos/ethereum.png" class="w-6 h-6" alt="Ethereum"><span class="font-medium">Ethereum</span>
-              </div>
-              <div class="custom-option" onclick="selectBuyNetwork('bsc', '/logos/bsc.png', 'BSC')">
-                <img src="/logos/bsc.png" class="w-6 h-6" alt="BSC"><span class="font-medium">BSC</span>
-              </div>
-              <div class="custom-option" onclick="selectBuyNetwork('polygon', '/logos/polygon.png', 'Polygon')">
-                <img src="/logos/polygon.png" class="w-6 h-6" alt="Polygon"><span class="font-medium">Polygon</span>
-              </div>
-              <div class="custom-option" onclick="selectBuyNetwork('arbitrum', '/logos/arbitrum.png', 'Arbitrum')">
-                <img src="/logos/arbitrum.png" class="w-6 h-6" alt="Arbitrum"><span class="font-medium">Arbitrum</span>
-              </div>
-              <div class="custom-option" onclick="selectBuyNetwork('base', '/logos/base.png', 'Base')">
-                <img src="/logos/base.png" class="w-6 h-6" alt="Base"><span class="font-medium">Base</span>
-              </div>
-              <div class="custom-option" onclick="selectBuyNetwork('tron', '/logos/tron.png', 'Tron')">
-                <img src="/logos/tron.png" class="w-6 h-6" alt="Tron"><span class="font-medium">Tron</span>
+                    <div class="custom-option" onclick="selectBuyNetwork('solana', '/logos/solana.png', 'Solana')">
+                      <img src="/logos/solana.png" class="w-6 h-6" alt="Solana"><span class="font-medium">Solana</span>
+                    </div>
+                    <div class="custom-option" onclick="selectBuyNetwork('ethereum', '/logos/ethereum.png', 'Ethereum')">
+                      <img src="/logos/ethereum.png" class="w-6 h-6" alt="Ethereum"><span class="font-medium">Ethereum</span>
+                    </div>
+                    <div class="custom-option" onclick="selectBuyNetwork('bsc', '/logos/bsc.png', 'BSC')">
+                      <img src="/logos/bsc.png" class="w-6 h-6" alt="BSC"><span class="font-medium">BSC</span>
+                    </div>
+                    <div class="custom-option" onclick="selectBuyNetwork('polygon', '/logos/polygon.png', 'Polygon')">
+                      <img src="/logos/polygon.png" class="w-6 h-6" alt="Polygon"><span class="font-medium">Polygon</span>
+                    </div>
+                    <div class="custom-option" onclick="selectBuyNetwork('arbitrum', '/logos/arbitrum.png', 'Arbitrum')">
+                      <img src="/logos/arbitrum.png" class="w-6 h-6" alt="Arbitrum"><span class="font-medium">Arbitrum</span>
+                    </div>
+                    <div class="custom-option" onclick="selectBuyNetwork('base', '/logos/base.png', 'Base')">
+                      <img src="/logos/base.png" class="w-6 h-6" alt="Base"><span class="font-medium">Base</span>
+                    </div>
+                    <div class="custom-option" onclick="selectBuyNetwork('tron', '/logos/tron.png', 'Tron')">
+                      <img src="/logos/tron.png" class="w-6 h-6" alt="Tron"><span class="font-medium">Tron</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="flex items-center gap-3 mt-3">
-            <input type="number" id="buy-receive" placeholder="0.00" min="0" step="0.01" oninput="calculateBuyFromCrypto()"
-              class="display-input flex-1 text-3xl font-bold text-gray-900 bg-transparent outline-none w-full p-0 border-none focus:ring-0 amount-input">
           </div>
 
           <!-- Swap Button -->
@@ -443,23 +459,29 @@
 
           <!-- You'll Send Panel (NGN) -->
           <div id="buy-send-panel" class="input-panel">
-            <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">You Send</label>
-            <div id="buy-amount-step" class="flex items-center gap-3 mt-2 opacity-50 pointer-events-none transition-opacity">
-              <span class="text-3xl font-bold text-gray-400" id="buy-send-currency">₦</span>
-              <input type="number" id="buy-amount" placeholder="0.00" min="0" step="0.01" oninput="calculateBuy()" 
-                class="display-input flex-1 text-3xl font-bold text-gray-900 bg-transparent outline-none w-full p-0 border-none focus:ring-0 amount-input">
-              <div class="bg-gray-100 border border-gray-200 rounded-lg px-3 py-1.5 flex items-center gap-2">
-                <img id="buy-send-flag" src="/flags/ng.png" class="w-4 h-auto rounded-sm" alt="">
-                <span class="text-gray-700 font-semibold text-sm" id="buy-send-currency-code">NGN</span>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-sm text-gray-500 font-medium">You'll send</span>
+            </div>
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex items-center gap-2 flex-1 min-w-0 opacity-50 pointer-events-none transition-opacity" id="buy-amount-step">
+                <span class="text-3xl font-bold text-gray-300" id="buy-send-currency">&#8358;</span>
+                <input type="number" id="buy-amount" placeholder="0.00" min="0" step="0.01" oninput="calculateBuy()" 
+                  class="display-input text-3xl font-bold text-gray-900 bg-transparent outline-none w-full p-0 border-none focus:ring-0 amount-input placeholder-gray-300">
+              </div>
+              <div class="shrink-0">
+                <div class="bg-gray-100 border border-gray-200 rounded-lg px-3 py-1.5 flex items-center gap-2">
+                  <img id="buy-send-flag" src="/flags/ng.png" class="w-4 h-auto rounded-sm" alt="">
+                  <span class="text-gray-700 font-semibold text-sm" id="buy-send-currency-code">NGN</span>
+                </div>
               </div>
             </div>
-            <div class="mt-2 text-xs text-gray-400 font-medium">Min: ₦2,000</div>
           </div>
+          <div class="text-xs text-gray-400 font-medium -mt-3">Min: &#8358;2,000</div>
 
           <!-- Wallet Address -->
           <div class="input-panel space-y-4">
             <div>
-              <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Your Wallet Address</label>
+              <label class="block text-sm font-medium text-gray-500 mb-2">Your Wallet Address</label>
               <input type="text" id="buy-wallet" placeholder="Enter your wallet address" 
                 class="w-full px-3 py-2.5 border border-gray-200 rounded-xl bg-white text-sm text-gray-900 outline-none transition-all focus:border-velcro-green amount-input font-mono"
                 oninput="updateStepIndicators('ONRAMP');">
