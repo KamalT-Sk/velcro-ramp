@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Velcro Convert - Crypto to Cash Instantly</title>
-  <link rel="icon" type="image/png" href="/velcro_logo.png">
+  <link rel="icon" type="image/png" href="/velcro_favicon.png">
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="style.css" rel="stylesheet">
@@ -248,7 +249,7 @@
           <div id="sell-receive-panel" class="input-panel">
             <div class="flex items-center justify-between mb-3">
               <span class="text-sm text-gray-500 font-medium">You'll receive</span>
-              <span class="text-xs font-medium text-gray-400 flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-full" id="sell-rate-display"><span class="w-1.5 h-1.5 rounded-full bg-green-500 live-pulse"></span>Rate: --</span>
+              <span class="text-xs font-semibold text-gray-700 flex items-center gap-1.5 bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-full" id="sell-rate-display"><span class="w-2 h-2 rounded-full bg-green-500 live-pulse"></span>Rate: --</span>
             </div>
             <div class="flex items-center justify-between gap-4">
               <div class="flex items-center gap-2 flex-1 min-w-0">
@@ -293,9 +294,14 @@
             </div>
             <div id="sell-name-wrap" class="hidden">
               <label class="block text-sm font-medium text-gray-500 mb-2">Account Holder Name</label>
-              <input type="text" id="sell-account-name" placeholder="Enter account holder name"
-                class="w-full px-3 py-2.5 border border-gray-200 rounded-xl bg-white text-sm text-gray-900 outline-none transition-all focus:border-velcro-green amount-input"
+              <div id="sell-name-loading" class="hidden w-full px-3 py-2.5 border border-gray-200 rounded-xl bg-gray-50 text-sm text-gray-500 flex items-center gap-2">
+                <svg class="animate-spin w-4 h-4 text-velcro-green" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                <span>Verifying account...</span>
+              </div>
+              <input type="text" id="sell-account-name" readonly placeholder="Account holder name will appear here"
+                class="w-full px-3 py-2.5 border border-gray-200 rounded-xl bg-gray-50 text-sm text-gray-900 outline-none transition-all focus:border-velcro-green amount-input"
                 oninput="updateStepIndicators('OFFRAMP');">
+              <p id="sell-name-error" class="hidden text-xs text-red-500 mt-1 font-medium"></p>
             </div>
           </div>
 
@@ -390,7 +396,7 @@
           <div id="buy-receive-panel" class="input-panel">
             <div class="flex items-center justify-between mb-3">
               <span class="text-sm text-gray-500 font-medium">You'll receive</span>
-              <span class="text-xs font-medium text-gray-400 flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded-full" id="buy-rate-display"><span class="w-1.5 h-1.5 rounded-full bg-green-500 live-pulse"></span>Rate: --</span>
+              <span class="text-xs font-semibold text-gray-700 flex items-center gap-1.5 bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-full" id="buy-rate-display"><span class="w-2 h-2 rounded-full bg-green-500 live-pulse"></span>Rate: --</span>
             </div>
             <div class="flex items-center justify-between gap-4">
               <div class="flex items-center gap-2 flex-1 min-w-0">
@@ -484,7 +490,8 @@
               <label class="block text-sm font-medium text-gray-500 mb-2">Your Wallet Address</label>
               <input type="text" id="buy-wallet" placeholder="Enter your wallet address" 
                 class="w-full px-3 py-2.5 border border-gray-200 rounded-xl bg-white text-sm text-gray-900 outline-none transition-all focus:border-velcro-green amount-input font-mono"
-                oninput="updateStepIndicators('ONRAMP');">
+                oninput="validateWalletInput(); updateStepIndicators('ONRAMP');">
+              <p id="buy-wallet-error" class="hidden text-xs text-red-500 mt-1.5 font-medium"></p>
               <p class="text-xs text-gray-400 mt-1.5">Crypto will be sent to this address once payment is confirmed.</p>
             </div>
             <span id="buy-amount-label" class="hidden">USDT</span>
@@ -654,9 +661,58 @@
     }
 
     // Init icons
+    async function setDefaults() {
+      try {
+        // Sell defaults: USDT on Solana
+        currentSellAsset = 'USDT';
+        currentSellNetwork = 'solana';
+        document.getElementById('sell-asset-display').innerHTML = `<img src="/logos/usdt.png" class="w-6 h-6" alt="USDT"><span class="font-medium">USDT</span><span class="text-gray-500 text-xs">Tether</span>`;
+        document.getElementById('sell-currency-prefix').innerHTML = '$';
+        document.getElementById('sell-asset-name').textContent = 'USDT';
+        document.getElementById('sell-confirm-asset').textContent = 'USDT';
+        document.getElementById('sell-confirm-asset-img').src = '/logos/usdt.png';
+        document.getElementById('sell-network-wrap').classList.remove('opacity-50', 'pointer-events-none');
+        document.getElementById('sell-network-display').innerHTML = `<img src="/logos/solana.png" class="w-6 h-6" alt="Solana"><span class="font-semibold">Solana</span>`;
+        document.getElementById('sell-network-name').textContent = 'Solana';
+        document.getElementById('sell-confirm-network-img').src = '/logos/solana.png';
+        document.getElementById('sell-amount-step').classList.remove('opacity-50', 'pointer-events-none');
+
+        // Buy defaults: USDT on Solana
+        currentBuyAsset = 'USDT';
+        currentBuyNetwork = 'solana';
+        document.getElementById('buy-asset-display').innerHTML = `<img src="/logos/usdt.png" class="w-6 h-6" alt="USDT"><span class="font-medium">USDT</span><span class="text-gray-500 text-xs">Tether</span>`;
+        document.getElementById('buy-amount-label').textContent = 'USDT';
+        document.getElementById('buy-confirm-asset').textContent = 'USDT';
+        document.getElementById('buy-confirm-asset-img').src = '/logos/usdt.png';
+        document.getElementById('buy-network-wrap').classList.remove('opacity-50', 'pointer-events-none');
+        document.getElementById('buy-network-display').innerHTML = `<img src="/logos/solana.png" class="w-6 h-6" alt="Solana"><span class="font-semibold">Solana</span>`;
+        document.getElementById('buy-confirm-network').textContent = 'Solana';
+        document.getElementById('buy-confirm-network-img').src = '/logos/solana.png';
+        document.getElementById('buy-amount-step').classList.remove('opacity-50', 'pointer-events-none');
+
+        // Mark options selected
+        document.querySelectorAll('#sell-asset-options .custom-option, #buy-asset-options .custom-option').forEach(o => {
+          if (o.textContent.includes('USDT')) o.classList.add('selected');
+        });
+        document.querySelectorAll('#sell-network-options .custom-option, #buy-network-options .custom-option').forEach(o => {
+          if (o.textContent.includes('Solana')) o.classList.add('selected');
+        });
+
+        currentSwitchAsset = getSwitchAsset('USDT', 'solana');
+        if (currentSwitchAsset) {
+          await fetchRate('OFFRAMP');
+          await fetchRate('ONRAMP');
+          updateRateDisplays();
+        }
+      } catch (e) {
+        console.error('setDefaults error:', e);
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       safeLucideInit();
       switchTab('sell');
+      setDefaults();
     });
 
     function getSwitchAsset(symbol, network) {
@@ -674,8 +730,8 @@
       return symbol + Number(value).toLocaleString();
     }
 
-    async function fetchRate() {
-      const direction = document.getElementById('form-sell').classList.contains('hidden') ? 'ONRAMP' : 'OFFRAMP';
+    async function fetchRate(forcedDirection) {
+      const direction = forcedDirection || (document.getElementById('form-sell').classList.contains('hidden') ? 'ONRAMP' : 'OFFRAMP');
       const asset = direction === 'OFFRAMP' ? currentSellAsset : currentBuyAsset;
       const network = direction === 'OFFRAMP' ? currentSellNetwork : currentBuyNetwork;
       currentSwitchAsset = getSwitchAsset(asset, network);
@@ -723,7 +779,7 @@
     function updateRateDisplays() {
       const sellRateEl = document.getElementById('sell-rate-display');
       const buyRateEl = document.getElementById('buy-rate-display');
-      const pulse = '<span class="w-1.5 h-1.5 rounded-full bg-green-500 live-pulse"></span>';
+      const pulse = '<span class="w-2 h-2 rounded-full bg-green-500 live-pulse"></span>';
       if (sellRateEl) {
         if (currentSellAsset && currentRate.sell) {
           sellRateEl.innerHTML = `${pulse}Rate: 1 ${currentSellAsset} = ${formatCurrency(currentRate.sell)}`;
@@ -843,7 +899,7 @@
       }
     }
 
-    function selectCountry(code, currency, label, flag) {
+    async function selectCountry(code, currency, label, flag) {
       currentCountry = code;
       currentCurrency = currency;
       const flagHtml = flag ? `<img src="${flag}" class="w-5 h-auto rounded-sm" alt="${code}">` : '';
@@ -853,7 +909,7 @@
       document.getElementById('country-options').classList.remove('open');
       updateCurrencySymbols();
       if (currentSwitchAsset) fetchRate();
-      fetchRequirements();
+      await fetchRequirements();
       fetchInstitutions();
     }
 
@@ -912,6 +968,7 @@
       }
       updateNavRate();
       updateStepIndicators(tab === 'sell' ? 'OFFRAMP' : 'ONRAMP');
+      fetchRate();
       safeLucideInit();
     }
 
@@ -955,38 +1012,83 @@
       document.getElementById('sell-bank-options').classList.remove('open');
       validateAccount();
       updateStepIndicators('OFFRAMP');
-      const bankNum = document.getElementById('sell-bank-number').value.trim();
-      const accReq = countryRequirements['account_number'];
-      const regex = accReq?.regex ? new RegExp(accReq.regex) : /^[0-9]{10}$/;
-      if (regex.test(bankNum)) {
-        document.getElementById('sell-name-wrap')?.classList.remove('hidden');
-        setTimeout(() => document.getElementById('sell-account-name')?.focus(), 100);
-      }
     }
 
     let _resolveTimer = null;
+    async function resolveAccountName() {
+      const bankNum = document.getElementById('sell-bank-number').value.trim();
+      const nameInput = document.getElementById('sell-account-name');
+      const nameLoading = document.getElementById('sell-name-loading');
+      const nameError = document.getElementById('sell-name-error');
+
+      if (!currentBankCode || !bankNum || bankNum.length < 10) return;
+
+      nameInput.classList.add('hidden');
+      nameLoading.classList.remove('hidden');
+      nameError.classList.add('hidden');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/resolve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            country: currentCountry,
+            beneficiary: {
+              account_number: bankNum,
+              bank_code: currentBankCode
+            }
+          })
+        });
+        const payload = await res.json();
+        if (!res.ok) {
+          throw new Error(payload.message || 'Could not resolve account name');
+        }
+        const resolvedName = payload.data?.account_name || payload.data?.holder_name || payload.data?.name;
+        if (resolvedName) {
+          nameInput.value = resolvedName;
+          nameInput.classList.remove('hidden');
+          nameLoading.classList.add('hidden');
+          nameError.classList.add('hidden');
+        } else {
+          throw new Error('Account name not found');
+        }
+      } catch (err) {
+        nameLoading.classList.add('hidden');
+        nameInput.classList.remove('hidden');
+        nameError.textContent = err.message || 'Could not verify account. Please check details.';
+        nameError.classList.remove('hidden');
+      }
+    }
+
     function validateAccount() {
       const bankNum = document.getElementById('sell-bank-number').value.trim();
       const errorEl = document.getElementById('sell-bank-error');
       const nameWrap = document.getElementById('sell-name-wrap');
+      const nameInput = document.getElementById('sell-account-name');
+      const nameLoading = document.getElementById('sell-name-loading');
+      const nameError = document.getElementById('sell-name-error');
       const accReq = countryRequirements['account_number'];
-      const regex = accReq?.regex ? new RegExp(accReq.regex) : /^[0-9]{10}$/;
+      const regex = accReq?.regex ? new RegExp(accReq.regex) : /^[0-9]{10,11}$/;
 
       if (!bankNum) {
         errorEl.classList.add('hidden');
         nameWrap?.classList.add('hidden');
+        nameInput.value = '';
         return;
       }
-      if (!regex.test(bankNum)) {
-        errorEl.textContent = accReq?.hint || 'Invalid account number format';
+      if (!regex.test(bankNum) || bankNum.length < 10) {
+        errorEl.textContent = accReq?.hint || 'Enter a valid account number (10+ digits)';
         errorEl.classList.remove('hidden');
         nameWrap?.classList.add('hidden');
+        nameInput.value = '';
         return;
       }
       errorEl.classList.add('hidden');
       if (currentBankCode && nameWrap) {
         nameWrap.classList.remove('hidden');
-        document.getElementById('sell-account-name')?.focus();
+        // Auto-resolve account holder name
+        clearTimeout(_resolveTimer);
+        _resolveTimer = setTimeout(() => resolveAccountName(), 600);
       }
     }
 
@@ -1190,11 +1292,11 @@
       if (amount < 1) { showToast('Minimum amount is $1', 'warning'); return; }
       const bankNum = document.getElementById('sell-bank-number').value.trim();
       const accReq = countryRequirements['account_number'];
-      const accRegex = accReq?.regex ? new RegExp(accReq.regex) : /^[0-9]{10}$/;
-      if (!accRegex.test(bankNum)) { showToast(accReq?.hint || 'Please enter a valid account number', 'warning'); return; }
+      const accRegex = accReq?.regex ? new RegExp(accReq.regex) : /^[0-9]{10,11}$/;
+      if (!accRegex.test(bankNum) || bankNum.length < 10) { showToast(accReq?.hint || 'Please enter a valid account number', 'warning'); return; }
       if (document.getElementById('sell-bank-display').textContent.trim() === 'Select your bank') { showToast('Please select a bank', 'warning'); return; }
       const accName = document.getElementById('sell-account-name').value.trim();
-      if (!accName) { showToast('Please enter the account holder name', 'warning'); return; }
+      if (!accName) { showToast('Please wait for account name verification', 'warning'); return; }
       if (!currentSwitchAsset) { showToast('Please select a valid asset and network', 'warning'); return; }
       const btn = document.getElementById('sell-btn');
       document.getElementById('sell-confirm-amount').textContent = amount;
@@ -1221,7 +1323,12 @@
             }
           })
         });
-        if (!res.ok) throw new Error('Failed to initiate transaction');
+        if (!res.ok) {
+          const errorText = await res.text();
+          let errorMsg = 'Failed to initiate transaction';
+          try { const err = JSON.parse(errorText); errorMsg = err.message || errorMsg; } catch {}
+          throw new Error(errorMsg);
+        }
         const payload = await res.json();
         const data = payload.data || {};
         const deposit = data.deposit || {};
@@ -1239,6 +1346,40 @@
       }
     }
 
+    function validateWalletInput() {
+      const wallet = document.getElementById('buy-wallet').value.trim();
+      const errorEl = document.getElementById('buy-wallet-error');
+      if (!wallet) { errorEl.classList.add('hidden'); return; }
+      if (!validateWalletAddress(wallet, currentBuyNetwork)) {
+        errorEl.textContent = `Invalid ${currentBuyNetwork} wallet address format`;
+        errorEl.classList.remove('hidden');
+      } else {
+        errorEl.classList.add('hidden');
+      }
+    }
+
+    function validateWalletAddress(address, network) {
+      const evmRegex = /^0x[a-fA-F0-9]{40}$/;
+      const solanaRegex = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+      const tronRegex = /^T[1-9A-HJ-NP-Za-km-z]{33}$/;
+      const btcRegex = /^(1|3)[a-zA-Z0-9]{25,34}$|^bc1[a-zA-Z0-9]{39,59}$/;
+      const suiRegex = /^0x[a-fA-F0-9]{64}$/;
+      switch (network) {
+        case 'ethereum': case 'bsc': case 'polygon': case 'arbitrum': case 'base':
+          return evmRegex.test(address);
+        case 'solana':
+          return solanaRegex.test(address);
+        case 'tron':
+          return tronRegex.test(address);
+        case 'bitcoin':
+          return btcRegex.test(address);
+        case 'sui':
+          return suiRegex.test(address);
+        default:
+          return address.length >= 26;
+      }
+    }
+
     async function generateBankAccount() {
       if (!currentBuyAsset) { showToast('Please select an asset', 'warning'); return; }
       if (!currentBuyNetwork || document.getElementById('buy-network-display').textContent.trim() === 'Select Network') { showToast('Please select a network', 'warning'); return; }
@@ -1248,6 +1389,9 @@
       if (receive < 1) { showToast('Minimum amount is $1', 'warning'); return; }
       const wallet = document.getElementById('buy-wallet').value.trim();
       if (!wallet) { showToast('Please enter your wallet address', 'warning'); return; }
+      if (!validateWalletAddress(wallet, currentBuyNetwork)) {
+        showToast(`Invalid ${currentBuyNetwork} wallet address`, 'warning'); return;
+      }
       if (!currentSwitchAsset) { showToast('Please select a valid asset and network', 'warning'); return; }
       const btn = document.getElementById('buy-btn');
       document.getElementById('buy-confirm-ngn').textContent = amount.toFixed(2);
@@ -1274,7 +1418,11 @@
           body: JSON.stringify(reqBody)
         });
         const responseBody = await res.text();
-        if (!res.ok) throw new Error('Failed to initiate transaction: ' + responseBody);
+        if (!res.ok) {
+          let errorMsg = 'Failed to initiate transaction';
+          try { const err = JSON.parse(responseBody); errorMsg = err.message || errorMsg; } catch {}
+          throw new Error(errorMsg);
+        }
         const payload = JSON.parse(responseBody);
         const data = payload.data || {};
         const deposit = data.deposit || {};
@@ -1460,8 +1608,10 @@
 
     // Auth Modal
     // Init
-    fetchRequirements();
-    fetchInstitutions();
+    (async function init() {
+      await fetchRequirements();
+      fetchInstitutions();
+    })();
 
     // Close dropdowns on scroll / resize
     window.addEventListener('scroll', () => {

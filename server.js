@@ -297,7 +297,11 @@ app.post('/api/initiate', async (req, res, next) => {
     if (direction === 'OFFRAMP') {
       payload.static = false;
       if (sender_name) payload.sender_name = sender_name;
+    } else if (direction === 'ONRAMP' && wallet_address) {
+      payload.wallet_address = wallet_address;
     }
+
+    console.log('[Switch Payload]', endpoint, JSON.stringify(payload));
 
     const data = await switchApi(endpoint, {
       method: 'POST',
@@ -378,17 +382,26 @@ app.post('/api/confirm', async (req, res, next) => {
   try {
     const { reference, hash } = req.body;
     if (!reference) return res.status(400).json(errorResponse('reference is required'));
-    if (!hash) return res.status(400).json(errorResponse('transaction hash is required'));
 
-    const data = await switchApi('/payment/confirm-deposit', {
+    const tx = db.prepare('SELECT type FROM transactions WHERE reference = ?').get(reference);
+    const isOfframp = tx?.type === 'OFFRAMP';
+
+    if (isOfframp && !hash) {
+      return res.status(400).json(errorResponse('transaction hash is required for crypto deposits'));
+    }
+
+    const payload = { reference };
+    if (hash) payload.hash = hash;
+
+    const data = await switchApi('/confirm', {
       method: 'POST',
-      body: JSON.stringify({ reference, hash }),
+      body: JSON.stringify(payload),
     });
 
     db.prepare(`UPDATE transactions SET status = 'PROCESSING', hash = ?, updated_at = datetime('now') WHERE reference = ?`)
-      .run(hash, reference);
+      .run(hash || null, reference);
 
-    console.log(`[POST] /api/confirm - reference: ${reference} hash: ${hash}`);
+    console.log(`[POST] /api/confirm - reference: ${reference} hash: ${hash || 'N/A'} type: ${tx?.type || 'unknown'}`);
     res.json(data);
   } catch (err) { next(err); }
 });
@@ -455,8 +468,9 @@ app.post('/webhook/switch', express.json(), (req, res) => {
 // ─── Serve Static Frontend ───
 const staticPath = path.join(__dirname, 'public');
 if (fs.existsSync(staticPath)) {
-  app.use(express.static(staticPath));
+  app.use(express.static(staticPath, { setHeaders: (res) => res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate') }));
   app.get('*', (req, res) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.sendFile(path.join(staticPath, 'index.html'));
   });
   console.log(` Serving static files from ${staticPath}`);
