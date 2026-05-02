@@ -1459,6 +1459,18 @@
       countryRequirements = {};
       populateBanks();
       
+      // Only fetch rates/requirements for Nigeria for now
+      if (code !== 'NG') {
+        showToast(`${label} support is coming soon!`, 'info');
+        updateCurrencySymbols();
+        return;
+      }
+
+      // Reset state for new country
+      cachedBanks = [];
+      countryRequirements = {};
+      populateBanks();
+      
       updateCurrencySymbols();
       
       // Force rate refresh for both directions
@@ -1835,6 +1847,10 @@
     }
 
     async function generateWalletAddress() {
+      if (currentCountry !== 'NG') {
+        showToast('Transactions for this country are currently disabled.', 'warning');
+        return;
+      }
       if (!currentSellAsset) { showToast('Please select an asset', 'warning'); return; }
       if (!currentSellNetwork || document.getElementById('sell-network-display').textContent.trim() === 'Select Network') { showToast('Please select a network', 'warning'); return; }
       const amount = parseFloat(document.getElementById('sell-amount').value);
@@ -1927,6 +1943,10 @@
     }
 
     async function generateBankAccount() {
+      if (currentCountry !== 'NG') {
+        showToast('Transactions for this country are currently disabled.', 'warning');
+        return;
+      }
       if (!currentBuyAsset) { showToast('Please select an asset', 'warning'); return; }
       if (!currentBuyNetwork || document.getElementById('buy-network-display').textContent.trim() === 'Select Network') { showToast('Please select a network', 'warning'); return; }
       const amount = parseFloat(document.getElementById('buy-amount').value);
