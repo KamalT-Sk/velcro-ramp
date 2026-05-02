@@ -1528,8 +1528,12 @@
 
     function selectSellAsset(symbol, logo, name) {
       currentSellAsset = symbol;
-      document.getElementById('sell-asset-display').innerHTML = `<img src="${logo}" class="w-6 h-6" alt="${symbol}"><span class="font-medium">${symbol}</span><span class="text-gray-500 text-xs">${name}</span>`;
-      document.getElementById('sell-currency-prefix').innerHTML = symbol === 'CNGN' ? '&#8358;' : '$';
+      document.getElementById('sell-asset-display').innerHTML = `
+        <img src="${logo}" class="w-6 h-6" alt="${symbol}">
+        <span class="font-bold text-sm sm:text-base">${symbol}</span>
+        <span class="text-gray-400 text-[10px] hidden sm:inline ml-1">${name}</span>
+      `;
+      document.getElementById('sell-currency-prefix').textContent = symbol === 'CNGN' ? '₦' : '$';
       document.getElementById('sell-asset-name').textContent = symbol;
       document.getElementById('sell-confirm-asset').textContent = symbol;
       document.getElementById('sell-confirm-asset-img').src = logo;
@@ -1545,8 +1549,12 @@
 
     function selectSellNetwork(id, logo, name) {
       currentSellNetwork = id;
-      document.getElementById('sell-network-display').innerHTML = `<img src="${logo}" class="w-6 h-6" alt="${name}"><span class="font-semibold">${name}</span>`;
+      document.getElementById('sell-network-display').innerHTML = `
+        <img src="${logo}" class="w-5 h-5" alt="${name}">
+        <span class="font-bold text-xs sm:text-sm">${name}</span>
+      `;
       document.getElementById('sell-network-name').textContent = name;
+      document.getElementById('sell-confirm-network').textContent = name;
       document.getElementById('sell-confirm-network-img').src = logo;
       document.querySelectorAll('#sell-network-options .custom-option').forEach(o => o.classList.remove('selected'));
       event.currentTarget.classList.add('selected');
@@ -1644,7 +1652,11 @@
 
     function selectBuyAsset(symbol, logo, name) {
       currentBuyAsset = symbol;
-      document.getElementById('buy-asset-display').innerHTML = `<img src="${logo}" class="w-6 h-6" alt="${symbol}"><span class="font-medium">${symbol}</span><span class="text-gray-500 text-xs">${name}</span>`;
+      document.getElementById('buy-asset-display').innerHTML = `
+        <img src="${logo}" class="w-6 h-6" alt="${symbol}">
+        <span class="font-bold text-sm sm:text-base">${symbol}</span>
+        <span class="text-gray-400 text-[10px] hidden sm:inline ml-1">${name}</span>
+      `;
       document.getElementById('buy-amount-label').textContent = symbol;
       document.getElementById('buy-confirm-asset').textContent = symbol;
       document.getElementById('buy-confirm-asset-img').src = logo;
@@ -1660,7 +1672,10 @@
 
     function selectBuyNetwork(id, logo, name) {
       currentBuyNetwork = id;
-      document.getElementById('buy-network-display').innerHTML = `<img src="${logo}" class="w-6 h-6" alt="${name}"><span class="font-semibold">${name}</span>`;
+      document.getElementById('buy-network-display').innerHTML = `
+        <img src="${logo}" class="w-5 h-5" alt="${name}">
+        <span class="font-bold text-xs sm:text-sm">${name}</span>
+      `;
       document.getElementById('buy-confirm-network').textContent = name;
       document.getElementById('buy-confirm-network-img').src = logo;
       document.querySelectorAll('#buy-network-options .custom-option').forEach(o => o.classList.remove('selected'));
