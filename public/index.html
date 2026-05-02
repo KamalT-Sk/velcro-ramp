@@ -1533,6 +1533,7 @@
         <span class="font-bold text-sm sm:text-base">${symbol}</span>
         <span class="text-gray-400 text-[10px] hidden sm:inline ml-1">${name}</span>
       `;
+      document.getElementById('sell-asset-options').classList.remove('open');
       document.getElementById('sell-currency-prefix').textContent = symbol === 'CNGN' ? '₦' : '$';
       document.getElementById('sell-asset-name').textContent = symbol;
       document.getElementById('sell-confirm-asset').textContent = symbol;
@@ -1657,6 +1658,7 @@
         <span class="font-bold text-sm sm:text-base">${symbol}</span>
         <span class="text-gray-400 text-[10px] hidden sm:inline ml-1">${name}</span>
       `;
+      document.getElementById('buy-asset-options').classList.remove('open');
       document.getElementById('buy-amount-label').textContent = symbol;
       document.getElementById('buy-confirm-asset').textContent = symbol;
       document.getElementById('buy-confirm-asset-img').src = logo;
