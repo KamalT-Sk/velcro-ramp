@@ -540,7 +540,6 @@ if (fs.existsSync(staticPath)) {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.sendFile(path.join(staticPath, 'index.html'));
   });
-  console.log(` Serving static files from ${staticPath}`);
 }
 
 // ─── Error Handler ───
@@ -552,10 +551,10 @@ app.use((err, req, res, next) => {
 
 // ─── Start ───
 app.listen(PORT, () => {
-  console.log(` Velcro Backend running on port ${PORT}`);
-  console.log(` Switch Base URL: ${SWITCH_BASE_URL}`);
-  console.log(` Developer Fee: ${DEVELOPER_FEE}%`);
-  console.log(` Supported: NG (NGN), GH (GHS), KE (KES)`);
+  console.log(`\n🚀 Velcro Backend running at: http://localhost:${PORT}`);
+  console.log(`🔌 Switch Base URL: ${SWITCH_BASE_URL}`);
+  console.log(`💰 Developer Fee: ${DEVELOPER_FEE}%`);
+  console.log(`🌍 Supported: NG (NGN), GH (GHS), KE (KES)\n`);
 });
 
 module.exports = app;
