@@ -1478,6 +1478,16 @@
       }
     });
 
+    function safeSetText(id, text) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    }
+
+    function safeSetSrc(id, src) {
+      const el = document.getElementById(id);
+      if (el) el.src = src;
+    }
+
     function toggleDropdown(id) {
       const el = document.getElementById(id);
       const isOpen = el.classList.contains('open');
@@ -1535,9 +1545,9 @@
       `;
       document.getElementById('sell-asset-options').classList.remove('open');
       document.getElementById('sell-currency-prefix').textContent = symbol === 'CNGN' ? '₦' : '$';
-      document.getElementById('sell-asset-name').textContent = symbol;
-      document.getElementById('sell-confirm-asset').textContent = symbol;
-      document.getElementById('sell-confirm-asset-img').src = logo;
+      safeSetText('sell-asset-name', symbol);
+      safeSetText('sell-confirm-asset', symbol);
+      safeSetSrc('sell-confirm-asset-img', logo);
       document.querySelectorAll('#sell-asset-options .custom-option').forEach(o => o.classList.remove('selected'));
       event.currentTarget.classList.add('selected');
       document.getElementById('sell-asset-options').classList.remove('open');
@@ -1554,9 +1564,9 @@
         <img src="${logo}" class="w-5 h-5" alt="${name}">
         <span class="font-bold text-xs sm:text-sm">${name}</span>
       `;
-      document.getElementById('sell-network-name').textContent = name;
-      document.getElementById('sell-confirm-network').textContent = name;
-      document.getElementById('sell-confirm-network-img').src = logo;
+      safeSetText('sell-network-name', name);
+      safeSetText('sell-confirm-network', name);
+      safeSetSrc('sell-confirm-network-img', logo);
       document.querySelectorAll('#sell-network-options .custom-option').forEach(o => o.classList.remove('selected'));
       event.currentTarget.classList.add('selected');
       document.getElementById('sell-network-options').classList.remove('open');
@@ -1660,8 +1670,8 @@
       `;
       document.getElementById('buy-asset-options').classList.remove('open');
       document.getElementById('buy-amount-label').textContent = symbol;
-      document.getElementById('buy-confirm-asset').textContent = symbol;
-      document.getElementById('buy-confirm-asset-img').src = logo;
+      safeSetText('buy-confirm-asset', symbol);
+      safeSetSrc('buy-confirm-asset-img', logo);
       document.querySelectorAll('#buy-asset-options .custom-option').forEach(o => o.classList.remove('selected'));
       event.currentTarget.classList.add('selected');
       document.getElementById('buy-asset-options').classList.remove('open');
@@ -1678,8 +1688,8 @@
         <img src="${logo}" class="w-5 h-5" alt="${name}">
         <span class="font-bold text-xs sm:text-sm">${name}</span>
       `;
-      document.getElementById('buy-confirm-network').textContent = name;
-      document.getElementById('buy-confirm-network-img').src = logo;
+      safeSetText('buy-confirm-network', name);
+      safeSetSrc('buy-confirm-network-img', logo);
       document.querySelectorAll('#buy-network-options .custom-option').forEach(o => o.classList.remove('selected'));
       event.currentTarget.classList.add('selected');
       document.getElementById('buy-network-options').classList.remove('open');
