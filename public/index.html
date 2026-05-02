@@ -1863,7 +1863,7 @@
             currency: currentCurrency,
             asset: currentSwitchAsset,
             channel: (currentCountry === 'GH' || currentCountry === 'KE') ? 'MOBILEMONEY' : 'BANK',
-            reason: 'PERSONAL_TRANSFER',
+            reason: 'TRANSFER',
             narration: 'Crypto Offramp Settlement',
             beneficiary: {
               holder_type: 'INDIVIDUAL',
@@ -1952,8 +1952,8 @@
             country: currentCountry,
             currency: currentCurrency,
             asset: currentSwitchAsset,
-            channel: 'BLOCKCHAIN',
-            reason: 'PERSONAL_TRANSFER',
+            channel: (currentCountry === 'GH' || currentCountry === 'KE') ? 'MOBILEMONEY' : 'BANK',
+            reason: 'TRANSFER',
             narration: 'Crypto Onramp Settlement',
             beneficiary: {
               holder_type: 'INDIVIDUAL',
