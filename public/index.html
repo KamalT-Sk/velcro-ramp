@@ -1380,7 +1380,7 @@
 
     async function fetchRequirements() {
       try {
-        const res = await fetch(`${API_BASE}/api/requirements?direction=OFFRAMP&country=${currentCountry}&currency=${currentCurrency}&type=INDIVIDUAL&channel=BANK`);
+        const res = await fetch(`${API_BASE}/api/requirements?direction=OFFRAMP&country=${currentCountry}&currency=${currentCurrency}`);
         if (!res.ok) return;
         const payload = await res.json();
         countryRequirements = {};
@@ -1462,8 +1462,18 @@
       document.querySelectorAll('#country-options .custom-option').forEach(o => o.classList.remove('selected'));
       event.currentTarget.classList.add('selected');
       document.getElementById('country-options').classList.remove('open');
+      
+      // Reset state for new country
+      cachedBanks = [];
+      countryRequirements = {};
+      populateBanks();
+      
       updateCurrencySymbols();
-      if (currentSwitchAsset) fetchRate();
+      
+      // Force rate refresh for both directions
+      fetchRate('OFFRAMP');
+      fetchRate('ONRAMP');
+      
       await fetchRequirements();
       fetchInstitutions();
     }
