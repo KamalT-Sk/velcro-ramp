@@ -3,17 +3,57 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const Database = require('better-sqlite3');
+const mongoose = require('mongoose');
 const { randomUUID } = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/velcro_ramp';
 const SWITCH_BASE_URL = process.env.SWITCH_BASE_URL || 'https://api.onswitch.xyz';
 const SWITCH_SERVICE_KEY = process.env.SWITCH_SERVICE_KEY;
 const DEVELOPER_FEE = parseFloat(process.env.DEVELOPER_FEE) || 0.5;
 const DEVELOPER_RECIPIENT = process.env.DEVELOPER_RECIPIENT || '';
+
+// ─── MongoDB Schema ───
+const transactionSchema = new mongoose.Schema({
+  reference: { type: String, unique: true, required: true, index: true },
+  switch_reference: { type: String, index: true },
+  type: { type: String, required: true, enum: ['OFFRAMP', 'ONRAMP'], index: true },
+  status: { type: String, default: 'PENDING', index: true },
+  country: { type: String, required: true, index: true },
+  currency: { type: String, required: true },
+  asset: { type: String, required: true },
+  channel: { type: String, default: 'BANK' },
+  amount: { type: Number, required: true },
+  rate: Number,
+  fee_total: Number,
+  fee_platform: Number,
+  fee_developer: Number,
+  source_amount: Number,
+  source_currency: String,
+  destination_amount: Number,
+  destination_currency: String,
+  deposit_address: String,
+  deposit_bank_name: String,
+  deposit_account_number: String,
+  deposit_account_name: String,
+  deposit_note: String,
+  beneficiary: String, // Stringified JSON or separate sub-doc
+  wallet_address: String,
+  hash: String,
+  explorer_url: String,
+  callback_url: String,
+  meta: String, // Stringified JSON
+}, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
+
+const Transaction = mongoose.model('Transaction', transactionSchema);
+
+// ─── Database Connection ───
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('✅ Connected to MongoDB'))
+  .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
 // ─── Middleware ───
 app.use(helmet({
@@ -37,53 +77,6 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 app.use('/api/', limiter);
-
-// ─── SQLite Database ───
-const dbPath = path.join(__dirname, 'database.sqlite');
-const db = new Database(dbPath);
-db.pragma('journal_mode = WAL');
-
-// Create tables
-db.exec(`
-  CREATE TABLE IF NOT EXISTS transactions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    reference TEXT UNIQUE NOT NULL,
-    switch_reference TEXT,
-    type TEXT NOT NULL CHECK(type IN ('OFFRAMP','ONRAMP')),
-    status TEXT DEFAULT 'PENDING',
-    country TEXT NOT NULL,
-    currency TEXT NOT NULL,
-    asset TEXT NOT NULL,
-    channel TEXT DEFAULT 'BANK',
-    amount REAL NOT NULL,
-    rate REAL,
-    fee_total REAL,
-    fee_platform REAL,
-    fee_developer REAL,
-    source_amount REAL,
-    source_currency TEXT,
-    destination_amount REAL,
-    destination_currency TEXT,
-    deposit_address TEXT,
-    deposit_bank_name TEXT,
-    deposit_account_number TEXT,
-    deposit_account_name TEXT,
-    deposit_note TEXT,
-    beneficiary TEXT,
-    wallet_address TEXT,
-    hash TEXT,
-    explorer_url TEXT,
-    callback_url TEXT,
-    meta TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
-
-  CREATE INDEX IF NOT EXISTS idx_transactions_reference ON transactions(reference);
-  CREATE INDEX IF NOT EXISTS idx_transactions_status ON transactions(status);
-  CREATE INDEX IF NOT EXISTS idx_transactions_type ON transactions(type);
-  CREATE INDEX IF NOT EXISTS idx_transactions_country ON transactions(country);
-`);
 
 // ─── Switch API Client ───
 async function switchApi(endpoint, options = {}) {
@@ -126,7 +119,7 @@ function errorResponse(message, status = 400) {
 
 // Health
 app.get('/api/health', (req, res) => {
-  res.json(successResponse({ service: 'velcro-backend', version: '1.0.0', env: process.env.NODE_ENV }));
+  res.json(successResponse({ service: 'velcro-backend', version: '1.1.0', db: 'mongodb' }));
 });
 
 // Get supported assets
@@ -149,38 +142,6 @@ app.get('/api/rates', async (req, res, next) => {
     if (qs) path += '?' + qs;
     
     const data = await switchApi(path);
-    res.json(data);
-  } catch (err) { next(err); }
-});
-
-// Get coverage
-app.get('/api/coverage', async (req, res, next) => {
-  try {
-    const { direction, country, currency } = req.query;
-    const params = new URLSearchParams();
-    if (direction) params.append('direction', direction);
-    if (country) params.append('country', country);
-    if (currency) params.append('currency', currency);
-    const qs = params.toString();
-    const data = await switchApi(`/coverage${qs ? '?' + qs : ''}`);
-    res.json(data);
-  } catch (err) { next(err); }
-});
-
-// Get countries
-app.get('/api/countries', async (req, res, next) => {
-  try {
-    const data = await switchApi('/country');
-    res.json(data);
-  } catch (err) { next(err); }
-});
-
-// Get states
-app.get('/api/states', async (req, res, next) => {
-  try {
-    const { country } = req.query;
-    if (!country) return res.status(400).json(errorResponse('country is required'));
-    const data = await switchApi(`/state?country=${encodeURIComponent(country)}`);
     res.json(data);
   } catch (err) { next(err); }
 });
@@ -252,34 +213,6 @@ app.post('/api/rate', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// Get quote
-app.post('/api/quote', async (req, res, next) => {
-  try {
-    const { direction, amount, country, asset, currency, channel, exact_output } = req.body;
-    if (!direction || !amount || !country || !asset) {
-      return res.status(400).json(errorResponse('direction, amount, country, and asset are required'));
-    }
-    const endpoint = direction === 'ONRAMP' ? '/onramp/quote' : '/offramp/quote';
-    const payload = {
-      amount,
-      country,
-      asset,
-      currency,
-      channel,
-      exact_output: exact_output ?? false,
-    };
-    if (DEVELOPER_RECIPIENT) {
-      payload.developer_fee = DEVELOPER_FEE;
-      payload.developer_recipient = DEVELOPER_RECIPIENT;
-    }
-    const data = await switchApi(endpoint, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-    res.json(data);
-  } catch (err) { next(err); }
-});
-
 // Initiate transaction
 app.post('/api/initiate', async (req, res, next) => {
   try {
@@ -317,23 +250,10 @@ app.post('/api/initiate', async (req, res, next) => {
       payload.wallet_address = wallet_address;
     }
 
-    console.log('[Switch Payload]', endpoint, JSON.stringify(payload));
-
     const data = await switchApi(endpoint, {
       method: 'POST',
       body: JSON.stringify(payload),
     });
-
-    // Store in local DB
-    const stmt = db.prepare(`
-      INSERT INTO transactions (
-        reference, switch_reference, type, status, country, currency, asset, channel,
-        amount, rate, fee_total, fee_platform, fee_developer,
-        source_amount, source_currency, destination_amount, destination_currency,
-        deposit_address, deposit_bank_name, deposit_account_number, deposit_account_name,
-        deposit_note, beneficiary, wallet_address, callback_url, meta
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
 
     const d = data.data || {};
     const dep = d.deposit || {};
@@ -341,34 +261,35 @@ app.post('/api/initiate', async (req, res, next) => {
     const src = d.source || {};
     const dst = d.destination || {};
 
-    stmt.run(
-      txRef,
-      d.id || d.reference || null,
-      direction,
-      d.status || 'PENDING',
+    // Store in MongoDB
+    await Transaction.create({
+      reference: txRef,
+      switch_reference: d.id || d.reference || null,
+      type: direction,
+      status: d.status || 'PENDING',
       country,
-      currency || (direction === 'ONRAMP' ? src.currency : dst.currency) || 'NGN',
+      currency: currency || (direction === 'ONRAMP' ? src.currency : dst.currency) || 'NGN',
       asset,
-      channel || 'BANK',
+      channel: channel || 'BANK',
       amount,
-      d.rate || null,
-      fee.total || null,
-      fee.platform || null,
-      fee.developer || null,
-      src.amount || null,
-      src.currency || null,
-      dst.amount || null,
-      dst.currency || null,
-      dep.address || null,
-      dep.bank_name || null,
-      dep.account_number || null,
-      dep.account_name || null,
-      Array.isArray(dep.note) ? dep.note.join('\n') : dep.note || null,
-      beneficiary ? JSON.stringify(beneficiary) : null,
-      wallet_address || null,
-      callback_url || null,
-      JSON.stringify(d)
-    );
+      rate: d.rate || null,
+      fee_total: fee.total || null,
+      fee_platform: fee.platform || null,
+      fee_developer: fee.developer || null,
+      source_amount: src.amount || null,
+      source_currency: src.currency || null,
+      destination_amount: dst.amount || null,
+      destination_currency: dst.currency || null,
+      deposit_address: dep.address || null,
+      deposit_bank_name: dep.bank_name || null,
+      deposit_account_number: dep.account_number || null,
+      deposit_account_name: dep.account_name || null,
+      deposit_note: Array.isArray(dep.note) ? dep.note.join('\n') : dep.note || null,
+      beneficiary: beneficiary ? JSON.stringify(beneficiary) : null,
+      wallet_address: wallet_address || null,
+      callback_url: callback_url || null,
+      meta: JSON.stringify(d)
+    });
 
     res.json(data);
   } catch (err) { next(err); }
@@ -381,12 +302,14 @@ app.get('/api/status', async (req, res, next) => {
     if (!reference) return res.status(400).json(errorResponse('reference is required'));
 
     const data = await switchApi(`/status?reference=${encodeURIComponent(reference)}`);
-
-    // Update local DB if we have this transaction
     const d = data.data || {};
+
     if (d.status) {
-      db.prepare(`UPDATE transactions SET status = ?, updated_at = datetime('now'), hash = ?, explorer_url = ? WHERE reference = ?`)
-        .run(d.status, d.hash || null, d.explorer_url || null, reference);
+      await Transaction.findOneAndUpdate(
+        { reference },
+        { status: d.status, hash: d.hash || null, explorer_url: d.explorer_url || null },
+        { new: true }
+      );
     }
 
     res.json(data);
@@ -399,10 +322,10 @@ app.post('/api/confirm', async (req, res, next) => {
     const { reference, hash } = req.body;
     if (!reference) return res.status(400).json(errorResponse('reference is required'));
 
-    const tx = db.prepare('SELECT type FROM transactions WHERE reference = ?').get(reference);
-    const isOfframp = tx?.type === 'OFFRAMP';
+    const tx = await Transaction.findOne({ reference });
+    if (!tx) return res.status(404).json(errorResponse('Transaction not found'));
 
-    if (isOfframp && !hash) {
+    if (tx.type === 'OFFRAMP' && !hash) {
       return res.status(400).json(errorResponse('transaction hash is required for crypto deposits'));
     }
 
@@ -414,39 +337,40 @@ app.post('/api/confirm', async (req, res, next) => {
       body: JSON.stringify(payload),
     });
 
-    db.prepare(`UPDATE transactions SET status = 'PROCESSING', hash = ?, updated_at = datetime('now') WHERE reference = ?`)
-      .run(hash || null, reference);
+    await Transaction.findOneAndUpdate(
+      { reference },
+      { status: 'PROCESSING', hash: hash || null }
+    );
 
-    console.log(`[POST] /api/confirm - reference: ${reference} hash: ${hash || 'N/A'} type: ${tx?.type || 'unknown'}`);
     res.json(data);
   } catch (err) { next(err); }
 });
 
 // List local transactions
-app.get('/api/transactions', (req, res) => {
+app.get('/api/transactions', async (req, res) => {
   const { type, country, status, limit = 50, offset = 0 } = req.query;
-  let sql = 'SELECT * FROM transactions WHERE 1=1';
-  const params = [];
-  if (type) { sql += ' AND type = ?'; params.push(type); }
-  if (country) { sql += ' AND country = ?'; params.push(country); }
-  if (status) { sql += ' AND status = ?'; params.push(status); }
-  sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
-  params.push(parseInt(limit), parseInt(offset));
+  const query = {};
+  if (type) query.type = type;
+  if (country) query.country = country;
+  if (status) query.status = status;
 
-  const rows = db.prepare(sql).all(...params);
+  const rows = await Transaction.find(query)
+    .sort({ created_at: -1 })
+    .limit(parseInt(limit))
+    .skip(parseInt(offset));
+    
   res.json(successResponse(rows));
 });
 
 // Get single local transaction
-app.get('/api/transactions/:reference', (req, res) => {
-  const row = db.prepare('SELECT * FROM transactions WHERE reference = ?').get(req.params.reference);
+app.get('/api/transactions/:reference', async (req, res) => {
+  const row = await Transaction.findOne({ reference: req.params.reference });
   if (!row) return res.status(404).json(errorResponse('Transaction not found', 404));
   res.json(successResponse(row));
 });
 
 // ─── Switch History & Summary ───
 
-// Get payment history from Switch
 app.get('/api/history', async (req, res, next) => {
   try {
     const { limit = 20, offset = 0, status, direction } = req.query;
@@ -461,57 +385,9 @@ app.get('/api/history', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// Get payment summary from Switch
-app.get('/api/summary', async (req, res, next) => {
-  try {
-    const data = await switchApi('/payment/summary');
-    res.json(data);
-  } catch (err) { next(err); }
-});
-
-// ─── Beneficiary Management ───
-
-// List beneficiaries
-app.get('/api/beneficiaries', async (req, res, next) => {
-  try {
-    const { country, currency } = req.query;
-    const params = new URLSearchParams();
-    if (country) params.append('country', country);
-    if (currency) params.append('currency', currency);
-    
-    const data = await switchApi(`/beneficiary/fetch?${params.toString()}`);
-    res.json(data);
-  } catch (err) { next(err); }
-});
-
-// Create beneficiary
-app.post('/api/beneficiaries', async (req, res, next) => {
-  try {
-    const data = await switchApi('/beneficiary/create', {
-      method: 'POST',
-      body: JSON.stringify(req.body),
-    });
-    res.json(data);
-  } catch (err) { next(err); }
-});
-
 // ─── Webhook ───
 
-// Proxy: Resend webhook from Switch
-app.post('/api/webhook/resend', async (req, res, next) => {
-  try {
-    const { reference } = req.body;
-    if (!reference) return res.status(400).json(errorResponse('reference is required'));
-    const data = await switchApi('/webhook/resend', {
-      method: 'POST',
-      body: JSON.stringify({ reference }),
-    });
-    res.json(data);
-  } catch (err) { next(err); }
-});
-
-// Listener: Receive webhook from Switch
-app.post('/webhook/switch', express.json(), (req, res) => {
+app.post('/webhook/switch', express.json(), async (req, res) => {
   try {
     const payload = req.body;
     console.log('[Webhook Received]', JSON.stringify(payload));
@@ -520,8 +396,10 @@ app.post('/webhook/switch', express.json(), (req, res) => {
     const status = payload.status || payload.data?.status;
 
     if (reference && status) {
-      db.prepare(`UPDATE transactions SET status = ?, meta = ?, updated_at = datetime('now') WHERE reference = ?`)
-        .run(status, JSON.stringify(payload), reference);
+      await Transaction.findOneAndUpdate(
+        { reference },
+        { status, meta: JSON.stringify(payload) }
+      );
       console.log(`[Webhook] Updated status of ${reference} to ${status}`);
     }
 
@@ -535,9 +413,8 @@ app.post('/webhook/switch', express.json(), (req, res) => {
 // ─── Serve Static Frontend ───
 const staticPath = path.join(__dirname, 'public');
 if (fs.existsSync(staticPath)) {
-  app.use(express.static(staticPath, { setHeaders: (res) => res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate') }));
+  app.use(express.static(staticPath));
   app.get('*', (req, res) => {
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.sendFile(path.join(staticPath, 'index.html'));
   });
 }
@@ -554,7 +431,8 @@ app.listen(PORT, () => {
   console.log(`\n🚀 Velcro Backend running at: http://localhost:${PORT}`);
   console.log(`🔌 Switch Base URL: ${SWITCH_BASE_URL}`);
   console.log(`💰 Developer Fee: ${DEVELOPER_FEE}%`);
-  console.log(`🌍 Supported: NG (NGN), GH (GHS), KE (KES)\n`);
+  console.log(`🌍 Supported: NG (NGN), GH (GHS), KE (KES)`);
+  console.log(`🍃 Database: MongoDB\n`);
 });
 
 module.exports = app;
