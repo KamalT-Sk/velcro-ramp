@@ -189,6 +189,13 @@ app.get('/api/requirements', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+app.get('/api/rates', async (req, res, next) => {
+  try {
+    const data = await switchApi('/rates', 'GET');
+    res.json(data);
+  } catch (err) { next(err); }
+});
+
 app.post('/api/rate', async (req, res, next) => {
   try {
     const { direction, asset, country, currency, channel } = req.body;
@@ -410,9 +417,13 @@ if (fs.existsSync(staticPath)) {
 }
 
 app.use((err, req, res, next) => {
-  console.error(`[${req.method}] ${req.path} -`, err.message);
-  const status = err.status || 500;
-  res.status(status).json(errorResponse(err.message, status));
+  const status = err.response?.status || err.status || 500;
+  const message = err.response?.data?.message || err.message || 'Internal Server Error';
+  console.error(`[${req.method}] ${req.path} Error (${status}):`, message);
+  res.status(status).json({
+    status: 'ERROR',
+    message: message
+  });
 });
 
 app.listen(PORT, () => {
