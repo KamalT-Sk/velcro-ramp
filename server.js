@@ -228,14 +228,15 @@ app.post('/api/initiate', async (req, res, next) => {
       beneficiary,
       exact_output: exact_output ?? false,
       reference: txRef,
-      reason,
+      reason: reason || 'PERSONAL_TRANSFER',
+      narration: 'Velcro Settlement',
       ...(DEVELOPER_RECIPIENT ? { developer_fee: DEVELOPER_FEE, developer_recipient: DEVELOPER_RECIPIENT } : {})
     };
     if (callback_url) payload.callback_url = callback_url;
 
     if (direction === 'OFFRAMP') {
       payload.static = false;
-      if (sender_name) payload.sender_name = sender_name;
+      payload.sender_name = 'Velcro Ramp';
     } else if (direction === 'ONRAMP' && wallet_address) {
       payload.wallet_address = wallet_address;
     }

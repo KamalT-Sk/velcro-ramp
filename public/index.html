@@ -962,22 +962,29 @@
                 <p class="text-xl font-bold text-gray-900"><span id="buy-confirm-currency-symbol">&#8358;</span><span
                     id="buy-confirm-ngn">0.00</span></p>
               </div>
-              <div class="bg-white rounded-xl border border-gray-200 p-4 mb-3 text-left space-y-3">
-                <div class="flex justify-between items-center">
-                  <span class="text-xs text-gray-500">Bank</span>
-                  <span class="text-sm font-semibold text-gray-900" id="buy-bank-name">-</span>
+              <div class="flex flex-col gap-3 mb-3">
+                <div
+                  class="bg-white rounded-xl border border-gray-200 p-4 text-left cursor-pointer hover:bg-gray-50 transition-colors group"
+                  onclick="copyAddress('buy-account-number')" title="Click to copy account number">
+                  <div class="flex items-center justify-between mb-1">
+                    <p class="text-xs text-gray-500">Account Number</p>
+                    <i data-lucide="copy"
+                      class="w-3.5 h-3.5 text-gray-400 group-hover:text-velcro-green transition-colors"></i>
+                  </div>
+                  <p class="text-lg font-bold text-gray-900 tracking-wider" id="buy-account-number">-</p>
                 </div>
-                <div class="border-t border-gray-100"></div>
-                <div class="flex justify-between items-center">
-                  <span class="text-xs text-gray-500">Account Number</span>
-                  <code class="text-sm font-mono font-bold text-gray-900" id="buy-account-number">-</code>
+
+                <div class="bg-white rounded-xl border border-gray-200 p-3 text-left">
+                  <p class="text-xs text-gray-500 mb-1">Bank Name</p>
+                  <p class="text-sm font-semibold text-gray-900" id="buy-bank-name">-</p>
                 </div>
-                <div class="border-t border-gray-100"></div>
-                <div class="flex justify-between items-center">
-                  <span class="text-xs text-gray-500">Account Name</span>
-                  <span class="text-sm font-semibold text-gray-900" id="buy-account-name">-</span>
+                
+                <div class="bg-white rounded-xl border border-gray-200 p-3 text-left">
+                  <p class="text-xs text-gray-500 mb-1">Account Name</p>
+                  <p class="text-sm font-semibold text-gray-900" id="buy-account-name">-</p>
                 </div>
               </div>
+
               <div class="bg-white rounded-xl border border-gray-200 p-3 mb-3 text-left">
                 <p class="text-xs text-gray-500 mb-1">Rate Used</p>
                 <p class="text-sm font-semibold text-gray-900" id="buy-rate-used">-</p>
@@ -1845,7 +1852,9 @@
         document.getElementById('sell-reference').textContent = data.reference || '-';
         currentReference = data.reference || '';
         document.getElementById('sell-generated-address').classList.remove('hidden');
-        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mr-2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg> Address Generated';
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mr-2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Address Generated';
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
         safeLucideInit();
         startStatusPoll(data.reference, 'sell');
       } catch (err) {
@@ -1935,7 +1944,9 @@
         document.getElementById('buy-reference').textContent = data.reference || '-';
         currentReference = data.reference || '';
         document.getElementById('buy-generated-account').classList.remove('hidden');
-        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mr-2"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg> Account Generated';
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mr-2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Account Generated';
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
         safeLucideInit();
         startStatusPoll(data.reference, 'buy');
       } catch (err) {
