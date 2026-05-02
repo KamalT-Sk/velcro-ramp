@@ -1086,30 +1086,36 @@
       <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-velcro-navy/5 rounded-full blur-3xl"></div>
       
       <div class="mb-6 relative flex justify-center">
-        <div class="w-24 h-24 rounded-full bg-green-50 flex items-center justify-center relative z-10">
+        <div class="w-20 h-20 rounded-full bg-green-50 flex items-center justify-center relative z-10">
           <svg class="success-checkmark" viewBox="0 0 52 52">
             <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
             <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
           </svg>
         </div>
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-green-400/20 rounded-full blur-xl animate-pulse"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 bg-green-400/20 rounded-full blur-xl animate-pulse"></div>
       </div>
 
-      <h2 class="text-2xl font-extrabold text-gray-900 mb-2">Transfer Successful!</h2>
-      <p class="text-gray-500 text-sm mb-8 leading-relaxed px-4">Your transaction has been processed and completed successfully.</p>
+      <h2 class="text-2xl font-extrabold text-gray-900 mb-1">Success!</h2>
+      <p class="text-gray-400 text-xs mb-6 uppercase tracking-widest font-bold">Transaction Completed</p>
       
-      <div class="space-y-3 mb-8">
-        <div class="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-2xl border border-gray-100">
-          <span class="text-xs text-gray-400 font-medium">Status</span>
-          <span class="text-xs font-bold text-green-600 bg-green-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Completed</span>
+      <div class="bg-gray-50 rounded-3xl p-5 mb-8 border border-gray-100 text-left space-y-4">
+        <div class="flex justify-between items-center">
+          <span class="text-xs text-gray-400 font-medium">Amount Sent</span>
+          <span class="text-sm font-bold text-gray-900" id="success-amount">0.00 USDT</span>
         </div>
-        <div class="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-2xl border border-gray-100">
+        <div class="border-t border-gray-100"></div>
+        <div class="flex justify-between items-center">
+          <span class="text-xs text-gray-400 font-medium">Received By</span>
+          <span class="text-sm font-bold text-gray-900 truncate max-w-[140px]" id="success-dest">-</span>
+        </div>
+        <div class="border-t border-gray-100"></div>
+        <div class="flex justify-between items-center">
           <span class="text-xs text-gray-400 font-medium">Reference</span>
-          <span class="text-xs font-mono text-gray-900 truncate max-w-[120px]" id="success-ref">REF-123456</span>
+          <span class="text-xs font-mono text-gray-500 truncate max-w-[120px]" id="success-ref">REF-123456</span>
         </div>
       </div>
 
-      <button onclick="window.location.reload()" class="w-full bg-velcro-navy text-white py-4 rounded-2xl font-bold hover:bg-gray-900 transition-all shadow-lg hover:shadow-velcro-navy/20 active:scale-[0.98]">
+      <button onclick="window.location.reload()" class="w-full bg-velcro-green text-velcro-navy py-4 rounded-2xl font-bold hover:bg-velcro-green-dark transition-all shadow-lg shadow-velcro-green/20 active:scale-[0.98]">
         Return Home
       </button>
     </div>
@@ -1969,7 +1975,7 @@
           if (status === 'COMPLETED' || status === 'FAILED' || status === 'CANCELLED') {
             clearInterval(statusPollInterval);
             if (status === 'COMPLETED') {
-              showSuccessModal(reference);
+              showSuccessModal(reference, data);
             } else if (status === 'FAILED') {
               showToast('Transaction Failed. Please contact support.', 'error');
             }
@@ -2149,12 +2155,22 @@
       modal.classList.remove('flex');
     }
 
-    function showSuccessModal(reference) {
+    function showSuccessModal(reference, data = {}) {
       document.getElementById('success-ref').textContent = reference;
+      
+      const isOfframp = data.type === 'OFFRAMP' || !data.wallet_address;
+      const amount = data.source?.amount || data.amount || 0;
+      const asset = data.source?.asset || data.asset || '';
+      const dest = isOfframp 
+        ? (data.beneficiary?.bank_name || data.deposit?.bank_name || 'Bank Account')
+        : (data.beneficiary?.wallet_address || data.wallet_address || 'Crypto Wallet');
+      
+      document.getElementById('success-amount').textContent = `${amount} ${asset.includes(':') ? asset.split(':')[1].toUpperCase() : asset.toUpperCase()}`;
+      document.getElementById('success-dest').textContent = dest;
+
       const modal = document.getElementById('success-modal');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
-      // confetti? Maybe later
     }
   </script>
 </body>
