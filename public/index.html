@@ -1296,7 +1296,7 @@
           asset: currentSwitchAsset,
           country: currentCountry,
           currency: currentCurrency,
-          channel: (currentCountry === 'GH' || currentCountry === 'KE') ? 'MOBILE_MONEY' : 'BANK'
+          channel: (currentCountry === 'GH' || currentCountry === 'KE') ? 'MOBILEMONEY' : 'BANK'
         };
         const res = await fetch(`${API_BASE}/api/rate`, {
           method: 'POST',
@@ -1862,7 +1862,7 @@
             country: currentCountry,
             currency: currentCurrency,
             asset: currentSwitchAsset,
-            channel: (currentCountry === 'GH' || currentCountry === 'KE') ? 'MOBILE_MONEY' : 'BANK',
+            channel: (currentCountry === 'GH' || currentCountry === 'KE') ? 'MOBILEMONEY' : 'BANK',
             reason: 'PERSONAL_TRANSFER',
             narration: 'Crypto Offramp Settlement',
             beneficiary: {
