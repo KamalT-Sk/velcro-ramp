@@ -360,7 +360,6 @@
     }
 
     @keyframes livePulse {
-
       0%,
       100% {
         opacity: 1;
@@ -368,6 +367,34 @@
 
       50% {
         opacity: 0.4;
+      }
+    }
+
+    /* Success Checkmark Animation */
+    .success-checkmark {
+      width: 52px;
+      height: 52px;
+    }
+    .checkmark-circle {
+      stroke-dasharray: 166;
+      stroke-dashoffset: 166;
+      stroke-width: 2;
+      stroke-miterlimit: 10;
+      stroke: #22c55e;
+      fill: none;
+      animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+    }
+    .checkmark-check {
+      transform-origin: 50% 50%;
+      stroke-dasharray: 48;
+      stroke-dashoffset: 48;
+      stroke-width: 4;
+      stroke: #22c55e;
+      animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+    }
+    @keyframes stroke {
+      100% {
+        stroke-dashoffset: 0;
       }
     }
   </style>
@@ -1042,6 +1069,42 @@
       <div class="overflow-y-auto p-6 space-y-3" id="history-list">
         <div class="text-center py-8 text-gray-400">Loading transactions...</div>
       </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div id="success-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-velcro-navy/60 backdrop-blur-md animate-fade-in px-4">
+    <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-8 text-center shadow-2xl relative overflow-hidden">
+      <div class="absolute -top-24 -right-24 w-48 h-48 bg-velcro-green/10 rounded-full blur-3xl"></div>
+      <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-velcro-navy/5 rounded-full blur-3xl"></div>
+      
+      <div class="mb-6 relative flex justify-center">
+        <div class="w-24 h-24 rounded-full bg-green-50 flex items-center justify-center relative z-10">
+          <svg class="success-checkmark" viewBox="0 0 52 52">
+            <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+            <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+          </svg>
+        </div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-green-400/20 rounded-full blur-xl animate-pulse"></div>
+      </div>
+
+      <h2 class="text-2xl font-extrabold text-gray-900 mb-2">Transfer Successful!</h2>
+      <p class="text-gray-500 text-sm mb-8 leading-relaxed px-4">Your transaction has been processed and completed successfully.</p>
+      
+      <div class="space-y-3 mb-8">
+        <div class="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-2xl border border-gray-100">
+          <span class="text-xs text-gray-400 font-medium">Status</span>
+          <span class="text-xs font-bold text-green-600 bg-green-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Completed</span>
+        </div>
+        <div class="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-2xl border border-gray-100">
+          <span class="text-xs text-gray-400 font-medium">Reference</span>
+          <span class="text-xs font-mono text-gray-900 truncate max-w-[120px]" id="success-ref">REF-123456</span>
+        </div>
+      </div>
+
+      <button onclick="window.location.reload()" class="w-full bg-velcro-navy text-white py-4 rounded-2xl font-bold hover:bg-gray-900 transition-all shadow-lg hover:shadow-velcro-navy/20 active:scale-[0.98]">
+        Return Home
+      </button>
     </div>
   </div>
 
@@ -1895,12 +1958,13 @@
           if (status === 'COMPLETED' || status === 'FAILED' || status === 'CANCELLED') {
             clearInterval(statusPollInterval);
             if (status === 'COMPLETED') {
-              showToast('Transaction Completed Successfully!', 'success');
-              setTimeout(() => window.location.reload(), 4000);
+              showSuccessModal(reference);
+            } else if (status === 'FAILED') {
+              showToast('Transaction Failed. Please contact support.', 'error');
             }
           }
         } catch (e) { }
-      }, 10000);
+      }, 5000); // Polling every 5 seconds for better responsiveness
     }
 
     function updateStatusUI(status, type) {
@@ -2072,6 +2136,14 @@
       const modal = document.getElementById('history-modal');
       modal.classList.add('hidden');
       modal.classList.remove('flex');
+    }
+
+    function showSuccessModal(reference) {
+      document.getElementById('success-ref').textContent = reference;
+      const modal = document.getElementById('success-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      // confetti? Maybe later
     }
   </script>
 </body>

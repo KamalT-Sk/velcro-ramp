@@ -22,7 +22,7 @@ const transactionSchema = new mongoose.Schema({
   reference: { type: String, unique: true, required: true, index: true },
   switch_reference: { type: String, index: true },
   type: { type: String, required: true, enum: ['OFFRAMP', 'ONRAMP'], index: true },
-  status: { type: String, default: 'PENDING', index: true },
+  status: { type: String, default: 'AWAITING_DEPOSIT', index: true },
   country: { type: String, required: true, index: true },
   currency: { type: String, required: true },
   asset: { type: String, required: true },
@@ -41,7 +41,7 @@ const transactionSchema = new mongoose.Schema({
   deposit_account_number: String,
   deposit_account_name: String,
   deposit_note: String,
-  beneficiary: String, // Stringified JSON or separate sub-doc
+  beneficiary: String, // Stringified JSON
   wallet_address: String,
   hash: String,
   explorer_url: String,
@@ -118,12 +118,10 @@ function errorResponse(message, status = 400) {
 
 // ─── Routes ───
 
-// Health
 app.get('/api/health', (req, res) => {
-  res.json(successResponse({ service: 'velcro-backend', version: '1.1.0', db: 'mongodb' }));
+  res.json(successResponse({ service: 'velcro-backend', version: '1.2.0', db: 'mongodb' }));
 });
 
-// Get supported assets
 app.get('/api/assets', async (req, res, next) => {
   try {
     const data = await switchApi('/asset');
@@ -131,7 +129,6 @@ app.get('/api/assets', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// Get all rates
 app.get('/api/rates', async (req, res, next) => {
   try {
     const { country, currency } = req.query;
@@ -141,13 +138,11 @@ app.get('/api/rates', async (req, res, next) => {
     if (currency) params.append('currency', currency);
     const qs = params.toString();
     if (qs) path += '?' + qs;
-    
     const data = await switchApi(path);
     res.json(data);
   } catch (err) { next(err); }
 });
 
-// Get institutions (Banks)
 app.get('/api/institutions', async (req, res, next) => {
   try {
     const { country, currency, channel } = req.query;
@@ -155,17 +150,14 @@ app.get('/api/institutions', async (req, res, next) => {
     if (country) params.append('country', country);
     if (currency) params.append('currency', currency);
     if (channel) params.append('channel', channel);
-    
     let path = '/institution';
     const qs = params.toString();
     if (qs) path += '?' + qs;
-
     const data = await switchApi(path);
     res.json(data);
   } catch (err) { next(err); }
 });
 
-// Resolve Account Name
 app.post('/api/resolve', async (req, res, next) => {
   try {
     const { country, beneficiary } = req.body;
@@ -180,7 +172,6 @@ app.post('/api/resolve', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// Get requirements
 app.get('/api/requirements', async (req, res, next) => {
   try {
     const { direction, country, currency, type, channel } = req.query;
@@ -198,7 +189,6 @@ app.get('/api/requirements', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// Get rate
 app.post('/api/rate', async (req, res, next) => {
   try {
     const { direction, asset, country, currency, channel } = req.body;
@@ -214,7 +204,6 @@ app.post('/api/rate', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// Initiate transaction
 app.post('/api/initiate', async (req, res, next) => {
   try {
     const {
@@ -262,12 +251,11 @@ app.post('/api/initiate', async (req, res, next) => {
     const src = d.source || {};
     const dst = d.destination || {};
 
-    // Store in MongoDB
     await Transaction.create({
       reference: txRef,
       switch_reference: d.id || d.reference || null,
       type: direction,
-      status: d.status || 'PENDING',
+      status: d.status || 'AWAITING_DEPOSIT',
       country,
       currency: currency || (direction === 'ONRAMP' ? src.currency : dst.currency) || 'NGN',
       asset,
@@ -296,19 +284,23 @@ app.post('/api/initiate', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// Get transaction status
+// Update to use /payment/status
 app.get('/api/status', async (req, res, next) => {
   try {
     const { reference } = req.query;
     if (!reference) return res.status(400).json(errorResponse('reference is required'));
 
-    const data = await switchApi(`/status?reference=${encodeURIComponent(reference)}`);
+    const data = await switchApi(`/payment/status?reference=${encodeURIComponent(reference)}`);
     const d = data.data || {};
 
     if (d.status) {
       await Transaction.findOneAndUpdate(
         { reference },
-        { status: d.status, hash: d.hash || null, explorer_url: d.explorer_url || null },
+        { 
+          status: d.status, 
+          hash: (d.meta && d.meta.hash) || d.hash || null, 
+          explorer_url: (d.meta && d.meta.explorer_url) || d.explorer_url || null 
+        },
         { new: true }
       );
     }
@@ -317,7 +309,7 @@ app.get('/api/status', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// Confirm payment deposit
+// Update to use /payment/confirm
 app.post('/api/confirm', async (req, res, next) => {
   try {
     const { reference, hash } = req.body;
@@ -326,28 +318,24 @@ app.post('/api/confirm', async (req, res, next) => {
     const tx = await Transaction.findOne({ reference });
     if (!tx) return res.status(404).json(errorResponse('Transaction not found'));
 
-    if (tx.type === 'OFFRAMP' && !hash) {
-      return res.status(400).json(errorResponse('transaction hash is required for crypto deposits'));
-    }
-
     const payload = { reference };
     if (hash) payload.hash = hash;
 
-    const data = await switchApi('/confirm', {
+    const data = await switchApi('/payment/confirm', {
       method: 'POST',
       body: JSON.stringify(payload),
     });
 
+    const d = data.data || {};
     await Transaction.findOneAndUpdate(
       { reference },
-      { status: 'PROCESSING', hash: hash || null }
+      { status: d.status || 'PROCESSING', hash: hash || null }
     );
 
     res.json(data);
   } catch (err) { next(err); }
 });
 
-// List local transactions
 app.get('/api/transactions', async (req, res) => {
   const { type, country, status, limit = 50, offset = 0 } = req.query;
   const query = {};
@@ -363,14 +351,11 @@ app.get('/api/transactions', async (req, res) => {
   res.json(successResponse(rows));
 });
 
-// Get single local transaction
 app.get('/api/transactions/:reference', async (req, res) => {
   const row = await Transaction.findOne({ reference: req.params.reference });
   if (!row) return res.status(404).json(errorResponse('Transaction not found', 404));
   res.json(successResponse(row));
 });
-
-// ─── Switch History & Summary ───
 
 app.get('/api/history', async (req, res, next) => {
   try {
@@ -380,26 +365,30 @@ app.get('/api/history', async (req, res, next) => {
     params.append('offset', offset);
     if (status) params.append('status', status);
     if (direction) params.append('direction', direction);
-    
     const data = await switchApi(`/payment/history?${params.toString()}`);
     res.json(data);
   } catch (err) { next(err); }
 });
 
-// ─── Webhook ───
-
+// Improved Webhook
 app.post('/webhook/switch', express.json(), async (req, res) => {
   try {
     const payload = req.body;
     console.log('[Webhook Received]', JSON.stringify(payload));
     
-    const reference = payload.reference || payload.data?.reference;
-    const status = payload.status || payload.data?.status;
+    // Switch often sends: { event, reference, status, data: { ... } }
+    const reference = payload.reference || (payload.data && payload.data.reference);
+    const status = payload.status || (payload.data && payload.data.status);
 
     if (reference && status) {
       await Transaction.findOneAndUpdate(
         { reference },
-        { status, meta: JSON.stringify(payload) }
+        { 
+          status, 
+          meta: JSON.stringify(payload),
+          hash: (payload.data && payload.data.hash) || null,
+          explorer_url: (payload.data && payload.data.explorer_url) || null
+        }
       );
       console.log(`[Webhook] Updated status of ${reference} to ${status}`);
     }
@@ -411,7 +400,6 @@ app.post('/webhook/switch', express.json(), async (req, res) => {
   }
 });
 
-// ─── Serve Static Frontend ───
 const staticPath = path.join(__dirname, 'public');
 if (fs.existsSync(staticPath)) {
   app.use(express.static(staticPath));
@@ -420,16 +408,14 @@ if (fs.existsSync(staticPath)) {
   });
 }
 
-// ─── Error Handler ───
 app.use((err, req, res, next) => {
   console.error(`[${req.method}] ${req.path} -`, err.message);
   const status = err.status || 500;
   res.status(status).json(errorResponse(err.message, status));
 });
 
-// ─── Start ───
 app.listen(PORT, () => {
-  console.log(`\n🚀 Velcro Backend running at: http://localhost:${PORT}`);
+  console.log(`\n🚀 Velcro Backend v1.2.0 running at: http://localhost:${PORT}`);
   console.log(`🔌 Switch Base URL: ${SWITCH_BASE_URL}`);
   console.log(`💰 Developer Fee: ${DEVELOPER_FEE}%`);
   console.log(`🌍 Supported: NG (NGN), GH (GHS), KE (KES)`);
