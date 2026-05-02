@@ -33,6 +33,7 @@
     .swap-btn:hover { transform: scale(1.08); box-shadow: 0 6px 20px rgba(168,207,69,0.5); }
     .swap-btn:active { transform: scale(0.95); }
     .tab-active { background: #A8CF45; color: #0D0D59; }
+    .tab-active:hover { background: #96ba3e; }
     .tab-inactive { background: #F3F4F6; color: #6B7280; }
     .tab-inactive:hover { background: #E5E7EB; }
     .animate-fade-in { animation: fadeIn 0.3s ease-out; }
@@ -50,8 +51,9 @@
     .custom-option.selected { background: #f0fdf4; }
     .custom-select-trigger { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
     #convert { scroll-margin-top: 80px; }
-    .display-input::-webkit-inner-spin-button, .display-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-    .display-input { -moz-appearance: textfield; }
+    .display-input::-webkit-inner-spin-button, .display-input::-webkit-outer-spin-button { -webkit-appearance: none; appearance: none; margin: 0; }
+    .display-input { -moz-appearance: textfield; appearance: textfield; }
+
     .custom-select-options .custom-option { color: #1f2937; }
     .custom-select-options .custom-option:hover { background: #f3f4f6; }
     .custom-select-options .custom-option.selected { background: #f0fdf4; }
@@ -731,6 +733,40 @@
     }
 
     async function fetchRate(forcedDirection) {
+      // If no direction is forced, we fetch all rates for the current country/currency
+      if (!forcedDirection) {
+        try {
+          const res = await fetch(`${API_BASE}/api/rates?country=${currentCountry}&currency=${currentCurrency}`);
+          if (!res.ok) throw new Error('Failed to fetch rates');
+          const payload = await res.json();
+          const rates = payload.data || [];
+          
+          // Update global currentRate object
+          rates.forEach(r => {
+            if (r.asset === currentSwitchAsset) {
+              if (r.direction === 'OFFRAMP') currentRate.sell = r.rate;
+              else if (r.direction === 'ONRAMP') currentRate.buy = r.rate;
+            }
+            // Fallback: update any rate that matches our current assets
+            if (r.asset === getSwitchAsset(currentSellAsset, currentSellNetwork) && r.direction === 'OFFRAMP') {
+              currentRate.sell = r.rate;
+            }
+            if (r.asset === getSwitchAsset(currentBuyAsset, currentBuyNetwork) && r.direction === 'ONRAMP') {
+              currentRate.buy = r.rate;
+            }
+          });
+
+          updateNavRate();
+          updateRateDisplays();
+          calculateSell();
+          calculateBuy();
+          return;
+        } catch (err) {
+          console.error('Fetch all rates error:', err);
+        }
+      }
+
+      // Fallback or forced single rate fetch
       const direction = forcedDirection || (document.getElementById('form-sell').classList.contains('hidden') ? 'ONRAMP' : 'OFFRAMP');
       const asset = direction === 'OFFRAMP' ? currentSellAsset : currentBuyAsset;
       const network = direction === 'OFFRAMP' ? currentSellNetwork : currentBuyNetwork;

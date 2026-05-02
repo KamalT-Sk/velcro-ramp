@@ -10,7 +10,7 @@ const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const SWITCH_BASE_URL = process.env.SWITCH_BASE_URL || 'https://switch-v2.up.railway.app';
+const SWITCH_BASE_URL = process.env.SWITCH_BASE_URL || 'https://api.onswitch.xyz';
 const SWITCH_SERVICE_KEY = process.env.SWITCH_SERVICE_KEY;
 const DEVELOPER_FEE = parseFloat(process.env.DEVELOPER_FEE) || 0.5;
 const DEVELOPER_RECIPIENT = process.env.DEVELOPER_RECIPIENT || '';
@@ -133,6 +133,22 @@ app.get('/api/health', (req, res) => {
 app.get('/api/assets', async (req, res, next) => {
   try {
     const data = await switchApi('/asset');
+    res.json(data);
+  } catch (err) { next(err); }
+});
+
+// Get all rates
+app.get('/api/rates', async (req, res, next) => {
+  try {
+    const { country, currency } = req.query;
+    let path = '/rates';
+    const params = new URLSearchParams();
+    if (country) params.append('country', country);
+    if (currency) params.append('currency', currency);
+    const qs = params.toString();
+    if (qs) path += '?' + qs;
+    
+    const data = await switchApi(path);
     res.json(data);
   } catch (err) { next(err); }
 });
@@ -426,6 +442,57 @@ app.get('/api/transactions/:reference', (req, res) => {
   const row = db.prepare('SELECT * FROM transactions WHERE reference = ?').get(req.params.reference);
   if (!row) return res.status(404).json(errorResponse('Transaction not found', 404));
   res.json(successResponse(row));
+});
+
+// ─── Switch History & Summary ───
+
+// Get payment history from Switch
+app.get('/api/history', async (req, res, next) => {
+  try {
+    const { limit = 20, offset = 0, status, direction } = req.query;
+    const params = new URLSearchParams();
+    params.append('limit', limit);
+    params.append('offset', offset);
+    if (status) params.append('status', status);
+    if (direction) params.append('direction', direction);
+    
+    const data = await switchApi(`/payment/history?${params.toString()}`);
+    res.json(data);
+  } catch (err) { next(err); }
+});
+
+// Get payment summary from Switch
+app.get('/api/summary', async (req, res, next) => {
+  try {
+    const data = await switchApi('/payment/summary');
+    res.json(data);
+  } catch (err) { next(err); }
+});
+
+// ─── Beneficiary Management ───
+
+// List beneficiaries
+app.get('/api/beneficiaries', async (req, res, next) => {
+  try {
+    const { country, currency } = req.query;
+    const params = new URLSearchParams();
+    if (country) params.append('country', country);
+    if (currency) params.append('currency', currency);
+    
+    const data = await switchApi(`/beneficiary/fetch?${params.toString()}`);
+    res.json(data);
+  } catch (err) { next(err); }
+});
+
+// Create beneficiary
+app.post('/api/beneficiaries', async (req, res, next) => {
+  try {
+    const data = await switchApi('/beneficiary/create', {
+      method: 'POST',
+      body: JSON.stringify(req.body),
+    });
+    res.json(data);
+  } catch (err) { next(err); }
 });
 
 // ─── Webhook ───
