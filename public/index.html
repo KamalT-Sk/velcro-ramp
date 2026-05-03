@@ -160,6 +160,8 @@
       background: #E5E7EB;
     }
 
+    .input-focus:focus {
+      border-color: #A8CF45;
       box-shadow: 0 0 0 3px rgba(168, 207, 69, 0.15);
     }
 
@@ -1053,12 +1055,12 @@
     </div>
   </div>
 
-  <!-- Success Modal (Bottom Sheet Drawer) -->
-  <div id="success-modal" class="fixed inset-0 z-[100] hidden items-end justify-center bg-gray-900/60 backdrop-blur-md animate-fade-in px-0">
-    <div class="bg-white w-full max-w-lg rounded-t-[2.5rem] p-8 sm:p-10 text-center shadow-[0_-10px_50px_rgba(0,0,0,0.2)] relative overflow-hidden animate-slide-up">
-      <!-- Close Icon (Top Left) -->
-      <button onclick="window.location.reload()" class="absolute top-6 left-6 p-2 hover:bg-gray-100 rounded-full transition-colors z-20">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-gray-400"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+  <!-- Success Modal (Solid Bottom Sheet) -->
+  <div id="success-modal" class="fixed inset-0 z-[100] hidden items-end justify-center bg-gray-900 animate-fade-in px-0" onclick="if(event.target === this) window.location.reload()">
+    <div class="bg-white w-full max-w-lg rounded-t-[2.5rem] p-10 text-center shadow-2xl relative overflow-hidden animate-slide-up h-[65vh] flex flex-col items-center">
+      <!-- Close Icon (Pinned to Top Left) -->
+      <button onclick="window.location.reload()" class="absolute top-6 left-6 p-4 hover:bg-gray-100 rounded-full transition-colors z-50">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-gray-400 hover:text-gray-900"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
 
       <!-- Decorative background elements -->
@@ -1978,7 +1980,7 @@
         const deposit = data.deposit || {};
         document.getElementById('buy-bank-name').textContent = deposit.bank_name || data.bank_name || '-';
         document.getElementById('buy-account-number').textContent = deposit.account_number || data.account_number || '-';
-        document.getElementById('buy-account-name').textContent = 'Velcro Checkout';
+        document.getElementById('buy-account-name').textContent = 'Velcro(switchLabsLtd. checkout)';
         document.getElementById('buy-rate-used').textContent = currentRate.buy ? `1 ${currentBuyAsset} = ${formatCurrency(currentRate.buy)}` : '-';
         document.getElementById('buy-reference').textContent = data.reference || '-';
         currentReference = data.reference || '';
@@ -2220,14 +2222,28 @@
       
       const summary = document.getElementById('success-summary');
       if (summary) {
-        summary.textContent = `${amountFormatted} sent to ${isOfframp ? 'Bank Account' : 'Wallet'}`;
+        summary.textContent = `${amountFormatted} sent to ${destMain} ${destSub ? `(${destSub})` : ''}`;
       }
 
       const modal = document.getElementById('success-modal');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
+      document.body.style.overflow = 'hidden'; // Lock scroll
       safeLucideInit();
     }
+
+    // DEBUG: Trigger success modal for testing
+    window.triggerTestSuccess = function() {
+      showSuccessModal('TEST-REF-999999', {
+        type: 'OFFRAMP',
+        amount: 1400.56,
+        asset: 'USDT',
+        beneficiary: {
+          account_number: '6027928654',
+          bank_name: 'Safehaven Microfinance Bank'
+        }
+      });
+    };
   </script>
 </body>
 
