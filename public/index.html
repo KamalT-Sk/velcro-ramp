@@ -858,7 +858,6 @@
                     </svg>
                   </div>
                   <div class="custom-select-options" id="buy-asset-options">
-                    <div class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider bg-gray-50">Switch</div>
                     <div class="custom-option" onclick="selectBuyAsset('USDT', '/logos/usdt.png', 'Tether', 'switch')">
                       <img src="/logos/usdt.png" class="w-6 h-6" alt="USDT"><span class="font-medium">USDT</span><span
                         class="text-gray-400 text-xs">Tether</span>
@@ -871,18 +870,18 @@
                       <img src="/logos/cngn.png?v=2" class="w-6 h-6" alt="CNGN"><span
                         class="font-medium">CNGN</span><span class="text-gray-400 text-xs">Naira Token</span>
                     </div>
-                    <div class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider bg-gray-50">PAJ (Solana)</div>
-                    <div class="custom-option" onclick="selectBuyAsset('SOL', '/logos/sol.png', 'Solana', 'paj')">
-                      <img src="/logos/sol.png" class="w-6 h-6" alt="SOL"><span class="font-medium">SOL</span><span
-                        class="text-gray-400 text-xs">Solana</span><span class="ml-auto text-[9px] px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded font-bold">PAJ</span>
+                    <div class="border-t border-gray-100 my-1"></div>
+                    <div class="custom-option" onclick="selectBuyAsset('SOL', '/logos/solana.png', 'Solana', 'paj')">
+                      <img src="/logos/solana.png" class="w-6 h-6" alt="SOL"><span class="font-medium">SOL</span><span
+                        class="text-gray-400 text-xs">Solana</span>
                     </div>
                     <div class="custom-option" onclick="selectBuyAsset('JUP', '/logos/jup.png', 'Jupiter', 'paj')">
-                      <img src="/logos/jup.png" class="w-6 h-6" alt="JUP"><span class="font-medium">JUP</span><span
-                        class="text-gray-400 text-xs">Jupiter</span><span class="ml-auto text-[9px] px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded font-bold">PAJ</span>
+                      <div class="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white text-[8px] font-bold shrink-0">J</div>
+                      <span class="font-medium">JUP</span><span class="text-gray-400 text-xs">Jupiter</span>
                     </div>
                     <div class="custom-option" onclick="selectBuyAsset('USDG', '/logos/usdc.png', 'USDC', 'paj')">
                       <img src="/logos/usdc.png" class="w-6 h-6" alt="USDG"><span class="font-medium">USDG</span><span
-                        class="text-gray-400 text-xs">USDC on Solana</span><span class="ml-auto text-[9px] px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded font-bold">PAJ</span>
+                        class="text-gray-400 text-xs">USDC on Solana</span>
                     </div>
                   </div>
                 </div>
@@ -1873,21 +1872,31 @@
         <img src="${logo}" class="w-6 h-6" alt="${symbol}">
         <span class="font-bold text-sm sm:text-base">${symbol}</span>
         <span class="text-gray-400 text-[10px] hidden sm:inline ml-1">${name}</span>
-        ${currentProvider === 'paj' ? '<span class="ml-1 text-[9px] px-1 py-0.5 bg-amber-100 text-amber-700 rounded font-bold">PAJ</span>' : ''}
       `;
+      // Close dropdown and remove backdrop/blur
       document.getElementById('buy-asset-options').classList.remove('open');
+      document.getElementById('dropdown-backdrop').classList.remove('active');
+      document.body.style.overflow = '';
+      document.querySelectorAll('#buy-asset-options .custom-option').forEach(o => o.classList.remove('selected'));
+      if (event && event.currentTarget) event.currentTarget.classList.add('selected');
+      
       document.getElementById('buy-amount-label').textContent = symbol;
       safeSetText('buy-confirm-asset', symbol);
       safeSetSrc('buy-confirm-asset-img', logo);
-      document.querySelectorAll('#buy-asset-options .custom-option').forEach(o => o.classList.remove('selected'));
-      event.currentTarget.classList.add('selected');
-      document.getElementById('buy-asset-options').classList.remove('open');
-      document.getElementById('buy-network-wrap').classList.remove('opacity-50', 'pointer-events-none');
+      
       if (currentProvider === 'paj') {
         currentBuyNetwork = 'solana';
-        document.getElementById('buy-network-display').innerHTML = '<img src="/logos/sol.png" class="w-5 h-5 rounded-full"><span class="font-medium text-sm">Solana</span>';
+        // Hide network selector for PAJ (always Solana)
+        const netWrap = document.getElementById('buy-network-wrap');
+        netWrap.classList.add('opacity-50', 'pointer-events-none');
+        netWrap.style.display = 'none';
+        document.getElementById('buy-network-display').innerHTML = '<img src="/logos/solana.png" class="w-5 h-5 rounded-full"><span class="font-medium text-sm">Solana</span>';
         fetchPajRate();
       } else {
+        // Show network selector for Switch assets
+        const netWrap = document.getElementById('buy-network-wrap');
+        netWrap.style.display = '';
+        netWrap.classList.remove('opacity-50', 'pointer-events-none');
         currentSwitchAsset = getSwitchAsset(currentBuyAsset, currentBuyNetwork);
         if (currentSwitchAsset) fetchRate();
       }
