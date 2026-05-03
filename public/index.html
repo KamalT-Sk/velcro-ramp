@@ -401,7 +401,11 @@
           </div>
           <button onclick="showHistoryModal()" id="history-btn"
             class="text-sm text-gray-600 hover:text-velcro-navy transition-colors flex items-center gap-1.5">
-            <i data-lucide="history" class="w-4 h-4"></i>
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 3v5h5"/>
+              <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/>
+              <path d="M12 7v5l4 2"/>
+            </svg>
             History
           </button>
         </div>
@@ -712,6 +716,12 @@
                 <p class="text-xs text-gray-500 mb-1">Reference</p>
                 <p class="text-sm font-mono text-gray-900" id="sell-reference">-</p>
               </div>
+              <!-- QR Code for Wallet Address -->
+              <div class="bg-white rounded-xl border border-gray-200 p-4 mb-3 text-center">
+                <p class="text-xs text-gray-500 mb-2">Scan to Pay</p>
+                <img id="sell-qr-code" src="" alt="Wallet QR Code" class="w-40 h-40 mx-auto rounded-lg">
+                <p class="text-[10px] text-gray-400 mt-1">Scan with your crypto wallet app</p>
+              </div>
               <button onclick="copyAddress('sell-wallet-address')"
                 class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-xl text-sm font-medium transition-colors inline-flex items-center justify-center gap-2">
                 <i data-lucide="copy" class="w-4 h-4"></i>
@@ -895,7 +905,11 @@
               </div>
             </div>
           </div>
-          <div class="text-xs text-gray-400 font-medium -mt-3">Min: &#8358;2,000</div>
+          <div class="flex items-center justify-between -mt-3">
+            <span class="text-xs text-gray-400 font-medium">Min: &#8358;2,000</span>
+            <span class="text-xs text-gray-400 font-medium">Max: &#8358;50,000</span>
+          </div>
+          <p id="buy-limit-error" class="hidden text-xs text-red-500 mt-1 font-medium">Maximum buy amount is &#8358;50,000 per transaction.</p>
 
           <!-- Wallet Address -->
           <div class="input-panel space-y-4">
@@ -1022,9 +1036,14 @@
                 <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg opacity-50" id="bstatus-4">
                   <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center"><i
                       data-lucide="check-circle" class="w-4 h-4 text-gray-500"></i></div>
-                  <div>
+                  <div class="flex-1">
                     <p class="text-sm font-medium text-gray-500">Completed</p>
+                    <p class="text-xs text-gray-400" id="buy-status-detail">Crypto sent to your wallet</p>
                   </div>
+                  <a id="buy-explorer-link" href="#" target="_blank" rel="noopener noreferrer"
+                    class="hidden text-xs bg-white border border-gray-200 text-velcro-navy px-2.5 py-1.5 rounded-lg hover:bg-gray-100 transition-colors font-medium shrink-0 inline-flex items-center gap-1">
+                    <i data-lucide="external-link" class="w-3 h-3"></i> View on Blockchain
+                  </a>
                 </div>
               </div>
             </div>
@@ -1044,8 +1063,13 @@
     <div
       class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden animate-fade-in flex flex-col">
       <div class="p-6 border-b border-gray-100 flex items-center justify-between">
-        <h2 class="text-lg font-bold text-velcro-navy flex items-center gap-2"><i data-lucide="history"
-            class="w-5 h-5"></i> Transaction History</h2>
+        <h2 class="text-lg font-bold text-velcro-navy flex items-center gap-2">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v5h5"/>
+            <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/>
+            <path d="M12 7v5l4 2"/>
+          </svg>
+          Transaction History</h2>
         <button onclick="hideHistoryModal()" class="p-2 hover:bg-gray-100 rounded-lg"><i data-lucide="x"
             class="w-5 h-5 text-gray-500"></i></button>
       </div>
@@ -1056,10 +1080,69 @@
   </div>
 
 
+  <!-- Success Modal -->
+  <div id="success-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-white/80 backdrop-blur-sm" onclick="hideSuccessModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in flex flex-col">
+      <div class="p-6 text-center">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+        <h2 class="text-xl font-bold text-gray-900 mb-1" id="success-title">Transaction Successful!</h2>
+        <p class="text-sm text-gray-500 mb-6" id="success-subtitle">Your transaction has been completed.</p>
+        
+        <div class="bg-gray-50 rounded-xl p-4 text-left space-y-4 mb-6">
+          <!-- Amount -->
+          <div>
+            <p class="text-[10px] uppercase tracking-wider text-gray-400 font-medium mb-1">Amount</p>
+            <p class="text-xl font-bold text-gray-900" id="success-amount">-</p>
+          </div>
+          <!-- Destination -->
+          <div id="success-destination-row">
+            <p class="text-[10px] uppercase tracking-wider text-gray-400 font-medium mb-1" id="success-destination-label">Credited To</p>
+            <p class="text-sm font-semibold text-gray-900" id="success-destination">-</p>
+          </div>
+          <!-- Detail -->
+          <div id="success-detail-row">
+            <p class="text-[10px] uppercase tracking-wider text-gray-400 font-medium mb-1" id="success-detail-label">Detail</p>
+            <p class="text-sm font-mono text-gray-700" id="success-detail">-</p>
+          </div>
+          <!-- Reference with copy -->
+          <div>
+            <p class="text-[10px] uppercase tracking-wider text-gray-400 font-medium mb-1">Reference</p>
+            <div class="flex items-center gap-2">
+              <p class="text-sm font-mono text-gray-700 break-all flex-1" id="success-reference">-</p>
+              <button onclick="copySuccessReference()" title="Copy reference"
+                class="shrink-0 p-1.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-velcro-navy">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                  <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <a id="success-explorer-link" href="#" target="_blank" rel="noopener noreferrer"
+          class="hidden w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl text-sm font-medium transition-colors inline-flex items-center justify-center gap-2 mb-3">
+          <i data-lucide="external-link" class="w-4 h-4"></i>
+          View on Blockchain
+        </a>
+        <button onclick="hideSuccessModal(); window.location.reload();"
+          class="w-full bg-velcro-green hover:bg-velcro-green-dark text-velcro-navy py-3 rounded-xl text-sm font-bold transition-colors">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Support Widget -->
   <div id="support-widget" class="fixed bottom-6 right-6 z-50">
     <div id="support-menu" class="hidden mb-3 space-y-2">
-      <a href="https://wa.me/2347035428475" target="_blank"
+      <a href="https://chat.whatsapp.com/FNiWMH0bnwgHT7lHhF32ab" target="_blank"
         class="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-lg hover:shadow-xl transition-shadow text-sm text-gray-700">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#25D366">
           <path
@@ -1116,6 +1199,8 @@
     var countryRequirements = {};
     var currentReference = '';
     var statusPollInterval = null;
+    var currentTxDetails = {}; // Stores details for success modal
+    const BUY_MAX_LIMIT = 50000; // Maximum buy amount per transaction (compliance)
 
     function safeLucideInit() {
       if (typeof lucide !== 'undefined' && lucide.createIcons) {
@@ -1665,8 +1750,19 @@
       document.getElementById('sell-amount').value = crypto.toFixed(2);
     }
 
+    function validateBuyLimit(amount) {
+      const errorEl = document.getElementById('buy-limit-error');
+      if (amount > BUY_MAX_LIMIT) {
+        errorEl.classList.remove('hidden');
+        return false;
+      }
+      errorEl.classList.add('hidden');
+      return true;
+    }
+
     function calculateBuy() {
       const amount = parseFloat(document.getElementById('buy-amount').value) || 0;
+      validateBuyLimit(amount);
       const rate = Number(currentRate.buy);
       if (Number.isNaN(rate) || rate <= 0) {
         document.getElementById('buy-receive').value = '';
@@ -1687,6 +1783,7 @@
       const crypto = parseFloat(document.getElementById('buy-receive').value) || 0;
       const ngn = crypto * currentRate.buy;
       document.getElementById('buy-amount').value = ngn.toFixed(2);
+      validateBuyLimit(ngn);
     }
 
     function showManualConfirm(type) {
@@ -1832,14 +1929,33 @@
         const payload = await res.json();
         const data = payload.data || {};
         const deposit = data.deposit || {};
-        document.getElementById('sell-wallet-address').textContent = deposit.address || data.address || '-';
+        const walletAddress = deposit.address || data.address || '-';
+        document.getElementById('sell-wallet-address').textContent = walletAddress;
         document.getElementById('sell-reference').textContent = data.reference || '-';
         currentReference = data.reference || '';
+        // Generate QR code for wallet address
+        const qrImg = document.getElementById('sell-qr-code');
+        if (qrImg && walletAddress !== '-') {
+          qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(walletAddress)}`;
+        }
         document.getElementById('sell-generated-address').classList.remove('hidden');
         btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mr-2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Address Generated';
         btn.disabled = true;
         btn.classList.add('opacity-50', 'cursor-not-allowed');
         safeLucideInit();
+        // Store tx details for success modal
+        const bankDisplay = document.getElementById('sell-bank-display').textContent.trim();
+        currentTxDetails = {
+          type: 'sell',
+          reference: data.reference,
+          amount: amount,
+          destinationAmount: data.destination?.amount || data.destination_amount,
+          bankName: bankDisplay !== 'Select your bank' ? bankDisplay : '-',
+          accountNumber: bankNum,
+          accountName: accName,
+          asset: currentSellAsset,
+          network: currentSellNetwork
+        };
         startStatusPoll(data.reference, 'sell');
       } catch (err) {
         btn.innerHTML = '<i data-lucide="wallet" class="w-5 h-5"></i> Generate Wallet Address';
@@ -1887,6 +2003,7 @@
       const receive = parseFloat(document.getElementById('buy-receive').value) || 0;
       if (!amount || amount <= 0) { showToast('Please enter a valid amount', 'warning'); return; }
       if (receive < 1) { showToast('Minimum amount is $1', 'warning'); return; }
+      if (amount > BUY_MAX_LIMIT) { showToast('Maximum buy amount is ₦50,000 per transaction', 'warning'); return; }
       const wallet = document.getElementById('buy-wallet').value.trim();
       if (!wallet) { showToast('Please enter your wallet address', 'warning'); return; }
       if (!validateWalletAddress(wallet, currentBuyNetwork)) {
@@ -1936,6 +2053,16 @@
         btn.disabled = true;
         btn.classList.add('opacity-50', 'cursor-not-allowed');
         safeLucideInit();
+        // Store tx details for success modal
+        currentTxDetails = {
+          type: 'buy',
+          reference: data.reference,
+          amount: amount,
+          destinationAmount: data.destination?.amount || data.destination_amount || receive,
+          asset: currentBuyAsset,
+          network: currentBuyNetwork,
+          walletAddress: wallet
+        };
         startStatusPoll(data.reference, 'buy');
       } catch (err) {
         btn.innerHTML = '<i data-lucide="landmark" class="w-5 h-5"></i> Generate Bank Account';
@@ -1954,17 +2081,68 @@
           const data = payload.data || {};
           const status = data.status || payload.status;
           updateStatusUI(status, type);
+          // Show blockchain explorer link for completed buy transactions
+          if (type === 'buy' && status === 'COMPLETED') {
+            const explorerUrl = data.explorer_url || '';
+            const txHash = data.hash || '';
+            const explorerLink = document.getElementById('buy-explorer-link');
+            const statusDetail = document.getElementById('buy-status-detail');
+            if (explorerLink) {
+              if (explorerUrl) {
+                explorerLink.href = explorerUrl;
+                explorerLink.classList.remove('hidden');
+              } else if (txHash) {
+                // Fallback: build explorer URL from hash and network
+                explorerLink.href = getExplorerUrl(txHash, currentBuyNetwork);
+                explorerLink.classList.remove('hidden');
+              }
+            }
+            if (statusDetail && txHash) {
+              statusDetail.textContent = `Tx: ${txHash.slice(0, 12)}...${txHash.slice(-8)}`;
+            }
+          }
           if (status === 'COMPLETED' || status === 'FAILED' || status === 'CANCELLED') {
             clearInterval(statusPollInterval);
             if (status === 'COMPLETED') {
               showToast('Transaction Completed Successfully!', 'success');
-              setTimeout(() => window.location.reload(), 4000);
+              // Show success modal with transaction details
+              const modalData = {
+                reference: currentTxDetails.reference || data.reference || '',
+                amount: currentTxDetails.amount,
+                destinationAmount: data.destination?.amount || data.destination_amount || currentTxDetails.destinationAmount,
+                bankName: currentTxDetails.bankName,
+                accountNumber: currentTxDetails.accountNumber,
+                accountName: currentTxDetails.accountName,
+                asset: currentTxDetails.asset || currentBuyAsset || currentSellAsset,
+                network: currentTxDetails.network || currentBuyNetwork || currentSellNetwork,
+                walletAddress: currentTxDetails.walletAddress || data.wallet_address || '',
+                explorerUrl: data.explorer_url || '',
+                hash: data.hash || ''
+              };
+              setTimeout(() => {
+                showSuccessModal(type, modalData);
+              }, 1500);
             } else if (status === 'FAILED') {
               showToast('Transaction Failed. Please contact support.', 'error');
             }
           }
         } catch (e) { }
       }, 5000); // Polling every 5 seconds for better responsiveness
+    }
+
+    function getExplorerUrl(hash, network) {
+      const explorers = {
+        'solana': `https://solscan.io/tx/${hash}`,
+        'ethereum': `https://etherscan.io/tx/${hash}`,
+        'bsc': `https://bscscan.com/tx/${hash}`,
+        'polygon': `https://polygonscan.com/tx/${hash}`,
+        'arbitrum': `https://arbiscan.io/tx/${hash}`,
+        'base': `https://basescan.org/tx/${hash}`,
+        'tron': `https://tronscan.org/#/transaction/${hash}`,
+        'bitcoin': `https://mempool.space/tx/${hash}`,
+        'sui': `https://suivision.xyz/txblock/${hash}`
+      };
+      return explorers[network] || '#';
     }
 
     function updateStatusUI(status, type) {
@@ -2000,6 +2178,13 @@
         showToast('Copied to clipboard!', 'success');
         el.parentElement.classList.add('copy-flash');
         setTimeout(() => el.parentElement.classList.remove('copy-flash'), 600);
+      });
+    }
+
+    function copySuccessReference() {
+      const ref = document.getElementById('success-reference').textContent;
+      navigator.clipboard.writeText(ref).then(() => {
+        showToast('Reference copied!', 'success');
       });
     }
 
@@ -2121,6 +2306,15 @@
                     <span class="font-mono text-gray-700 select-all">${tx.reference}</span>
                   </div>
                   ${tx.hash ? `<div class="flex justify-between"><span class="text-gray-500">Hash:</span><span class="font-mono">${tx.hash.slice(0, 8)}...</span></div>` : ''}
+                  ${(tx.explorer_url || tx.hash) && isBuy && tx.status === 'COMPLETED' ? `
+                    <div class="pt-2">
+                      <a href="${tx.explorer_url || getExplorerUrl(tx.hash, tx.meta ? JSON.parse(tx.meta).network || '' : '')}" target="_blank" rel="noopener noreferrer"
+                        class="inline-flex items-center gap-1 text-velcro-navy hover:underline font-medium">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        View on Blockchain
+                      </a>
+                    </div>
+                  ` : ''}
                 </div>
               </div>
             `;
@@ -2136,6 +2330,87 @@
       const modal = document.getElementById('history-modal');
       modal.classList.add('hidden');
       modal.classList.remove('flex');
+    }
+
+    function showSuccessModal(type, data) {
+      const modal = document.getElementById('success-modal');
+      const title = document.getElementById('success-title');
+      const subtitle = document.getElementById('success-subtitle');
+      const amountEl = document.getElementById('success-amount');
+      const destLabel = document.getElementById('success-destination-label');
+      const destEl = document.getElementById('success-destination');
+      const detailLabel = document.getElementById('success-detail-label');
+      const detailEl = document.getElementById('success-detail');
+      const refEl = document.getElementById('success-reference');
+      const explorerLink = document.getElementById('success-explorer-link');
+
+      if (type === 'sell') {
+        title.textContent = 'Payout Successful!';
+        subtitle.textContent = 'Your crypto has been converted and sent to your bank account.';
+        amountEl.textContent = `₦${data.destinationAmount?.toLocaleString() || data.amount?.toLocaleString() || '-'}`;
+        destLabel.textContent = 'Bank';
+        destEl.textContent = data.bankName || '-';
+        detailLabel.textContent = 'Account';
+        detailEl.textContent = `${data.accountNumber || '-'} (${data.accountName || '-'})`;
+        explorerLink.classList.add('hidden');
+      } else {
+        title.textContent = 'Crypto Delivered!';
+        subtitle.textContent = 'Your crypto has been sent to your wallet.';
+        amountEl.textContent = `${data.destinationAmount?.toFixed(4) || data.amount || '-'} ${data.asset || ''}`;
+        destLabel.textContent = 'Network';
+        destEl.textContent = data.network || '-';
+        detailLabel.textContent = 'Wallet';
+        detailEl.textContent = data.walletAddress ? `${data.walletAddress.slice(0, 8)}...${data.walletAddress.slice(-8)}` : '-';
+        
+        // Show blockchain explorer link if available
+        if (data.explorerUrl || data.hash) {
+          explorerLink.href = data.explorerUrl || getExplorerUrl(data.hash, data.network);
+          explorerLink.classList.remove('hidden');
+        } else {
+          explorerLink.classList.add('hidden');
+        }
+      }
+      
+      refEl.textContent = data.reference || '-';
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      safeLucideInit();
+    }
+
+    function hideSuccessModal() {
+      const modal = document.getElementById('success-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // Debug helper — call from browser console to preview success modal
+    // Examples:
+    //   callSuccessModal('sell')   // Preview sell payout modal
+    //   callSuccessModal('buy')    // Preview buy crypto modal
+    function callSuccessModal(type) {
+      if (type === 'sell') {
+        showSuccessModal('sell', {
+          reference: '4cd42f3f-79e7-42be-a686-68822e376f31',
+          amount: 1,
+          destinationAmount: 1520.50,
+          bankName: 'OPay Digital Services Limited',
+          accountNumber: '8107861652',
+          accountName: 'OSHIOKPEKHAI KAMAL SHEHU',
+          asset: 'USDT',
+          network: 'solana'
+        });
+      } else {
+        showSuccessModal('buy', {
+          reference: '7edf115b-e1a1-44a9-9040-4c86e47ced86',
+          amount: 1542.41,
+          destinationAmount: 1.0025,
+          asset: 'USDC',
+          network: 'solana',
+          walletAddress: 'HFempdvGXbFDgoViVZ4X97H2tcLjDsekmvpD99M3MAbD',
+          explorerUrl: 'https://solscan.io/tx/5UfgJ5p5s8Lr5z9qQ3w7vT2y1x4a8b6c3d9e7f0g2h4i6j8k0l2m4n6o8p0q2r4s6t8u0v2w4x6y8z0a2b4c6d8e0f2',
+          hash: '5UfgJ5p5s8Lr5z9qQ3w7vT2y1x4a8b6c3d9e7f0g2h4i6j8k0l2m4n6o8p0q2r4s6t8u0v2w4x6y8z0a2b4c6d8e0f2'
+        });
+      }
     }
 
   </script>

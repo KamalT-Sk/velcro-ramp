@@ -19,44 +19,23 @@ const DEVELOPER_RECIPIENT = process.env.DEVELOPER_RECIPIENT || '8hM6fCeFrBZAenN8
 const DEVELOPER_WITHDRAW_ASSET = process.env.DEVELOPER_WITHDRAW_ASSET || 'solana:usdc';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'velcroadmin2026';
 
-// ─── Auto-Withdrawal Logic ───
+// ─── Auto-Withdrawal Logic (DISABLED - crashes server due to MongoDB timeout) ───
+// Use /api/admin/withdraw endpoint manually instead
 async function autoWithdrawFees() {
   if (!DEVELOPER_RECIPIENT || DEVELOPER_RECIPIENT === 'your_actual_wallet_address') return;
-  
   try {
     console.log('🔄 Checking accumulated developer fees...');
     const feesData = await switchApi('/developer/fees');
-    
-    if (feesData.success && feesData.data && feesData.data.amount > 1) { // Withdraw if > $1
-      console.log(`💰 Found $${feesData.data.amount} in fees. Initiating withdrawal to ${DEVELOPER_RECIPIENT}...`);
-      
-      const withdrawData = await switchApi('/developer/withdraw', {
-        method: 'POST',
-        body: JSON.stringify({
-          asset: DEVELOPER_WITHDRAW_ASSET,
-          beneficiary: {
-            wallet_address: DEVELOPER_RECIPIENT
-          }
-        })
-      });
-      
-      if (withdrawData.success) {
-        console.log(`✅ Fee withdrawal initiated! Hash: ${withdrawData.data?.hash}`);
-      } else {
-        console.error(`❌ Fee withdrawal failed: ${withdrawData.message}`);
-      }
-    } else {
-      console.log('ℹ️ Fee balance too low or not fetched.');
+    if (feesData.success && feesData.data && feesData.data.amount > 1) {
+      console.log(`💰 Found $${feesData.data.amount} in fees. Use /api/admin/withdraw to withdraw manually.`);
     }
   } catch (err) {
-    console.error('❌ Error in auto-withdrawal:', err.message);
+    console.log('ℹ️ Fee check skipped:', err.message);
   }
 }
-
-// Run withdrawal check every hour
-setInterval(autoWithdrawFees, 60 * 60 * 1000);
-// Run once on startup after 30 seconds
-setTimeout(autoWithdrawFees, 30 * 1000);
+// Auto-withdrawal disabled to prevent server crashes. Manual withdrawal via admin dashboard.
+// setInterval(autoWithdrawFees, 60 * 60 * 1000);
+// setTimeout(autoWithdrawFees, 30 * 1000);
 
 // ─── MongoDB Schema ───
 const transactionSchema = new mongoose.Schema({
@@ -121,7 +100,8 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // ─── Switch API Client ───
-async function switchApi(endpoint, options = {}) {
+// ─── Switch API Client with Retry ───
+async function switchApi(endpoint, options = {}, retries = 2) {
   const url = `${SWITCH_BASE_URL}${endpoint}`;
   const headers = {
     'Content-Type': 'application/json',
@@ -130,22 +110,31 @@ async function switchApi(endpoint, options = {}) {
     ...(options.headers || {}),
   };
 
-  const res = await fetch(url, {
-    ...options,
-    headers,
-  });
+  let lastErr;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(url, { ...options, headers });
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = { raw: text }; }
 
-  const text = await res.text();
-  let data;
-  try { data = JSON.parse(text); } catch { data = { raw: text }; }
-
-  if (!res.ok) {
-    const err = new Error(data.message || `Switch API error: ${res.status}`);
-    err.status = res.status;
-    err.data = data;
-    throw err;
+      if (!res.ok) {
+        const err = new Error(data.message || `Switch API error: ${res.status}`);
+        err.status = res.status;
+        err.data = data;
+        throw err;
+      }
+      return data;
+    } catch (err) {
+      lastErr = err;
+      const isRetryable = !err.status || err.status >= 500 || err.message.includes('fetch failed') || err.message.includes('EAI_AGAIN');
+      if (!isRetryable || attempt >= retries) break;
+      const delay = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
+      console.log(`[Retry ${attempt + 1}/${retries}] ${endpoint} — waiting ${delay}ms...`);
+      await new Promise(r => setTimeout(r, delay));
+    }
   }
-  return data;
+  throw lastErr;
 }
 
 // ─── Helpers ───
