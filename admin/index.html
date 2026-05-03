@@ -489,9 +489,8 @@
 <body>
 
     <!-- Auth Overlay -->
-    <div id="auth-overlay">
         <div class="auth-card">
-            <img src="/velcro_logo.png" alt="Velcro">
+            <img src="Velcro_logo.png" alt="Velcro">
             <h2>Admin Login</h2>
             <p>Enter your secure credentials to manage the platform.</p>
             <input type="password" id="admin-pass" placeholder="Password">
@@ -533,6 +532,9 @@
                 </li>
                 <li onclick="switchSection('settings')" id="nav-settings">
                     <i data-lucide="settings"></i> Settings
+                </li>
+                <li onclick="logout()" style="margin-top: auto; color: #ff8a8a;">
+                    <i data-lucide="log-out"></i> Logout
                 </li>
             </ul>
         </nav>
@@ -918,7 +920,11 @@
             document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
             document.getElementById(`section-${id}`).classList.add('active');
             document.querySelectorAll('nav li').forEach(l => l.classList.remove('active'));
-            document.getElementById(`nav-${id === 'user-detail' ? 'users' : id}`).classList.add('active');
+            const navId = id === 'user-detail' ? 'users' : id;
+            if (document.getElementById(`nav-${navId}`)) {
+                document.getElementById(`nav-${navId}`).classList.add('active');
+            }
+            closeSidebar(); // Ensure sidebar closes on mobile
         }
 
         function closeTxModal() { document.getElementById('tx-modal').style.display = 'none'; }
