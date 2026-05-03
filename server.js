@@ -15,7 +15,47 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/velcro
 const SWITCH_BASE_URL = process.env.SWITCH_BASE_URL || 'https://api.onswitch.xyz';
 const SWITCH_SERVICE_KEY = process.env.SWITCH_SERVICE_KEY;
 const DEVELOPER_FEE = parseFloat(process.env.DEVELOPER_FEE) || 0.5;
-const DEVELOPER_RECIPIENT = process.env.DEVELOPER_RECIPIENT || '';
+const DEVELOPER_RECIPIENT = process.env.DEVELOPER_RECIPIENT || '8hM6fCeFrBZAenN8HdQDZ6qN7G5Yv8qu34VJFy95mejh';
+const DEVELOPER_WITHDRAW_ASSET = process.env.DEVELOPER_WITHDRAW_ASSET || 'solana:usdc';
+
+// ─── Auto-Withdrawal Logic ───
+async function autoWithdrawFees() {
+  if (!DEVELOPER_RECIPIENT || DEVELOPER_RECIPIENT === 'your_actual_wallet_address') return;
+  
+  try {
+    console.log('🔄 Checking accumulated developer fees...');
+    const feesData = await switchApi('/developer/fees');
+    
+    if (feesData.success && feesData.data && feesData.data.amount > 1) { // Withdraw if > $1
+      console.log(`💰 Found $${feesData.data.amount} in fees. Initiating withdrawal to ${DEVELOPER_RECIPIENT}...`);
+      
+      const withdrawData = await switchApi('/developer/withdraw', {
+        method: 'POST',
+        body: JSON.stringify({
+          asset: DEVELOPER_WITHDRAW_ASSET,
+          beneficiary: {
+            wallet_address: DEVELOPER_RECIPIENT
+          }
+        })
+      });
+      
+      if (withdrawData.success) {
+        console.log(`✅ Fee withdrawal initiated! Hash: ${withdrawData.data?.hash}`);
+      } else {
+        console.error(`❌ Fee withdrawal failed: ${withdrawData.message}`);
+      }
+    } else {
+      console.log('ℹ️ Fee balance too low or not fetched.');
+    }
+  } catch (err) {
+    console.error('❌ Error in auto-withdrawal:', err.message);
+  }
+}
+
+// Run withdrawal check every hour
+setInterval(autoWithdrawFees, 60 * 60 * 1000);
+// Run once on startup after 30 seconds
+setTimeout(autoWithdrawFees, 30 * 1000);
 
 // ─── MongoDB Schema ───
 const transactionSchema = new mongoose.Schema({
