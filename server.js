@@ -17,6 +17,7 @@ const SWITCH_SERVICE_KEY = process.env.SWITCH_SERVICE_KEY;
 const DEVELOPER_FEE = parseFloat(process.env.DEVELOPER_FEE) || 0.5;
 const DEVELOPER_RECIPIENT = process.env.DEVELOPER_RECIPIENT || '8hM6fCeFrBZAenN8HdQDZ6qN7G5Yv8qu34VJFy95mejh';
 const DEVELOPER_WITHDRAW_ASSET = process.env.DEVELOPER_WITHDRAW_ASSET || 'solana:usdc';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'velcroadmin2026';
 
 // ─── Auto-Withdrawal Logic ───
 async function autoWithdrawFees() {
@@ -442,10 +443,104 @@ app.post('/webhook/switch', express.json(), async (req, res) => {
   }
 });
 
+// ─── Admin Endpoints ───
+const adminAuth = (req, res, next) => {
+  const auth = req.headers.authorization;
+  if (auth && (auth === `Bearer ${ADMIN_PASSWORD}` || auth === ADMIN_PASSWORD)) {
+    return next();
+  }
+  res.status(401).json({ error: 'Unauthorized' });
+};
+
+app.get('/api/admin/stats', adminAuth, async (req, res) => {
+  try {
+    const allTxs = await Transaction.find({});
+    const totalUsers = new Set(allTxs.map(t => t.wallet_address).filter(Boolean)).size;
+    const completedTxs = allTxs.filter(t => t.status === 'COMPLETED');
+    
+    const volumeUSD = completedTxs.reduce((sum, t) => sum + (t.type === 'OFFRAMP' ? t.amount : (t.destination_amount || 0)), 0);
+    const volumeNGN = completedTxs.reduce((sum, t) => sum + (t.type === 'ONRAMP' ? t.amount : (t.destination_amount || 0)), 0);
+
+    // Get current balance from Switch
+    const feesData = await switchApi('/developer/fees').catch(() => ({ data: { amount: 0 } }));
+
+    res.json({
+      totalUsers,
+      allTransactions: allTxs.length,
+      completedTransactions: completedTxs.length,
+      totalVolumeUSD: volumeUSD,
+      totalVolumeNGN: volumeNGN,
+      developerFees: feesData.data || { amount: 0, currency: 'USD' }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/admin/transactions', adminAuth, async (req, res) => {
+  const rows = await Transaction.find({}).sort({ created_at: -1 }).limit(200);
+  res.json(rows);
+});
+
+app.get('/api/admin/users', adminAuth, async (req, res) => {
+  const txs = await Transaction.find({});
+  const userMap = {};
+  
+  txs.forEach(t => {
+    const id = t.wallet_address || 'unknown';
+    if (!userMap[id]) {
+      userMap[id] = { id, total_volume: 0, total_volume_ngn: 0, tx_count: 0, created_at: t.created_at };
+    }
+    if (t.status === 'COMPLETED') {
+      userMap[id].total_volume += (t.type === 'OFFRAMP' ? t.amount : (t.destination_amount || 0));
+      userMap[id].total_volume_ngn += (t.type === 'ONRAMP' ? t.amount : (t.destination_amount || 0));
+    }
+    userMap[id].tx_count++;
+    if (t.created_at < userMap[id].created_at) userMap[id].created_at = t.created_at;
+  });
+
+  const users = Object.values(userMap).sort((a, b) => b.total_volume - a.total_volume);
+  res.json(users);
+});
+
+app.post('/api/admin/withdraw', adminAuth, async (req, res) => {
+  try {
+    const { asset } = req.body;
+    const data = await switchApi('/developer/withdraw', {
+      method: 'POST',
+      body: JSON.stringify({
+        asset: asset || DEVELOPER_WITHDRAW_ASSET,
+        beneficiary: { wallet_address: DEVELOPER_RECIPIENT }
+      })
+    });
+    if (data.success) {
+      res.json({ success: true, data: data.data });
+    } else {
+      res.status(400).json({ success: false, error: data.message });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/admin/settings', adminAuth, async (req, res) => {
+  res.json({ platform_fee: DEVELOPER_FEE });
+});
+
+// ─── Static Files ───
+const adminPath = path.join(__dirname, 'admin');
+if (fs.existsSync(adminPath)) {
+  app.use('/admin', express.static(adminPath));
+}
+
 const staticPath = path.join(__dirname, 'public');
 if (fs.existsSync(staticPath)) {
   app.use(express.static(staticPath));
   app.get('*', (req, res) => {
+    // If it starts with /admin, don't redirect to public index
+    if (req.path.startsWith('/admin')) {
+      return res.sendFile(path.join(adminPath, 'index.html'));
+    }
     res.sendFile(path.join(staticPath, 'index.html'));
   });
 }

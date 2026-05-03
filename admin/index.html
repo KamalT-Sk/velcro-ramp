@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Velcro Private Admin | Insights</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-bg: #0D0D59;
+            --sidebar-hover: #1a1a7a;
+            --bg-light: #f4f7fe;
+            --card-bg: #ffffff;
+            --text-main: #2b3674;
+            --text-secondary: #a3aed0;
+            --accent: #4318ff;
+            --success: #A8CF45;
+            --pending: #ffb547;
+            --failed: #ee5d50;
+            --border: #e9edf7;
+            --velcro-green: #A8CF45;
+            --velcro-navy: #0D0D59;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Login Screen --- */
+        #auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: 0.5s ease;
+        }
+
+        .auth-card {
+            background: var(--card-bg);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        .auth-card img {
+            width: 120px;
+            margin-bottom: 30px;
+        }
+
+        .auth-card h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .auth-card p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--sidebar-bg);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--sidebar-bg);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(13, 13, 89, 0.3);
+        }
+
+        /* --- Main Layout --- */
+        aside {
+            width: 290px;
+            background: var(--sidebar-bg);
+            padding: 40px 20px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 1001;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 60px;
+            padding-left: 15px;
+        }
+
+        .mobile-header {
+            display: none;
+            background: var(--sidebar-bg);
+            color: white;
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        nav ul {
+            list-style: none;
+        }
+
+        nav li {
+            padding: 15px 18px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            transition: 0.3s;
+        }
+
+        nav li i {
+            width: 20px;
+            height: 20px;
+        }
+
+        nav li:hover {
+            color: white;
+            background: var(--sidebar-hover);
+        }
+
+        nav li.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        main {
+            flex-grow: 1;
+            margin-left: 290px;
+            padding: 40px;
+            position: relative;
+        }
+
+        .view-content {
+            display: none;
+        }
+
+        .view-content.active {
+            display: block;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .header-title h1 {
+            font-size: 34px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .header-title p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .refresh-btn {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            color: var(--text-main);
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .refresh-btn:hover {
+            background: var(--bg-light);
+        }
+
+        .refresh-btn.spinning i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* --- Stats Cards --- */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: #f4f7fe;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--sidebar-bg);
+            flex-shrink: 0;
+        }
+
+        .stat-info h4 {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+
+        .stat-info span {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        /* --- Tables --- */
+        .table-card {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            padding: 30px;
+            animation: fadeIn 0.4s ease;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+
+        th {
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            padding: 0 10px 15px 10px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 18px 10px;
+            border-bottom: 1px solid #f8f9fc;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--bg-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--sidebar-bg);
+            font-weight: 700;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .status-pill {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .completed {
+            background: rgba(168, 207, 69, 0.1);
+            color: #8bab2f;
+        }
+
+        .pending {
+            background: rgba(255, 181, 71, 0.1);
+            color: var(--pending);
+        }
+
+        .failed, .expired, .cancelled {
+            background: rgba(238, 93, 80, 0.1);
+            color: var(--failed);
+        }
+
+        .awaiting_deposit, .processing, .received, .verified {
+            background: rgba(13, 13, 89, 0.1);
+            color: var(--velcro-navy);
+        }
+
+        .btn-view {
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: white;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+
+        .btn-view:hover {
+            background: var(--bg-light);
+            border-color: var(--sidebar-bg);
+        }
+
+        /* --- User Detail Section --- */
+        .user-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .user-profile-lg {
+            width: 80px;
+            height: 80px;
+            background: var(--bg-light);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: var(--sidebar-bg);
+        }
+
+        .user-details-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .detail-mini-card {
+            background: #f8f9fc;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .detail-mini-card b {
+            display: block;
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .detail-mini-card span {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        /* --- Hidden Utils --- */
+        .hidden { display: none !important; }
+
+        /* --- Responsive: Tablet & Mobile --- */
+        @media (max-width: 1024px) {
+            aside { transform: translateX(-100%); z-index: 2000; }
+            aside.active { transform: translateX(0); box-shadow: 5px 0 25px rgba(0,0,0,0.2); }
+            main { margin-left: 0; padding: 20px 16px; }
+            .mobile-header { display: flex; }
+            .stats-row { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .stat-card { padding: 16px; }
+            .stat-info span { font-size: 20px; }
+            .header-title h1 { font-size: 22px; }
+            .table-card { padding: 16px; }
+            .user-details-stats { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 480px) {
+            .stats-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .stat-card { padding: 14px; gap: 10px; }
+            .stat-icon { width: 40px; height: 40px; }
+            .stat-info h4 { font-size: 11px; }
+            .stat-info span { font-size: 16px; }
+            .auth-card { padding: 30px 20px; margin: 0 16px; }
+            .user-details-stats { grid-template-columns: 1fr 1fr; }
+            header { margin-bottom: 20px; }
+            .header-title h1 { font-size: 20px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Auth Overlay -->
+    <div id="auth-overlay">
+        <div class="auth-card">
+            <img src="/velcro_logo.png" alt="Velcro">
+            <h2>Admin Login</h2>
+            <p>Enter your secure credentials to manage the platform.</p>
+            <input type="password" id="admin-pass" placeholder="Password">
+            <button class="btn-primary" onclick="authenticate()">Sign In</button>
+            <p id="auth-error" style="color: var(--failed); margin-top: 15px; display: none;">Invalid credentials. Try again.</p>
+        </div>
+    </div>
+
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <div class="logo-box" style="margin-bottom: 0; padding-left: 0;">
+            <i data-lucide="zap"></i>
+            <span style="font-size: 18px;">Velcro</span>
+        </div>
+        <button class="hamburger" onclick="toggleSidebar()">
+            <i data-lucide="menu"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside id="main-sidebar">
+        <div class="logo-box">
+            <i data-lucide="shield"></i>
+            <span>Velcro Admin</span>
+        </div>
+        <nav>
+            <ul>
+                <li onclick="switchSection('dashboard')" id="nav-dashboard" class="active">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </li>
+                <li onclick="switchSection('users')" id="nav-users">
+                    <i data-lucide="wallet"></i> Wallets
+                </li>
+                <li onclick="switchSection('transactions')" id="nav-transactions">
+                    <i data-lucide="refresh-ccw"></i> Transactions
+                </li>
+                <li onclick="switchSection('settings')" id="nav-settings">
+                    <i data-lucide="settings"></i> Settings
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main>
+        <!-- Dashboard Content -->
+        <div id="section-dashboard" class="view-content active">
+            <header>
+                <div class="header-title">
+                    <h1>Main Dashboard</h1>
+                    <p>Ecosystem overview and live stats.</p>
+                </div>
+                <div class="header-actions">
+                    <button class="refresh-btn" onclick="fetchData()"><i data-lucide="rotate-cw"></i></button>
+                </div>
+            </header>
+
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-icon"><i data-lucide="users"></i></div>
+                    <div class="stat-info">
+                        <h4>Active Wallets</h4>
+                        <span id="stat-total-users">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i data-lucide="bar-chart-3"></i></div>
+                    <div class="stat-info">
+                        <h4>Total Volume</h4>
+                        <span id="stat-total-volume" style="font-size: 14px;">$0 | ₦0</span>
+                    </div>
+                </div>
+                <div class="stat-card" style="position: relative;">
+                    <div class="stat-icon"><i data-lucide="dollar-sign"></i></div>
+                    <div class="stat-info">
+                        <h4>Accumulated Fees</h4>
+                        <span id="stat-total-earned" style="font-size: 14px;">$0.00 USDC</span>
+                        <div style="font-size: 10px; color: var(--text-secondary); margin-top: 4px;">Ready for Withdrawal</div>
+                        <button id="btn-withdraw-fees" onclick="withdrawFees()" title="Withdraw all fees to Solana wallet" 
+                            style="margin-top: 8px; background: linear-gradient(135deg, #9945FF, #14F195); color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 5px;">
+                            💸 Withdraw to Solana
+                        </button>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i data-lucide="refresh-ccw"></i></div>
+                    <div class="stat-info">
+                        <h4>Total TXs</h4>
+                        <span id="stat-total-txs">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <h3 style="margin-bottom: 20px;">Recent Platform Activity</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Wallet</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tx-summary-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Transactions Content -->
+        <div id="section-transactions" class="view-content">
+            <header>
+                <div class="header-title">
+                    <h1>Transaction History</h1>
+                    <p>Complete record of all platform trades.</p>
+                </div>
+                <div class="header-actions">
+                    <button class="refresh-btn" onclick="fetchData()"><i data-lucide="rotate-cw"></i></button>
+                </div>
+            </header>
+
+            <div class="table-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Wallet</th>
+                            <th class="hide-mobile">Reference</th>
+                            <th class="hide-mobile">Type</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th class="hide-mobile">Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="all-tx-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Users Content -->
+        <div id="section-users" class="view-content">
+            <header>
+                <div class="header-title">
+                    <h1>Wallet Directory</h1>
+                    <p id="user-count-label">0 wallets found.</p>
+                </div>
+            </header>
+
+            <div class="table-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Wallet Address</th>
+                            <th>First Seen</th>
+                            <th>Total Volume</th>
+                            <th>TXs</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- User Detail Section -->
+        <div id="section-user-detail" class="view-content">
+            <header>
+                <div class="header-title">
+                    <button class="btn-view" onclick="switchSection('users')" style="margin-bottom: 15px;">
+                        <i data-lucide="arrow-left" style="width: 14px; height: 14px;"></i> Back to list
+                    </button>
+                    <h1>Wallet Insights</h1>
+                </div>
+            </header>
+
+            <div class="user-header">
+                <div class="user-profile-lg"><i data-lucide="wallet"></i></div>
+                <div>
+                    <h2 id="detail-username" style="font-size: 18px; word-break: break-all;">-</h2>
+                    <p style="color: var(--text-secondary);">Active Participant</p>
+                </div>
+            </div>
+
+            <div class="user-details-stats">
+                <div class="detail-mini-card">
+                    <b id="detail-vol" style="color: var(--sidebar-bg);">$0</b>
+                    <span>Total Volume</span>
+                </div>
+                <div class="detail-mini-card">
+                    <b id="detail-success" style="color: var(--velcro-green)">0</b>
+                    <span>Successful Trades</span>
+                </div>
+                <div id="detail-tx-count-box" class="detail-mini-card">
+                    <b id="detail-tx-count">0</b>
+                    <span>Total Attempts</span>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <h3>Wallet Activity</h3>
+                <table style="margin-top: 20px;">
+                    <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detail-tx-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Settings Content -->
+        <div id="section-settings" class="view-content">
+            <header>
+                <div class="header-title">
+                    <h1>Settings</h1>
+                    <p>Adjust platform variables.</p>
+                </div>
+            </header>
+
+            <div class="table-card" style="max-width: 500px;">
+                <label style="font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 8px; display: block;">DEVELOPER FEE (%)</label>
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <input type="number" id="fee-input" placeholder="e.g. 0.5" style="margin-bottom: 0;" disabled>
+                    <button class="refresh-btn" onclick="fetchData()" title="Refresh Settings" style="height: 50px; width: 50px; flex-shrink: 0;"><i data-lucide="rotate-cw"></i></button>
+                </div>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 20px;">Note: Fee percentage is currently managed via .env for security.</p>
+                <button class="btn-primary" onclick="alert('Update DEVELOPER_FEE in your .env file to change this.')">Save Configuration</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Transaction Detail Modal -->
+    <div id="tx-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center;">
+        <div style="background: white; width: 500px; max-width: 90%; padding: 30px; border-radius: 20px; position: relative;">
+            <button onclick="closeTxModal()" style="position: absolute; top: 20px; right: 20px; background: none; border: none; cursor: pointer;"><i data-lucide="x"></i></button>
+            <h2 style="margin-bottom: 5px;">Transaction Details</h2>
+            <div style="background: var(--bg-light); padding: 15px; border-radius: 12px; margin: 20px 0;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="color: var(--text-secondary); font-size: 13px;">Status</span>
+                    <span id="modal-status" class="status-pill">PENDING</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="color: var(--text-secondary); font-size: 13px;">Amount</span>
+                    <b id="modal-amount" style="font-size: 16px;">$0</b>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-secondary); font-size: 13px;">Type</span>
+                    <b id="modal-type">ONRAMP</b>
+                </div>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px;">REFERENCE</label>
+                <code id="modal-ref" style="background: #f1f5f9; padding: 8px; border-radius: 6px; display: block; font-size: 13px;">-</code>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px;">TX HASH</label>
+                <a id="modal-hash-link" href="#" target="_blank" style="color: var(--sidebar-bg); font-size: 12px; word-break: break-all;">-</a>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px;">DATE</label>
+                    <div id="modal-date" style="font-size: 13px;">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let adminKey = localStorage.getItem('velcro_admin_key') || '';
+        let currentTxs = [];
+
+        function authenticate() {
+            const pass = document.getElementById('admin-pass').value;
+            fetch('/api/admin/stats', { headers: { 'Authorization': pass } })
+                .then(res => {
+                    if (res.ok) {
+                        adminKey = pass;
+                        localStorage.setItem('velcro_admin_key', adminKey);
+                        document.getElementById('auth-overlay').style.display = 'none';
+                        fetchData();
+                    } else {
+                        document.getElementById('auth-error').style.display = 'block';
+                    }
+                });
+        }
+
+        async function fetchData() {
+            const btn = document.querySelector('.refresh-btn');
+            btn.classList.add('spinning');
+            const headers = { 'Authorization': adminKey };
+
+            try {
+                // 1. Stats
+                const statsRes = await fetch('/api/admin/stats', { headers });
+                const stats = await statsRes.json();
+                document.getElementById('stat-total-users').innerText = stats.totalUsers;
+                document.getElementById('stat-total-txs').innerText = stats.allTransactions;
+                document.getElementById('stat-total-volume').innerText = `$${Number(stats.totalVolumeUSD).toLocaleString(undefined, {maximumFractionDigits: 0})} | ₦${Number(stats.totalVolumeNGN).toLocaleString(undefined, {maximumFractionDigits: 0})}`;
+                document.getElementById('stat-total-earned').innerText = `${Number(stats.developerFees.amount).toFixed(2)} ${stats.developerFees.currency || 'USDC'}`;
+
+                // 2. Transactions
+                const txRes = await fetch('/api/admin/transactions', { headers });
+                currentTxs = await txRes.json();
+                renderTransactions(currentTxs);
+
+                // 3. Users (Wallets)
+                const userRes = await fetch('/api/admin/users', { headers });
+                const users = await userRes.json();
+                renderUsers(users);
+
+                // 4. Settings
+                const settingsRes = await fetch('/api/admin/settings', { headers });
+                const settings = await settingsRes.json();
+                document.getElementById('fee-input').value = settings.platform_fee;
+
+                lucide.createIcons();
+            } catch (e) {
+                console.error(e);
+                if (e.message.includes('401')) logout();
+            } finally {
+                btn.classList.remove('spinning');
+            }
+        }
+
+        function renderTransactions(txs) {
+            const summaryBody = document.getElementById('tx-summary-body');
+            const allBody = document.getElementById('all-tx-body');
+            
+            const rowsHtml = txs.map(tx => `
+                <tr>
+                    <td><div class="user-cell"><div class="avatar">${tx.wallet_address?.slice(-4) || '??'}</div><b style="font-size: 11px;">${tx.wallet_address?.slice(0, 8)}...</b></div></td>
+                    <td class="hide-mobile"><b>${tx.type}</b></td>
+                    <td><b>${(tx.type === 'ONRAMP' ? '₦' : '$')}${Number(tx.amount).toLocaleString()}</b></td>
+                    <td><span class="status-pill ${tx.status.toLowerCase()}">${tx.status}</span></td>
+                    <td>${new Date(tx.created_at).toLocaleDateString()}</td>
+                    <td class="hide-mobile">${tx.reference.slice(0, 10)}...</td>
+                    <td><button class="btn-view" onclick="viewTransaction('${tx.reference}')">Details</button></td>
+                </tr>
+            `);
+
+            summaryBody.innerHTML = rowsHtml.slice(0, 8).join('');
+            allBody.innerHTML = rowsHtml.join('');
+        }
+
+        function renderUsers(users) {
+            document.getElementById('user-count-label').innerText = `${users.length} wallets found.`;
+            const body = document.getElementById('user-body');
+            body.innerHTML = users.map(u => `
+                <tr>
+                    <td><b style="font-size: 12px;">${u.id}</b></td>
+                    <td>${new Date(u.created_at).toLocaleDateString()}</td>
+                    <td><b>$${Number(u.total_volume).toLocaleString()}</b></td>
+                    <td>${u.tx_count}</td>
+                    <td><button class="btn-view" onclick="viewWalletDetails('${u.id}')">View</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function viewTransaction(ref) {
+            const tx = currentTxs.find(t => t.reference === ref);
+            if (!tx) return;
+            document.getElementById('modal-ref').innerText = tx.reference;
+            document.getElementById('modal-status').innerText = tx.status;
+            document.getElementById('modal-status').className = `status-pill ${tx.status.toLowerCase()}`;
+            document.getElementById('modal-amount').innerText = `${(tx.type === 'ONRAMP' ? '₦' : '$')}${Number(tx.amount).toLocaleString()}`;
+            document.getElementById('modal-type').innerText = tx.type;
+            document.getElementById('modal-hash-link').innerText = tx.hash || 'No hash available';
+            document.getElementById('modal-hash-link').href = tx.explorer_url || '#';
+            document.getElementById('modal-date').innerText = new Date(tx.created_at).toLocaleString();
+            document.getElementById('tx-modal').style.display = 'flex';
+            lucide.createIcons();
+        }
+
+        async function viewWalletDetails(wallet) {
+            const userTxs = currentTxs.filter(t => t.wallet_address === wallet);
+            const totalVol = userTxs.reduce((s, t) => s + (t.status === 'COMPLETED' ? (t.type === 'OFFRAMP' ? t.amount : (t.destination_amount || 0)) : 0), 0);
+            
+            document.getElementById('detail-username').innerText = wallet;
+            document.getElementById('detail-vol').innerText = `$${totalVol.toLocaleString()}`;
+            document.getElementById('detail-success').innerText = userTxs.filter(t => t.status === 'COMPLETED').length;
+            document.getElementById('detail-tx-count').innerText = userTxs.length;
+
+            document.getElementById('detail-tx-body').innerHTML = userTxs.map(tx => `
+                <tr>
+                    <td><code>${tx.reference.slice(0, 8)}...</code></td>
+                    <td><b>${tx.type}</b></td>
+                    <td>${(tx.type === 'ONRAMP' ? '₦' : '$')}${Number(tx.amount).toLocaleString()}</td>
+                    <td><span class="status-pill ${tx.status.toLowerCase()}">${tx.status}</span></td>
+                    <td>${new Date(tx.created_at).toLocaleDateString()}</td>
+                </tr>
+            `).join('');
+
+            switchSection('user-detail');
+        }
+
+        async function withdrawFees() {
+            if (!confirm('Initiate withdrawal of all fees to your Solana wallet?')) return;
+            const btn = document.getElementById('btn-withdraw-fees');
+            btn.innerText = '⌛ Processing...';
+            const res = await fetch('/api/admin/withdraw', { 
+                method: 'POST', 
+                headers: { 'Authorization': adminKey, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ asset: 'solana:usdc' })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(`Success! Withdrawal initiated.\nHash: ${data.data.hash}`);
+                fetchData();
+            } else {
+                alert(`Error: ${data.error}`);
+                btn.innerText = '💸 Withdraw to Solana';
+            }
+        }
+
+        function switchSection(id) {
+            document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+            document.getElementById(`section-${id}`).classList.add('active');
+            document.querySelectorAll('nav li').forEach(l => l.classList.remove('active'));
+            document.getElementById(`nav-${id === 'user-detail' ? 'users' : id}`).classList.add('active');
+        }
+
+        function closeTxModal() { document.getElementById('tx-modal').style.display = 'none'; }
+        function toggleSidebar() { document.getElementById('main-sidebar').classList.toggle('active'); }
+        function closeSidebar() { document.getElementById('main-sidebar').classList.remove('active'); }
+        function logout() { localStorage.removeItem('velcro_admin_key'); location.reload(); }
+
+        window.onload = () => {
+            if (adminKey) {
+                document.getElementById('auth-overlay').style.display = 'none';
+                fetchData();
+                setInterval(fetchData, 60000);
+            }
+        };
+    </script>
+</body>
+</html>
