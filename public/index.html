@@ -447,8 +447,8 @@
       <div
         class="bg-white rounded-3xl card-shadow p-6 lg:p-8 border border-gray-200 hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-500">
 
-        <!-- Country Selector -->
-        <div class="mb-4 flex justify-end">
+        <!-- Country Selector (Hidden as only Nigeria is supported) -->
+        <div class="mb-4 hidden justify-end">
           <div class="custom-select" id="country-wrap">
             <div
               class="custom-select-trigger bg-white hover:bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 flex items-center gap-2 transition-colors text-sm shadow-sm"
@@ -461,14 +461,6 @@
               <div class="custom-option selected" onclick="selectCountry('NG', 'NGN', 'Nigeria', '/flags/ng.png')">
                 <img src="/flags/ng.png" class="w-6 h-auto rounded shadow-sm" alt="NG"> <span
                   class="font-medium">Nigeria</span>
-              </div>
-              <div class="custom-option" onclick="selectCountry('GH', 'GHS', 'Ghana', '/flags/gh.png')">
-                <img src="/flags/gh.png" class="w-6 h-auto rounded shadow-sm" alt="GH"> <span
-                  class="font-medium">Ghana</span>
-              </div>
-              <div class="custom-option" onclick="selectCountry('KE', 'KES', 'Kenya', '/flags/ke.png')">
-                <img src="/flags/ke.png" class="w-6 h-auto rounded shadow-sm" alt="KE"> <span
-                  class="font-medium">Kenya</span>
               </div>
             </div>
           </div>
@@ -1255,7 +1247,7 @@
     }
 
     function formatCurrency(value) {
-      const symbol = currentCurrency === 'NGN' ? '₦' : currentCurrency === 'GHS' ? '₵' : 'KSh';
+      const symbol = '₦';
       return symbol + Number(value).toLocaleString();
     }
 
@@ -1296,7 +1288,7 @@
           asset: currentSwitchAsset,
           country: currentCountry,
           currency: currentCurrency,
-          channel: (currentCountry === 'GH' || currentCountry === 'KE') ? 'MOBILEMONEY' : 'BANK'
+          channel: 'BANK'
         };
         const res = await fetch(`${API_BASE}/api/rate`, {
           method: 'POST',
@@ -1351,7 +1343,7 @@
     }
 
     function updateCurrencySymbols() {
-      const symbol = currentCurrency === 'NGN' ? '&#8358;' : currentCurrency === 'GHS' ? 'GH&#8373;' : 'KSh';
+      const symbol = '&#8358;';
       const sellReceiveCurrency = document.getElementById('sell-receive-currency');
       const buySendCurrency = document.getElementById('buy-send-currency');
       const buyConfirmSymbol = document.getElementById('buy-confirm-currency-symbol');
@@ -1359,14 +1351,14 @@
       const buySendCode = document.getElementById('buy-send-currency-code');
       const sellReceiveFlag = document.getElementById('sell-receive-flag');
       const buySendFlag = document.getElementById('buy-send-flag');
-      const flagMap = { 'NGN': '/flags/ng.png', 'GHS': '/flags/gh.png', 'KES': '/flags/ke.png' };
+      const flagMap = { 'NGN': '/flags/ng.png' };
       if (sellReceiveCurrency) sellReceiveCurrency.innerHTML = symbol;
       if (buySendCurrency) buySendCurrency.innerHTML = symbol;
       if (buyConfirmSymbol) buyConfirmSymbol.innerHTML = symbol;
-      if (sellReceiveCode) sellReceiveCode.textContent = currentCurrency;
-      if (buySendCode) buySendCode.textContent = currentCurrency;
-      if (sellReceiveFlag) sellReceiveFlag.src = flagMap[currentCurrency] || '';
-      if (buySendFlag) buySendFlag.src = flagMap[currentCurrency] || '';
+      if (sellReceiveCode) sellReceiveCode.textContent = 'NGN';
+      if (buySendCode) buySendCode.textContent = 'NGN';
+      if (sellReceiveFlag) sellReceiveFlag.src = flagMap['NGN'];
+      if (buySendFlag) buySendFlag.src = flagMap['NGN'];
     }
 
     async function fetchRequirements() {

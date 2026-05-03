@@ -189,12 +189,6 @@ app.get('/api/requirements', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-app.get('/api/rates', async (req, res, next) => {
-  try {
-    const data = await switchApi('/rates', 'GET');
-    res.json(data);
-  } catch (err) { next(err); }
-});
 
 app.post('/api/rate', async (req, res, next) => {
   try {
@@ -430,7 +424,7 @@ app.listen(PORT, () => {
   console.log(`\n🚀 Velcro Backend v1.2.0 running at: http://localhost:${PORT}`);
   console.log(`🔌 Switch Base URL: ${SWITCH_BASE_URL}`);
   console.log(`💰 Developer Fee: ${DEVELOPER_FEE}%`);
-  console.log(`🌍 Supported: NG (NGN), GH (GHS), KE (KES)`);
+  console.log(`🌍 Supported: NG (NGN) only`);
   console.log(`🍃 Database: MongoDB\n`);
 });
 
