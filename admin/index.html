@@ -517,45 +517,10 @@
 
         @media (max-width: 640px) {
             .hide-mobile { display: none !important; }
-            .table-card { overflow-x: visible; padding: 12px; }
-            table { min-width: unset; }
-            thead { display: none; }
-            tbody, tr, td { display: block; width: 100%; }
-            tr {
-                margin-bottom: 16px;
-                background: white;
-                border: 1px solid var(--border);
-                border-radius: 16px;
-                padding: 16px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            }
-            td {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 10px 0;
-                border-bottom: 1px solid #f8f9fc;
-                white-space: normal;
-                text-align: right;
-            }
-            td:last-child {
-                border-bottom: none;
-                justify-content: center;
-                padding-top: 12px;
-            }
-            td::before {
-                content: attr(data-label);
-                font-weight: 600;
-                color: var(--text-secondary);
-                font-size: 12px;
-                text-transform: uppercase;
-                margin-right: 12px;
-                text-align: left;
-                flex-shrink: 0;
-            }
-            .user-cell {
-                justify-content: flex-end;
-            }
+            .table-card { overflow-x: auto; padding: 12px; -webkit-overflow-scrolling: touch; }
+            table { min-width: 600px; }
+            td { padding: 12px 8px; font-size: 13px; }
+            th { padding: 12px 8px; font-size: 11px; }
             .user-details-stats { grid-template-columns: 1fr; }
             .tx-modal-content {
                 padding: 20px;
@@ -880,11 +845,11 @@
             <div class="table-card" style="max-width: 500px;">
                 <label style="font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 8px; display: block;">DEVELOPER FEE (%)</label>
                 <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                    <input type="number" id="fee-input" placeholder="e.g. 0.5" style="margin-bottom: 0;" disabled>
+                    <input type="number" id="fee-input" placeholder="e.g. 0.5" step="0.01" min="0" max="10" style="margin-bottom: 0;">
                     <button class="refresh-btn" onclick="fetchData()" title="Refresh Settings" style="height: 50px; width: 50px; flex-shrink: 0;"><i data-lucide="rotate-cw"></i></button>
                 </div>
-                <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 20px;">Note: Fee percentage is currently managed via .env for security.</p>
-                <button class="btn-primary" onclick="alert('Update DEVELOPER_FEE in your .env file to change this.')">Save Configuration</button>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 20px;">This fee is deducted from the "You'll receive" amount shown to users. Range: 0% – 10%.</p>
+                <button class="btn-primary" onclick="saveSettings()">Save Configuration</button>
             </div>
         </div>
     </main>
@@ -996,6 +961,30 @@
                 if (e.message.includes('401')) logout();
             } finally {
                 btn.classList.remove('spinning');
+            }
+        }
+
+        async function saveSettings() {
+            const feeInput = document.getElementById('fee-input');
+            const fee = parseFloat(feeInput.value);
+            if (Number.isNaN(fee) || fee < 0 || fee > 10) {
+                alert('Fee must be between 0 and 10');
+                return;
+            }
+            try {
+                const res = await fetch('/api/admin/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': adminKey },
+                    body: JSON.stringify({ platform_fee: fee })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(`Platform fee updated to ${fee}%`);
+                } else {
+                    alert(data.error || 'Failed to save settings');
+                }
+            } catch (e) {
+                alert('Error saving settings: ' + e.message);
             }
         }
 

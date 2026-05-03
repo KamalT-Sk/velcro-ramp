@@ -18,6 +18,35 @@ const DEVELOPER_FEE = parseFloat(process.env.DEVELOPER_FEE) || 0.5;
 const DEVELOPER_RECIPIENT = process.env.DEVELOPER_RECIPIENT || '8hM6fCeFrBZAenN8HdQDZ6qN7G5Yv8qu34VJFy95mejh';
 const DEVELOPER_WITHDRAW_ASSET = process.env.DEVELOPER_WITHDRAW_ASSET || 'solana:usdc';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'velcroadmin2026';
+const SETTINGS_PATH = path.join(__dirname, 'settings.json');
+
+// ─── Persistent Settings ───
+function loadSettings() {
+  try {
+    if (fs.existsSync(SETTINGS_PATH)) {
+      return JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf8'));
+    }
+  } catch (err) {
+    console.error('Failed to load settings:', err.message);
+  }
+  return { platform_fee: DEVELOPER_FEE };
+}
+
+function saveSettings(settings) {
+  try {
+    fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
+    return true;
+  } catch (err) {
+    console.error('Failed to save settings:', err.message);
+    return false;
+  }
+}
+
+function getPlatformFee() {
+  const settings = loadSettings();
+  const fee = parseFloat(settings.platform_fee);
+  return Number.isNaN(fee) ? DEVELOPER_FEE : fee;
+}
 
 // ─── Auto-Withdrawal Logic (DISABLED - crashes server due to MongoDB timeout) ───
 // Use /api/admin/withdraw endpoint manually instead
@@ -72,9 +101,64 @@ const transactionSchema = new mongoose.Schema({
 const Transaction = mongoose.model('Transaction', transactionSchema);
 
 // ─── Database Connection ───
-mongoose.connect(MONGODB_URI)
-  .then(() => console.log('✅ Connected to MongoDB'))
-  .catch(err => console.error('❌ MongoDB Connection Error:', err));
+let dbConnected = false;
+mongoose.set('bufferCommands', false); // Don't buffer ops when disconnected
+mongoose.connect(MONGODB_URI, {
+  serverSelectionTimeoutMS: 5000,
+  connectTimeoutMS: 5000,
+  socketTimeoutMS: 10000,
+})
+  .then(() => {
+    dbConnected = true;
+    console.log('✅ Connected to MongoDB');
+  })
+  .catch(err => {
+    dbConnected = false;
+    console.error('❌ MongoDB Connection Error:', err.message);
+    console.log('⚠️  Running without database persistence. Core API still works.');
+  });
+
+mongoose.connection.on('disconnected', () => {
+  dbConnected = false;
+  console.log('⚠️  MongoDB disconnected');
+});
+
+mongoose.connection.on('reconnected', () => {
+  dbConnected = true;
+  console.log('✅ MongoDB reconnected');
+});
+
+// Prevent unhandled promise rejections from crashing the server
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+// Safe DB operation wrapper — silently skips writes when DB is down
+async function safeDbWrite(operation) {
+  if (!dbConnected) {
+    console.log('⏭️  DB write skipped (MongoDB unavailable)');
+    return null;
+  }
+  try {
+    return await operation();
+  } catch (err) {
+    console.error('DB write error:', err.message);
+    return null;
+  }
+}
+
+async function safeDbRead(operation) {
+  if (!dbConnected) {
+    console.log('⏭️  DB read skipped (MongoDB unavailable)');
+    return [];
+  }
+  try {
+    return await operation();
+  } catch (err) {
+    console.error('DB read error:', err.message);
+    return [];
+  }
+}
 
 // ─── Middleware ───
 app.use(helmet({
@@ -149,7 +233,12 @@ function errorResponse(message, status = 400) {
 // ─── Routes ───
 
 app.get('/api/health', (req, res) => {
-  res.json(successResponse({ service: 'velcro-backend', version: '1.2.0', db: 'mongodb' }));
+  res.json(successResponse({
+    service: 'velcro-backend',
+    version: '1.2.0',
+    db: dbConnected ? 'mongodb' : 'offline',
+    dbConnected
+  }));
 });
 
 app.get('/api/assets', async (req, res, next) => {
@@ -261,7 +350,7 @@ app.post('/api/initiate', async (req, res, next) => {
       reference: txRef,
       reason: reason || 'PERSONAL_TRANSFER',
       narration: 'Velcro Settlement',
-      ...(DEVELOPER_RECIPIENT ? { developer_fee: DEVELOPER_FEE, developer_recipient: DEVELOPER_RECIPIENT } : {})
+      ...(DEVELOPER_RECIPIENT ? { developer_fee: getPlatformFee(), developer_recipient: DEVELOPER_RECIPIENT } : {})
     };
     if (callback_url) payload.callback_url = callback_url;
 
@@ -283,7 +372,7 @@ app.post('/api/initiate', async (req, res, next) => {
     const src = d.source || {};
     const dst = d.destination || {};
 
-    await Transaction.create({
+    await safeDbWrite(() => Transaction.create({
       reference: txRef,
       switch_reference: d.id || d.reference || null,
       type: direction,
@@ -310,7 +399,7 @@ app.post('/api/initiate', async (req, res, next) => {
       wallet_address: wallet_address || null,
       callback_url: callback_url || null,
       meta: JSON.stringify(d)
-    });
+    }));
 
     res.json(data);
   } catch (err) { next(err); }
@@ -326,7 +415,7 @@ app.get('/api/status', async (req, res, next) => {
     const d = data.data || {};
 
     if (d.status) {
-      await Transaction.findOneAndUpdate(
+      await safeDbWrite(() => Transaction.findOneAndUpdate(
         { reference },
         { 
           status: d.status, 
@@ -334,7 +423,7 @@ app.get('/api/status', async (req, res, next) => {
           explorer_url: (d.meta && d.meta.explorer_url) || d.explorer_url || null 
         },
         { new: true }
-      );
+      ));
     }
 
     res.json(data);
@@ -347,8 +436,9 @@ app.post('/api/confirm', async (req, res, next) => {
     const { reference, hash } = req.body;
     if (!reference) return res.status(400).json(errorResponse('reference is required'));
 
-    const tx = await Transaction.findOne({ reference });
-    if (!tx) return res.status(404).json(errorResponse('Transaction not found'));
+    const tx = await safeDbRead(() => Transaction.findOne({ reference }));
+    // Don't require DB record for confirmation — Switch is source of truth
+    // if (!tx) return res.status(404).json(errorResponse('Transaction not found'));
 
     const payload = { reference };
     if (hash) payload.hash = hash;
@@ -359,34 +449,42 @@ app.post('/api/confirm', async (req, res, next) => {
     });
 
     const d = data.data || {};
-    await Transaction.findOneAndUpdate(
+    await safeDbWrite(() => Transaction.findOneAndUpdate(
       { reference },
       { status: d.status || 'PROCESSING', hash: hash || null }
-    );
+    ));
 
     res.json(data);
   } catch (err) { next(err); }
 });
 
 app.get('/api/transactions', async (req, res) => {
-  const { type, country, status, limit = 50, offset = 0 } = req.query;
-  const query = {};
-  if (type) query.type = type;
-  if (country) query.country = country;
-  if (status) query.status = status;
+  try {
+    const { type, country, status, limit = 50, offset = 0 } = req.query;
+    const query = {};
+    if (type) query.type = type;
+    if (country) query.country = country;
+    if (status) query.status = status;
 
-  const rows = await Transaction.find(query)
-    .sort({ created_at: -1 })
-    .limit(parseInt(limit))
-    .skip(parseInt(offset));
+    const rows = await safeDbRead(() => Transaction.find(query)
+      .sort({ created_at: -1 })
+      .limit(parseInt(limit))
+      .skip(parseInt(offset)));
     
-  res.json(successResponse(rows));
+    res.json(successResponse(rows));
+  } catch (err) {
+    res.status(500).json(errorResponse(err.message));
+  }
 });
 
 app.get('/api/transactions/:reference', async (req, res) => {
-  const row = await Transaction.findOne({ reference: req.params.reference });
-  if (!row) return res.status(404).json(errorResponse('Transaction not found', 404));
-  res.json(successResponse(row));
+  try {
+    const row = await safeDbRead(() => Transaction.findOne({ reference: req.params.reference }));
+    if (!row) return res.status(404).json(errorResponse('Transaction not found', 404));
+    res.json(successResponse(row));
+  } catch (err) {
+    res.status(500).json(errorResponse(err.message));
+  }
 });
 
 app.get('/api/history', async (req, res, next) => {
@@ -413,7 +511,7 @@ app.post('/webhook/switch', express.json(), async (req, res) => {
     const status = payload.status || (payload.data && payload.data.status);
 
     if (reference && status) {
-      await Transaction.findOneAndUpdate(
+      await safeDbWrite(() => Transaction.findOneAndUpdate(
         { reference },
         { 
           status, 
@@ -421,7 +519,7 @@ app.post('/webhook/switch', express.json(), async (req, res) => {
           hash: (payload.data && payload.data.hash) || null,
           explorer_url: (payload.data && payload.data.explorer_url) || null
         }
-      );
+      ));
       console.log(`[Webhook] Updated status of ${reference} to ${status}`);
     }
 
@@ -443,7 +541,7 @@ const adminAuth = (req, res, next) => {
 
 app.get('/api/admin/stats', adminAuth, async (req, res) => {
   try {
-    const allTxs = await Transaction.find({});
+    const allTxs = await safeDbRead(() => Transaction.find({}));
     const totalUsers = new Set(allTxs.map(t => t.wallet_address).filter(Boolean)).size;
     const completedTxs = allTxs.filter(t => t.status === 'COMPLETED');
     
@@ -467,29 +565,37 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
 });
 
 app.get('/api/admin/transactions', adminAuth, async (req, res) => {
-  const rows = await Transaction.find({}).sort({ created_at: -1 }).limit(200);
-  res.json(rows);
+  try {
+    const rows = await safeDbRead(() => Transaction.find({}).sort({ created_at: -1 }).limit(200));
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.get('/api/admin/users', adminAuth, async (req, res) => {
-  const txs = await Transaction.find({});
-  const userMap = {};
-  
-  txs.forEach(t => {
-    const id = t.wallet_address || 'unknown';
-    if (!userMap[id]) {
-      userMap[id] = { id, total_volume: 0, total_volume_ngn: 0, tx_count: 0, created_at: t.created_at };
-    }
-    if (t.status === 'COMPLETED') {
-      userMap[id].total_volume += (t.type === 'OFFRAMP' ? t.amount : (t.destination_amount || 0));
-      userMap[id].total_volume_ngn += (t.type === 'ONRAMP' ? t.amount : (t.destination_amount || 0));
-    }
-    userMap[id].tx_count++;
-    if (t.created_at < userMap[id].created_at) userMap[id].created_at = t.created_at;
-  });
+  try {
+    const txs = await safeDbRead(() => Transaction.find({}));
+    const userMap = {};
+    
+    txs.forEach(t => {
+      const id = t.wallet_address || 'unknown';
+      if (!userMap[id]) {
+        userMap[id] = { id, total_volume: 0, total_volume_ngn: 0, tx_count: 0, created_at: t.created_at };
+      }
+      if (t.status === 'COMPLETED') {
+        userMap[id].total_volume += (t.type === 'OFFRAMP' ? t.amount : (t.destination_amount || 0));
+        userMap[id].total_volume_ngn += (t.type === 'ONRAMP' ? t.amount : (t.destination_amount || 0));
+      }
+      userMap[id].tx_count++;
+      if (t.created_at < userMap[id].created_at) userMap[id].created_at = t.created_at;
+    });
 
-  const users = Object.values(userMap).sort((a, b) => b.total_volume - a.total_volume);
-  res.json(users);
+    const users = Object.values(userMap).sort((a, b) => b.total_volume - a.total_volume);
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.post('/api/admin/withdraw', adminAuth, async (req, res) => {
@@ -512,8 +618,31 @@ app.post('/api/admin/withdraw', adminAuth, async (req, res) => {
   }
 });
 
+// Public settings (fee only)
+app.get('/api/settings', async (req, res) => {
+  res.json(successResponse({ platform_fee: getPlatformFee() }));
+});
+
 app.get('/api/admin/settings', adminAuth, async (req, res) => {
-  res.json({ platform_fee: DEVELOPER_FEE });
+  res.json({ platform_fee: getPlatformFee() });
+});
+
+app.post('/api/admin/settings', adminAuth, async (req, res) => {
+  try {
+    const { platform_fee } = req.body;
+    const fee = parseFloat(platform_fee);
+    if (Number.isNaN(fee) || fee < 0 || fee > 10) {
+      return res.status(400).json({ success: false, error: 'Fee must be between 0 and 10' });
+    }
+    if (saveSettings({ platform_fee: fee })) {
+      console.log(`✅ Platform fee updated to ${fee}%`);
+      res.json({ success: true, platform_fee: fee });
+    } else {
+      res.status(500).json({ success: false, error: 'Failed to save settings' });
+    }
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 // ─── Static Files ───
@@ -547,7 +676,7 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`\n🚀 Velcro Backend v1.2.0 running at: http://localhost:${PORT}`);
   console.log(`🔌 Switch Base URL: ${SWITCH_BASE_URL}`);
-  console.log(`💰 Developer Fee: ${DEVELOPER_FEE}%`);
+  console.log(`💰 Developer Fee: ${getPlatformFee()}%`);
   console.log(`🌍 Supported: NG (NGN) only`);
   console.log(`🍃 Database: MongoDB\n`);
 });
