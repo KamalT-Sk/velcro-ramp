@@ -270,6 +270,10 @@
             to { transform: rotate(360deg); }
         }
 
+        .spinning {
+            animation: spin 1s linear infinite;
+        }
+
         /* --- Stats Cards --- */
         .stats-row {
             display: grid;
@@ -858,28 +862,63 @@
 
             <!-- PAJ Session Management -->
             <div class="table-card" style="max-width: 500px; margin-top: 20px;">
-                <label style="font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 8px; display: block;">PAJ Ramp Session</label>
-                <div style="margin-bottom: 16px;">
-                    <label style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 4px;">PAJ Email</label>
-                    <div style="display: flex; gap: 10px; margin-bottom: 12px;">
-                        <input type="email" id="paj-email-input" placeholder="your@email.com" style="margin-bottom: 0; flex: 1;">
-                        <button class="btn-primary" onclick="savePajEmail()" style="height: 50px; padding: 0 16px;">Save</button>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+                    <div style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #4318ff 0%, #7c3aed 100%); display: flex; align-items: center; justify-content: center;">
+                        <i data-lucide="shield-check" style="width: 18px; height: 18px; color: white;"></i>
+                    </div>
+                    <div>
+                        <label style="font-size: 14px; font-weight: 700; color: var(--text-main); display: block;">PAJ Ramp Session</label>
+                        <span style="font-size: 11px; color: var(--text-secondary);">Solana on-ramp provider</span>
+                    </div>
+                </div>
+
+                <!-- Status Indicator -->
+                <div id="paj-session-status" style="margin-bottom: 16px; padding: 16px; border-radius: 14px; background: #f8f9fc; border: 1px solid var(--border); text-align: center; transition: all 0.3s ease;">
+                    <div id="paj-status-icon" style="width: 44px; height: 44px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+                        <i data-lucide="loader" style="width: 20px; height: 20px; color: #94a3b8;"></i>
+                    </div>
+                    <p id="paj-status-title" style="font-size: 14px; font-weight: 600; color: var(--text-main); margin-bottom: 4px;">Checking session...</p>
+                    <p id="paj-status-sub" style="font-size: 12px; color: var(--text-secondary);">Please wait</p>
+                </div>
+
+                <!-- Email Configuration -->
+                <div style="margin-bottom: 16px; padding: 14px; border-radius: 12px; background: #f8f9fc; border: 1px solid var(--border);">
+                    <label style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 8px;">Registered Email</label>
+                    <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+                        <div style="flex: 1; position: relative;">
+                            <i data-lucide="mail" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-secondary);"></i>
+                            <input type="email" id="paj-email-input" placeholder="your@email.com" style="margin-bottom: 0; padding-left: 40px; font-size: 13px;">
+                        </div>
+                        <button class="btn-primary" id="paj-save-email-btn" onclick="savePajEmail()" style="height: 50px; padding: 0 18px; white-space: nowrap; font-size: 13px;">Save</button>
                     </div>
                     <p style="font-size: 11px; color: var(--text-secondary);">OTP will be sent to this email. Use an inbox you can access.</p>
                 </div>
-                <div id="paj-session-status" style="margin-bottom: 16px; padding: 12px; border-radius: 12px; background: #f8f9fc; border: 1px solid var(--border);">
-                    <p style="font-size: 13px; color: var(--text-secondary);">Loading session status...</p>
-                </div>
-                <div id="paj-otp-section" class="hidden" style="margin-bottom: 16px;">
-                    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Enter the OTP sent to your email:</p>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="paj-otp-input" placeholder="Enter OTP" style="margin-bottom: 0; flex: 1;">
-                        <button class="btn-primary" onclick="verifyPajOtp()">Verify</button>
+
+                <!-- Inline Message -->
+                <div id="paj-message" class="hidden" style="margin-bottom: 16px; padding: 12px 14px; border-radius: 10px; font-size: 13px; font-weight: 500; background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0;"></div>
+
+                <!-- OTP Section -->
+                <div id="paj-otp-section" class="hidden" style="margin-bottom: 16px; padding: 16px; border-radius: 14px; background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%); border: 1px solid #fde047;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                        <i data-lucide="key-round" style="width: 16px; height: 16px; color: #a16207;"></i>
+                        <span style="font-size: 12px; font-weight: 600; color: #854d0e;">OTP Verification</span>
+                    </div>
+                    <p style="font-size: 12px; color: #a16207; margin-bottom: 12px;">Enter the 6-digit code sent to your email.</p>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="paj-otp-input" placeholder="000000" maxlength="10" style="margin-bottom: 0; flex: 1; text-align: center; font-size: 18px; font-weight: 600; letter-spacing: 4px; font-family: monospace;">
+                        <button class="btn-primary" id="paj-verify-btn" onclick="verifyPajOtp()" style="padding: 0 20px; white-space: nowrap;">Verify</button>
                     </div>
                 </div>
+
+                <!-- Action Buttons -->
                 <div style="display: flex; gap: 10px;">
-                    <button class="btn-primary" onclick="initiatePajSession()" style="flex: 1;">Initiate Session</button>
-                    <button class="refresh-btn" onclick="fetchPajSession()" title="Refresh" style="height: 50px; width: 50px; flex-shrink: 0;"><i data-lucide="rotate-cw"></i></button>
+                    <button class="btn-primary" id="paj-initiate-btn" onclick="initiatePajSession()" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i data-lucide="send" style="width: 16px; height: 16px;"></i>
+                        <span>Initiate Session</span>
+                    </button>
+                    <button class="refresh-btn" onclick="fetchPajSession()" title="Refresh" style="height: 50px; width: 50px; flex-shrink: 0;">
+                        <i data-lucide="rotate-cw"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -1007,35 +1046,84 @@
             }
         }
 
+        function setPajMessage(text, type) {
+            const el = document.getElementById('paj-message');
+            el.innerText = text;
+            el.classList.remove('hidden');
+            if (type === 'error') {
+                el.style.background = '#fef2f2';
+                el.style.color = '#dc2626';
+                el.style.borderColor = '#fecaca';
+            } else if (type === 'success') {
+                el.style.background = '#f0fdf4';
+                el.style.color = '#166534';
+                el.style.borderColor = '#bbf7d0';
+            } else {
+                el.style.background = '#f8f9fc';
+                el.style.color = 'var(--text-main)';
+                el.style.borderColor = 'var(--border)';
+            }
+            setTimeout(() => el.classList.add('hidden'), 6000);
+        }
+
+        function setPajStatus(state, title, sub, iconName) {
+            const statusEl = document.getElementById('paj-session-status');
+            const iconWrap = document.getElementById('paj-status-icon');
+            const titleEl = document.getElementById('paj-status-title');
+            const subEl = document.getElementById('paj-status-sub');
+
+            titleEl.innerText = title;
+            subEl.innerText = sub || '';
+            iconWrap.innerHTML = `<i data-lucide="${iconName}" style="width: 20px; height: 20px; color: white;"></i>`;
+
+            if (state === 'active') {
+                statusEl.style.background = '#f0fdf4';
+                statusEl.style.borderColor = '#bbf7d0';
+                iconWrap.style.background = 'var(--success)';
+            } else if (state === 'expired') {
+                statusEl.style.background = '#fffbeb';
+                statusEl.style.borderColor = '#fde68a';
+                iconWrap.style.background = '#f59e0b';
+            } else if (state === 'error') {
+                statusEl.style.background = '#fef2f2';
+                statusEl.style.borderColor = '#fecaca';
+                iconWrap.style.background = 'var(--failed)';
+            } else {
+                statusEl.style.background = '#f8f9fc';
+                statusEl.style.borderColor = 'var(--border)';
+                iconWrap.style.background = '#cbd5e1';
+            }
+            if (window.lucide) lucide.createIcons();
+        }
+
         async function fetchPajSession() {
             try {
                 const res = await fetch('/api/paj/session', { headers: { 'Authorization': adminKey } });
                 const data = await res.json();
                 const status = data.data || {};
-                const statusEl = document.getElementById('paj-session-status');
                 const otpSection = document.getElementById('paj-otp-section');
+
                 if (status.isValid) {
-                    statusEl.innerHTML = `<p style="font-size: 13px; color: var(--success); font-weight: 600;">✅ Session Active</p><p style="font-size: 12px; color: var(--text-secondary);">Email: ${status.email || '-'}</p>`;
-                    statusEl.style.background = '#f0fdf4';
-                    statusEl.style.borderColor = '#bbf7d0';
+                    setPajStatus('active', 'Session Active', `Email: ${status.email || '-'}`, 'check');
                     otpSection.classList.add('hidden');
                 } else if (status.hasSession) {
-                    statusEl.innerHTML = `<p style="font-size: 13px; color: var(--warning); font-weight: 600;">⏳ Session Expired</p><p style="font-size: 12px; color: var(--text-secondary);">Email: ${status.email || '-'}</p>`;
-                    statusEl.style.background = '#fffbeb';
-                    statusEl.style.borderColor = '#fcd34d';
+                    setPajStatus('expired', 'Session Expired', `Email: ${status.email || '-'} — Re-verify to continue`, 'clock');
                     otpSection.classList.remove('hidden');
                 } else {
-                    statusEl.innerHTML = `<p style="font-size: 13px; color: var(--failed); font-weight: 600;">❌ No Session</p><p style="font-size: 12px; color: var(--text-secondary);">Click "Initiate Session" to start. OTP will be sent to the email above.</p>`;
-                    statusEl.style.background = '#fef2f2';
-                    statusEl.style.borderColor = '#fecaca';
+                    setPajStatus('inactive', 'No Active Session', 'Click Initiate to receive an OTP', 'shield-alert');
                     otpSection.classList.add('hidden');
                 }
             } catch (e) {
+                setPajStatus('error', 'Connection Error', 'Could not reach PAJ service', 'wifi-off');
                 console.error('PAJ session fetch failed:', e);
             }
         }
 
         async function initiatePajSession() {
+            const btn = document.getElementById('paj-initiate-btn');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="loader-2" style="width: 16px; height: 16px;" class="spinning"></i><span>Sending...</span>';
+            btn.disabled = true;
             try {
                 const res = await fetch('/api/admin/paj/initiate', {
                     method: 'POST',
@@ -1043,19 +1131,28 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    alert('OTP sent! Check the PAJ email inbox.');
+                    setPajMessage('OTP sent! Check your email inbox.', 'success');
                     document.getElementById('paj-otp-section').classList.remove('hidden');
+                    document.getElementById('paj-otp-input').focus();
                 } else {
-                    alert(data.error || 'Failed to initiate PAJ session');
+                    setPajMessage(data.error || 'Failed to initiate PAJ session', 'error');
                 }
             } catch (e) {
-                alert('Error: ' + e.message);
+                setPajMessage('Error: ' + e.message, 'error');
+            } finally {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+                if (window.lucide) lucide.createIcons();
             }
         }
 
         async function verifyPajOtp() {
             const otp = document.getElementById('paj-otp-input').value.trim();
-            if (!otp) { alert('Please enter the OTP'); return; }
+            if (!otp) { setPajMessage('Please enter the OTP', 'error'); return; }
+            const btn = document.getElementById('paj-verify-btn');
+            const originalText = btn.innerText;
+            btn.innerText = 'Verifying...';
+            btn.disabled = true;
             try {
                 const res = await fetch('/api/admin/paj/verify', {
                     method: 'POST',
@@ -1064,14 +1161,17 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    alert('PAJ session verified successfully!');
+                    setPajMessage('PAJ session verified successfully!', 'success');
                     document.getElementById('paj-otp-input').value = '';
                     await fetchPajSession();
                 } else {
-                    alert(data.error || 'Verification failed');
+                    setPajMessage(data.error || 'Verification failed', 'error');
                 }
             } catch (e) {
-                alert('Error: ' + e.message);
+                setPajMessage('Error: ' + e.message, 'error');
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
             }
         }
 
@@ -1102,7 +1202,11 @@
         async function savePajEmail() {
             const emailInput = document.getElementById('paj-email-input');
             const email = emailInput.value.trim();
-            if (!email) { alert('Please enter an email'); return; }
+            if (!email || !email.includes('@')) { setPajMessage('Please enter a valid email', 'error'); return; }
+            const btn = document.getElementById('paj-save-email-btn');
+            const originalText = btn.innerText;
+            btn.innerText = 'Saving...';
+            btn.disabled = true;
             try {
                 const res = await fetch('/api/admin/settings', {
                     method: 'POST',
@@ -1111,12 +1215,16 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    alert('PAJ email updated to: ' + email);
+                    setPajMessage('PAJ email updated to ' + email, 'success');
+                    await fetchPajSession();
                 } else {
-                    alert(data.error || 'Failed to save email');
+                    setPajMessage(data.error || 'Failed to save email', 'error');
                 }
             } catch (e) {
-                alert('Error saving email: ' + e.message);
+                setPajMessage('Error saving email: ' + e.message, 'error');
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
             }
         }
 
