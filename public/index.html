@@ -2621,7 +2621,10 @@
               <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 hover:bg-gray-100 transition-colors group">
                 <div class="cursor-pointer" onclick="const d = this.parentElement.querySelector('.tx-details'); d.classList.toggle('hidden');">
                   <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-bold text-gray-900">${isBuy ? 'Buy' : 'Sell'} ${assetName}</span>
+                    <div class="flex items-center gap-2">
+                      <span class="text-sm font-bold text-gray-900">${isBuy ? 'Buy' : 'Sell'} ${assetName}</span>
+                      <span class="text-[9px] px-1.5 py-0.5 ${isBuy ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'} rounded font-semibold uppercase tracking-wide">${tx.type}</span>
+                    </div>
                     <span class="text-[10px] px-2 py-0.5 ${statusClass} rounded-full font-medium uppercase">${tx.status}</span>
                   </div>
                   <div class="flex justify-between items-end">

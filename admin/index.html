@@ -346,6 +346,10 @@
             font-weight: 500;
             white-space: nowrap;
         }
+        tbody tr:hover {
+            background: #f8f9fc;
+            cursor: pointer;
+        }
 
         .user-cell {
             display: flex;
@@ -993,7 +997,7 @@
             const allBody = document.getElementById('all-tx-body');
             
             const summaryRows = txs.map(tx => `
-                <tr>
+                <tr onclick="viewTransaction('${tx.reference}')" style="cursor: pointer;" title="Click to view details">
                     <td data-label="Wallet"><div class="user-cell"><div class="avatar">${tx.wallet_address?.slice(-4) || '??'}</div><b style="font-size: 11px;">${tx.wallet_address?.slice(0, 8)}...</b></div></td>
                     <td data-label="Type"><b>${tx.type}</b></td>
                     <td data-label="Amount"><b>${(tx.type === 'ONRAMP' ? '₦' : '$')}${Number(tx.amount).toLocaleString()}</b></td>
