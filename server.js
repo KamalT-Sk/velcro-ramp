@@ -12,6 +12,10 @@ const app = express();
 app.set('trust proxy', 1); // Trust first proxy (Nginx)
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/velcro_ramp';
+
+// ─── PAJ Ramp Integration ───
+let pajModule = null;
+try { pajModule = require('./paj'); } catch (err) { console.log('⚠️  PAJ module not loaded:', err.message); }
 const SWITCH_BASE_URL = process.env.SWITCH_BASE_URL || 'https://api.onswitch.xyz';
 const SWITCH_SERVICE_KEY = process.env.SWITCH_SERVICE_KEY;
 const DEVELOPER_FEE = parseFloat(process.env.DEVELOPER_FEE) || 0.5;
@@ -643,6 +647,77 @@ app.post('/api/admin/settings', adminAuth, async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
+});
+
+// ─── PAJ Ramp Routes ───
+
+app.get('/api/paj/assets', (req, res) => {
+  if (!pajModule) return res.status(503).json(errorResponse('PAJ module not available'));
+  res.json(successResponse(pajModule.getAssets()));
+});
+
+app.get('/api/paj/rate', async (req, res, next) => {
+  try {
+    if (!pajModule) return res.status(503).json(errorResponse('PAJ module not available'));
+    const rate = await pajModule.getPajRate();
+    res.json(successResponse(rate));
+  } catch (err) { next(err); }
+});
+
+app.post('/api/paj/value', async (req, res, next) => {
+  try {
+    if (!pajModule) return res.status(503).json(errorResponse('PAJ module not available'));
+    const { fiatAmount, mint } = req.body;
+    if (!fiatAmount || !mint) return res.status(400).json(errorResponse('fiatAmount and mint are required'));
+    const value = await pajModule.getTokenValue(fiatAmount, mint);
+    res.json(successResponse(value));
+  } catch (err) { next(err); }
+});
+
+app.post('/api/paj/initiate', async (req, res, next) => {
+  try {
+    if (!pajModule) return res.status(503).json(errorResponse('PAJ module not available'));
+    const { fiatAmount, recipient, mint } = req.body;
+    if (!fiatAmount || !recipient || !mint) {
+      return res.status(400).json(errorResponse('fiatAmount, recipient, and mint are required'));
+    }
+    const order = await pajModule.createOnrampOrder({ fiatAmount, recipient, mint });
+    res.json(successResponse(order));
+  } catch (err) { next(err); }
+});
+
+app.get('/api/paj/status', async (req, res, next) => {
+  try {
+    if (!pajModule) return res.status(503).json(errorResponse('PAJ module not available'));
+    const { id } = req.query;
+    if (!id) return res.status(400).json(errorResponse('id is required'));
+    const tx = await pajModule.getTransactionStatus(id);
+    res.json(successResponse(tx));
+  } catch (err) { next(err); }
+});
+
+app.get('/api/paj/session', (req, res) => {
+  if (!pajModule) return res.status(503).json(errorResponse('PAJ module not available'));
+  res.json(successResponse(pajModule.getSessionStatus()));
+});
+
+// ─── Admin PAJ Session Routes ───
+app.post('/api/admin/paj/initiate', adminAuth, async (req, res, next) => {
+  try {
+    if (!pajModule) return res.status(503).json({ error: 'PAJ module not available' });
+    const result = await pajModule.initiateSession();
+    res.json(result);
+  } catch (err) { next(err); }
+});
+
+app.post('/api/admin/paj/verify', adminAuth, async (req, res, next) => {
+  try {
+    if (!pajModule) return res.status(503).json({ error: 'PAJ module not available' });
+    const { otp } = req.body;
+    if (!otp) return res.status(400).json({ error: 'OTP is required' });
+    const result = await pajModule.verifySession(otp);
+    res.json(result);
+  } catch (err) { next(err); }
 });
 
 // ─── Static Files ───

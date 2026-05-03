@@ -858,17 +858,31 @@
                     </svg>
                   </div>
                   <div class="custom-select-options" id="buy-asset-options">
-                    <div class="custom-option" onclick="selectBuyAsset('USDT', '/logos/usdt.png', 'Tether')">
+                    <div class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider bg-gray-50">Switch</div>
+                    <div class="custom-option" onclick="selectBuyAsset('USDT', '/logos/usdt.png', 'Tether', 'switch')">
                       <img src="/logos/usdt.png" class="w-6 h-6" alt="USDT"><span class="font-medium">USDT</span><span
                         class="text-gray-400 text-xs">Tether</span>
                     </div>
-                    <div class="custom-option" onclick="selectBuyAsset('USDC', '/logos/usdc.png', 'USD Coin')">
+                    <div class="custom-option" onclick="selectBuyAsset('USDC', '/logos/usdc.png', 'USD Coin', 'switch')">
                       <img src="/logos/usdc.png" class="w-6 h-6" alt="USDC"><span class="font-medium">USDC</span><span
                         class="text-gray-400 text-xs">USD Coin</span>
                     </div>
-                    <div class="custom-option" onclick="selectBuyAsset('CNGN', '/logos/cngn.png?v=2', 'Naira Token')">
+                    <div class="custom-option" onclick="selectBuyAsset('CNGN', '/logos/cngn.png?v=2', 'Naira Token', 'switch')">
                       <img src="/logos/cngn.png?v=2" class="w-6 h-6" alt="CNGN"><span
                         class="font-medium">CNGN</span><span class="text-gray-400 text-xs">Naira Token</span>
+                    </div>
+                    <div class="px-3 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider bg-gray-50">PAJ (Solana)</div>
+                    <div class="custom-option" onclick="selectBuyAsset('SOL', '/logos/sol.png', 'Solana', 'paj')">
+                      <img src="/logos/sol.png" class="w-6 h-6" alt="SOL"><span class="font-medium">SOL</span><span
+                        class="text-gray-400 text-xs">Solana</span><span class="ml-auto text-[9px] px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded font-bold">PAJ</span>
+                    </div>
+                    <div class="custom-option" onclick="selectBuyAsset('JUP', '/logos/jup.png', 'Jupiter', 'paj')">
+                      <img src="/logos/jup.png" class="w-6 h-6" alt="JUP"><span class="font-medium">JUP</span><span
+                        class="text-gray-400 text-xs">Jupiter</span><span class="ml-auto text-[9px] px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded font-bold">PAJ</span>
+                    </div>
+                    <div class="custom-option" onclick="selectBuyAsset('USDG', '/logos/usdc.png', 'USDC', 'paj')">
+                      <img src="/logos/usdc.png" class="w-6 h-6" alt="USDG"><span class="font-medium">USDG</span><span
+                        class="text-gray-400 text-xs">USDC on Solana</span><span class="ml-auto text-[9px] px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded font-bold">PAJ</span>
                     </div>
                   </div>
                 </div>
@@ -1272,6 +1286,7 @@
     var currentSwitchAsset = '';
     var currentSellAsset = '';
     var currentBuyAsset = '';
+    var currentProvider = 'switch'; // 'switch' or 'paj'
     var currentSellNetwork = '';
     var currentBuyNetwork = '';
     var currentBankCode = '';
@@ -1467,6 +1482,26 @@
         else calculateBuy();
       } catch (err) {
         showToast(err.message || 'Failed to fetch rate', 'error');
+      }
+    }
+
+    async function fetchPajRate() {
+      try {
+        const res = await fetch(`${API_BASE}/api/paj/rate`);
+        if (!res.ok) throw new Error('Failed to fetch PAJ rate');
+        const payload = await res.json();
+        const data = payload.data || {};
+        const onrampRate = data.onramp?.rate;
+        if (onrampRate) {
+          // PAJ rate is USD->NGN, we need to convert to crypto rate
+          // Store PAJ USD/NGN rate and fetch token value for precise calculation
+          currentRate.paj = onrampRate;
+        }
+        updateNavRate();
+        updateRateDisplays();
+        calculateBuy();
+      } catch (err) {
+        console.log('PAJ rate fetch failed:', err.message);
       }
     }
 
@@ -1831,12 +1866,14 @@
       }
     }
 
-    function selectBuyAsset(symbol, logo, name) {
+    function selectBuyAsset(symbol, logo, name, provider) {
       currentBuyAsset = symbol;
+      currentProvider = provider || 'switch';
       document.getElementById('buy-asset-display').innerHTML = `
         <img src="${logo}" class="w-6 h-6" alt="${symbol}">
         <span class="font-bold text-sm sm:text-base">${symbol}</span>
         <span class="text-gray-400 text-[10px] hidden sm:inline ml-1">${name}</span>
+        ${currentProvider === 'paj' ? '<span class="ml-1 text-[9px] px-1 py-0.5 bg-amber-100 text-amber-700 rounded font-bold">PAJ</span>' : ''}
       `;
       document.getElementById('buy-asset-options').classList.remove('open');
       document.getElementById('buy-amount-label').textContent = symbol;
@@ -1846,8 +1883,14 @@
       event.currentTarget.classList.add('selected');
       document.getElementById('buy-asset-options').classList.remove('open');
       document.getElementById('buy-network-wrap').classList.remove('opacity-50', 'pointer-events-none');
-      currentSwitchAsset = getSwitchAsset(currentBuyAsset, currentBuyNetwork);
-      if (currentSwitchAsset) fetchRate();
+      if (currentProvider === 'paj') {
+        currentBuyNetwork = 'solana';
+        document.getElementById('buy-network-display').innerHTML = '<img src="/logos/sol.png" class="w-5 h-5 rounded-full"><span class="font-medium text-sm">Solana</span>';
+        fetchPajRate();
+      } else {
+        currentSwitchAsset = getSwitchAsset(currentBuyAsset, currentBuyNetwork);
+        if (currentSwitchAsset) fetchRate();
+      }
       calculateBuy();
       updateStepIndicators('ONRAMP');
     }
@@ -1912,9 +1955,30 @@
       return true;
     }
 
+    const PAJ_MINTS = {
+      'SOL': 'So11111111111111111111111111111111111111112',
+      'JUP': 'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN',
+      'USDG': 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+    };
+    let pajValueTimeout = null;
+
     function calculateBuy() {
       const amount = parseFloat(document.getElementById('buy-amount').value) || 0;
       validateBuyLimit(amount);
+
+      // PAJ provider uses different rate calculation
+      if (currentProvider === 'paj') {
+        document.getElementById('buy-receive').value = '';
+        document.getElementById('buy-preview').classList.add('hidden');
+        if (amount > 0) {
+          // Debounce PAJ value fetch
+          if (pajValueTimeout) clearTimeout(pajValueTimeout);
+          pajValueTimeout = setTimeout(() => fetchPajValue(amount), 400);
+        }
+        updateStepIndicators('ONRAMP');
+        return;
+      }
+
       const rate = Number(currentRate.buy);
       if (Number.isNaN(rate) || rate <= 0) {
         document.getElementById('buy-receive').value = '';
@@ -1943,6 +2007,33 @@
         preview.classList.add('hidden');
       }
       updateStepIndicators('ONRAMP');
+    }
+
+    async function fetchPajValue(fiatAmount) {
+      const mint = PAJ_MINTS[currentBuyAsset];
+      if (!mint) return;
+      try {
+        const res = await fetch(`${API_BASE}/api/paj/value`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fiatAmount, mint })
+        });
+        if (!res.ok) throw new Error('Failed to fetch PAJ value');
+        const payload = await res.json();
+        const data = payload.data || {};
+        const tokenAmount = data.amount;
+        if (tokenAmount !== undefined) {
+          document.getElementById('buy-receive').value = tokenAmount.toFixed(4);
+          const preview = document.getElementById('buy-preview');
+          const previewFiat = document.getElementById('buy-preview-fiat');
+          const previewCrypto = document.getElementById('buy-preview-crypto');
+          previewFiat.textContent = `₦${fiatAmount.toLocaleString()}`;
+          previewCrypto.textContent = `${tokenAmount.toFixed(4)} ${currentBuyAsset}`;
+          preview.classList.remove('hidden');
+        }
+      } catch (err) {
+        console.log('PAJ value fetch failed:', err.message);
+      }
     }
 
     function calculateBuyFromCrypto() {
@@ -2257,21 +2348,72 @@
         return;
       }
       if (!currentBuyAsset) { showToast('Please select an asset', 'warning'); return; }
-      if (!currentBuyNetwork || document.getElementById('buy-network-display').textContent.trim() === 'Select Network') { showToast('Please select a network', 'warning'); return; }
       const amount = parseFloat(document.getElementById('buy-amount').value);
       const receive = parseFloat(document.getElementById('buy-receive').value) || 0;
       if (!amount || amount <= 0) { showToast('Please enter a valid amount', 'warning'); return; }
-      if (receive < 1) { showToast('Minimum amount is $1', 'warning'); return; }
       if (amount > BUY_MAX_LIMIT) { showToast('Maximum buy amount is ₦50,000 per transaction', 'warning'); return; }
       const wallet = document.getElementById('buy-wallet').value.trim();
       if (!wallet) { showToast('Please enter your wallet address', 'warning'); return; }
+
+      const btn = document.getElementById('buy-btn');
+      document.getElementById('buy-confirm-ngn').textContent = amount.toFixed(2);
+      btn.innerHTML = '<svg class="animate-spin w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating...';
+
+      // PAJ Provider flow
+      if (currentProvider === 'paj') {
+        const mint = PAJ_MINTS[currentBuyAsset];
+        if (!mint) { showToast('Invalid PAJ asset', 'warning'); btn.innerHTML = '<i data-lucide="landmark" class="w-5 h-5"></i> Generate Bank Account'; safeLucideInit(); return; }
+        try {
+          const res = await fetch(`${API_BASE}/api/paj/initiate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fiatAmount: amount, recipient: wallet, mint })
+          });
+          const responseBody = await res.text();
+          if (!res.ok) {
+            let errorMsg = 'Failed to initiate PAJ transaction';
+            try { const err = JSON.parse(responseBody); errorMsg = err.message || errorMsg; } catch { }
+            throw new Error(errorMsg);
+          }
+          const payload = JSON.parse(responseBody);
+          const data = payload.data || {};
+          document.getElementById('buy-bank-name').textContent = data.bank || 'PAJ Partner Bank';
+          document.getElementById('buy-account-number').textContent = data.accountNumber || '-';
+          document.getElementById('buy-account-name').textContent = data.accountName || 'PAJ Ramp';
+          document.getElementById('buy-rate-used').textContent = `Via PAJ Ramp`;
+          document.getElementById('buy-reference').textContent = data.id || '-';
+          currentReference = data.id || '';
+          document.getElementById('buy-generated-account').classList.remove('hidden');
+          btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mr-2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Account Generated';
+          btn.disabled = true;
+          btn.classList.add('opacity-50', 'cursor-not-allowed');
+          safeLucideInit();
+          currentTxDetails = {
+            type: 'buy',
+            reference: data.id,
+            amount: amount,
+            destinationAmount: receive,
+            asset: currentBuyAsset,
+            network: 'solana',
+            walletAddress: wallet,
+            provider: 'paj'
+          };
+          startPajStatusPoll(data.id);
+        } catch (err) {
+          btn.innerHTML = '<i data-lucide="landmark" class="w-5 h-5"></i> Generate Bank Account';
+          safeLucideInit();
+          showToast(err.message || 'Failed to generate account', 'error');
+        }
+        return;
+      }
+
+      // Switch Provider flow
+      if (!currentBuyNetwork || document.getElementById('buy-network-display').textContent.trim() === 'Select Network') { showToast('Please select a network', 'warning'); return; }
+      if (receive < 1) { showToast('Minimum amount is $1', 'warning'); return; }
       if (!validateWalletAddress(wallet, currentBuyNetwork)) {
         showToast(`Invalid ${currentBuyNetwork} wallet address`, 'warning'); return;
       }
       if (!currentSwitchAsset) { showToast('Please select a valid asset and network', 'warning'); return; }
-      const btn = document.getElementById('buy-btn');
-      document.getElementById('buy-confirm-ngn').textContent = amount.toFixed(2);
-      btn.innerHTML = '<svg class="animate-spin w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating...';
       try {
         const res = await fetch(`${API_BASE}/api/initiate`, {
           method: 'POST',
@@ -2396,6 +2538,62 @@
           }
         } catch (e) { }
       }, 5000); // Polling every 5 seconds for better responsiveness
+    }
+
+    function startPajStatusPoll(txId) {
+      if (statusPollInterval) clearInterval(statusPollInterval);
+      statusPollInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`${API_BASE}/api/paj/status?id=${encodeURIComponent(txId)}`);
+          if (!res.ok) return;
+          const payload = await res.json();
+          const data = payload.data || {};
+          const status = data.status || 'INIT';
+          // Map PAJ status to generic status for UI
+          const statusMap = {
+            'INIT': 'AWAITING_DEPOSIT',
+            'PAID': 'DETECTED',
+            'PROCESSING': 'PROCESSING',
+            'COMPLETED': 'COMPLETED',
+            'FAILED': 'FAILED',
+            'CANCELLED': 'CANCELLED'
+          };
+          const mappedStatus = statusMap[status] || status;
+          updateStatusUI(mappedStatus, 'buy');
+          // Show blockchain explorer link for completed buy transactions
+          if (status === 'COMPLETED') {
+            const txHash = data.signature || data.hash || '';
+            const explorerLink = document.getElementById('buy-explorer-link');
+            const statusDetail = document.getElementById('buy-status-detail');
+            if (explorerLink && txHash) {
+              explorerLink.href = `https://solscan.io/tx/${txHash}`;
+              explorerLink.classList.remove('hidden');
+            }
+            if (statusDetail && txHash) {
+              statusDetail.textContent = `Tx: ${txHash.slice(0, 12)}...${txHash.slice(-8)}`;
+            }
+          }
+          if (status === 'COMPLETED' || status === 'FAILED' || status === 'CANCELLED') {
+            clearInterval(statusPollInterval);
+            if (status === 'COMPLETED') {
+              showToast('Transaction Completed Successfully!', 'success');
+              const modalData = {
+                reference: currentTxDetails.reference || txId,
+                amount: currentTxDetails.amount,
+                destinationAmount: data.amount || currentTxDetails.destinationAmount,
+                asset: currentTxDetails.asset,
+                network: 'solana',
+                walletAddress: currentTxDetails.walletAddress || data.recipient || '',
+                explorerUrl: data.signature ? `https://solscan.io/tx/${data.signature}` : '',
+                hash: data.signature || ''
+              };
+              setTimeout(() => showSuccessModal('buy', modalData), 1500);
+            } else if (status === 'FAILED') {
+              showToast('Transaction Failed. Please contact support.', 'error');
+            }
+          }
+        } catch (e) { }
+      }, 5000);
     }
 
     function getExplorerUrl(hash, network) {
@@ -2617,15 +2815,20 @@
             const meta = tx.meta ? JSON.parse(tx.meta) : {};
             const network = meta.network || meta.chain || (tx.asset.includes(':') ? tx.asset.split(':')[0] : '');
 
+            const typeLabel = (tx.type || '').toUpperCase();
+            const isOnramp = typeLabel === 'ONRAMP';
+            const isOfframp = typeLabel === 'OFFRAMP';
+            const typeBadgeClass = isOnramp ? 'bg-blue-100 text-blue-700' : isOfframp ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600';
+
             return `
               <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 hover:bg-gray-100 transition-colors group">
                 <div class="cursor-pointer" onclick="const d = this.parentElement.querySelector('.tx-details'); d.classList.toggle('hidden');">
                   <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center gap-2">
-                      <span class="text-sm font-bold text-gray-900">${isBuy ? 'Buy' : 'Sell'} ${assetName}</span>
-                      <span class="text-[9px] px-1.5 py-0.5 ${isBuy ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'} rounded font-semibold uppercase tracking-wide">${tx.type}</span>
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="text-sm font-bold text-gray-900">${isOnramp ? 'Buy' : isOfframp ? 'Sell' : typeLabel || 'Trade'} ${assetName}</span>
+                      <span class="text-[9px] px-1.5 py-0.5 ${typeBadgeClass} rounded font-semibold uppercase tracking-wide">${typeLabel || 'UNKNOWN'}</span>
                     </div>
-                    <span class="text-[10px] px-2 py-0.5 ${statusClass} rounded-full font-medium uppercase">${tx.status}</span>
+                    <span class="text-[10px] px-2 py-0.5 ${statusClass} rounded-full font-medium uppercase shrink-0">${tx.status || 'PENDING'}</span>
                   </div>
                   <div class="flex justify-between items-end">
                     <div>

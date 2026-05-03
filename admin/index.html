@@ -28,7 +28,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
 
         body {
@@ -855,6 +855,25 @@
                 <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 20px;">This fee is deducted from the "You'll receive" amount shown to users. Range: 0% – 10%.</p>
                 <button class="btn-primary" onclick="saveSettings()">Save Configuration</button>
             </div>
+
+            <!-- PAJ Session Management -->
+            <div class="table-card" style="max-width: 500px; margin-top: 20px;">
+                <label style="font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 8px; display: block;">PAJ Ramp Session</label>
+                <div id="paj-session-status" style="margin-bottom: 16px; padding: 12px; border-radius: 12px; background: #f8f9fc; border: 1px solid var(--border);">
+                    <p style="font-size: 13px; color: var(--text-secondary);">Loading session status...</p>
+                </div>
+                <div id="paj-otp-section" class="hidden" style="margin-bottom: 16px;">
+                    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Enter the OTP sent to the PAJ email:</p>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="paj-otp-input" placeholder="Enter OTP" style="margin-bottom: 0; flex: 1;">
+                        <button class="btn-primary" onclick="verifyPajOtp()">Verify</button>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-primary" onclick="initiatePajSession()" style="flex: 1;">Initiate Session</button>
+                    <button class="refresh-btn" onclick="fetchPajSession()" title="Refresh" style="height: 50px; width: 50px; flex-shrink: 0;"><i data-lucide="rotate-cw"></i></button>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -959,12 +978,91 @@
                 const settings = await settingsRes.json();
                 document.getElementById('fee-input').value = settings.platform_fee;
 
+                // 5. PAJ Session
+                await fetchPajSession();
+
                 lucide.createIcons();
             } catch (e) {
                 console.error(e);
-                if (e.message.includes('401')) logout();
+                if (e.message.includes('401')) { logout(); return; }
+                // Show connection error in stats area
+                document.getElementById('stat-total-users').innerText = '—';
+                document.getElementById('stat-total-txs').innerText = '—';
+                document.getElementById('stat-total-volume').innerText = 'Server unreachable';
+                document.getElementById('stat-total-earned').innerText = '—';
+                const retryBtn = `<button onclick="fetchData()" class="btn-primary" style="margin-top:10px;">Retry</button>`;
+                document.getElementById('tx-summary-body').innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--failed);padding:20px;">Unable to connect to server.<br>${retryBtn}</td></tr>`;
+                document.getElementById('all-tx-body').innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--failed);padding:20px;">Unable to connect to server.<br>${retryBtn}</td></tr>`;
             } finally {
                 btn.classList.remove('spinning');
+            }
+        }
+
+        async function fetchPajSession() {
+            try {
+                const res = await fetch('/api/paj/session', { headers: { 'Authorization': adminKey } });
+                const data = await res.json();
+                const status = data.data || {};
+                const statusEl = document.getElementById('paj-session-status');
+                const otpSection = document.getElementById('paj-otp-section');
+                if (status.isValid) {
+                    statusEl.innerHTML = `<p style="font-size: 13px; color: var(--success); font-weight: 600;">✅ Session Active</p><p style="font-size: 12px; color: var(--text-secondary);">Email: ${status.email}</p>`;
+                    statusEl.style.background = '#f0fdf4';
+                    statusEl.style.borderColor = '#bbf7d0';
+                    otpSection.classList.add('hidden');
+                } else if (status.hasSession) {
+                    statusEl.innerHTML = `<p style="font-size: 13px; color: var(--warning); font-weight: 600;">⏳ Session Expired</p><p style="font-size: 12px; color: var(--text-secondary);">Email: ${status.email}</p>`;
+                    statusEl.style.background = '#fffbeb';
+                    statusEl.style.borderColor = '#fcd34d';
+                    otpSection.classList.remove('hidden');
+                } else {
+                    statusEl.innerHTML = `<p style="font-size: 13px; color: var(--failed); font-weight: 600;">❌ No Session</p><p style="font-size: 12px; color: var(--text-secondary);">Click "Initiate Session" to start.</p>`;
+                    statusEl.style.background = '#fef2f2';
+                    statusEl.style.borderColor = '#fecaca';
+                    otpSection.classList.add('hidden');
+                }
+            } catch (e) {
+                console.error('PAJ session fetch failed:', e);
+            }
+        }
+
+        async function initiatePajSession() {
+            try {
+                const res = await fetch('/api/admin/paj/initiate', {
+                    method: 'POST',
+                    headers: { 'Authorization': adminKey, 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('OTP sent! Check the PAJ email inbox.');
+                    document.getElementById('paj-otp-section').classList.remove('hidden');
+                } else {
+                    alert(data.error || 'Failed to initiate PAJ session');
+                }
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+
+        async function verifyPajOtp() {
+            const otp = document.getElementById('paj-otp-input').value.trim();
+            if (!otp) { alert('Please enter the OTP'); return; }
+            try {
+                const res = await fetch('/api/admin/paj/verify', {
+                    method: 'POST',
+                    headers: { 'Authorization': adminKey, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ otp })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('PAJ session verified successfully!');
+                    document.getElementById('paj-otp-input').value = '';
+                    await fetchPajSession();
+                } else {
+                    alert(data.error || 'Verification failed');
+                }
+            } catch (e) {
+                alert('Error: ' + e.message);
             }
         }
 
@@ -1010,7 +1108,7 @@
                 <tr>
                     <td data-label="Wallet"><div class="user-cell"><div class="avatar">${tx.wallet_address?.slice(-4) || '??'}</div><b style="font-size: 11px;">${tx.wallet_address?.slice(0, 8)}...</b></div></td>
                     <td data-label="Reference" class="hide-mobile">${tx.reference.slice(0, 10)}...</td>
-                    <td data-label="Type" class="hide-mobile"><b>${tx.type}</b></td>
+                    <td data-label="Type"><b>${tx.type}</b></td>
                     <td data-label="Amount"><b>${(tx.type === 'ONRAMP' ? '₦' : '$')}${Number(tx.amount).toLocaleString()}</b></td>
                     <td data-label="Status"><span class="status-pill ${tx.status.toLowerCase()}">${tx.status}</span></td>
                     <td data-label="Date" class="hide-mobile">${new Date(tx.created_at).toLocaleDateString()}</td>
