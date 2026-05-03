@@ -628,19 +628,31 @@ app.get('/api/settings', async (req, res) => {
 });
 
 app.get('/api/admin/settings', adminAuth, async (req, res) => {
-  res.json({ platform_fee: getPlatformFee() });
+  const settings = loadSettings();
+  res.json({ platform_fee: getPlatformFee(), paj_email: settings.paj_email || process.env.PAJ_EMAIL || 'paj@usevelcro.com' });
 });
 
 app.post('/api/admin/settings', adminAuth, async (req, res) => {
   try {
-    const { platform_fee } = req.body;
-    const fee = parseFloat(platform_fee);
-    if (Number.isNaN(fee) || fee < 0 || fee > 10) {
-      return res.status(400).json({ success: false, error: 'Fee must be between 0 and 10' });
+    const { platform_fee, paj_email } = req.body;
+    const settings = loadSettings();
+    if (platform_fee !== undefined) {
+      const fee = parseFloat(platform_fee);
+      if (Number.isNaN(fee) || fee < 0 || fee > 10) {
+        return res.status(400).json({ success: false, error: 'Fee must be between 0 and 10' });
+      }
+      settings.platform_fee = fee;
     }
-    if (saveSettings({ platform_fee: fee })) {
-      console.log(`✅ Platform fee updated to ${fee}%`);
-      res.json({ success: true, platform_fee: fee });
+    if (paj_email !== undefined) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(paj_email)) {
+        return res.status(400).json({ success: false, error: 'Invalid email format' });
+      }
+      settings.paj_email = paj_email;
+    }
+    if (saveSettings(settings)) {
+      console.log('✅ Settings updated:', JSON.stringify(settings));
+      res.json({ success: true, ...settings });
     } else {
       res.status(500).json({ success: false, error: 'Failed to save settings' });
     }

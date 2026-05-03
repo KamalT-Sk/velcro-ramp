@@ -859,11 +859,19 @@
             <!-- PAJ Session Management -->
             <div class="table-card" style="max-width: 500px; margin-top: 20px;">
                 <label style="font-size: 13px; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 8px; display: block;">PAJ Ramp Session</label>
+                <div style="margin-bottom: 16px;">
+                    <label style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 4px;">PAJ Email</label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                        <input type="email" id="paj-email-input" placeholder="your@email.com" style="margin-bottom: 0; flex: 1;">
+                        <button class="btn-primary" onclick="savePajEmail()" style="height: 50px; padding: 0 16px;">Save</button>
+                    </div>
+                    <p style="font-size: 11px; color: var(--text-secondary);">OTP will be sent to this email. Use an inbox you can access.</p>
+                </div>
                 <div id="paj-session-status" style="margin-bottom: 16px; padding: 12px; border-radius: 12px; background: #f8f9fc; border: 1px solid var(--border);">
                     <p style="font-size: 13px; color: var(--text-secondary);">Loading session status...</p>
                 </div>
                 <div id="paj-otp-section" class="hidden" style="margin-bottom: 16px;">
-                    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Enter the OTP sent to the PAJ email:</p>
+                    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Enter the OTP sent to your email:</p>
                     <div style="display: flex; gap: 10px;">
                         <input type="text" id="paj-otp-input" placeholder="Enter OTP" style="margin-bottom: 0; flex: 1;">
                         <button class="btn-primary" onclick="verifyPajOtp()">Verify</button>
@@ -977,6 +985,7 @@
                 const settingsRes = await fetch('/api/admin/settings', { headers });
                 const settings = await settingsRes.json();
                 document.getElementById('fee-input').value = settings.platform_fee;
+                document.getElementById('paj-email-input').value = settings.paj_email || '';
 
                 // 5. PAJ Session
                 await fetchPajSession();
@@ -1006,17 +1015,17 @@
                 const statusEl = document.getElementById('paj-session-status');
                 const otpSection = document.getElementById('paj-otp-section');
                 if (status.isValid) {
-                    statusEl.innerHTML = `<p style="font-size: 13px; color: var(--success); font-weight: 600;">✅ Session Active</p><p style="font-size: 12px; color: var(--text-secondary);">Email: ${status.email}</p>`;
+                    statusEl.innerHTML = `<p style="font-size: 13px; color: var(--success); font-weight: 600;">✅ Session Active</p><p style="font-size: 12px; color: var(--text-secondary);">Email: ${status.email || '-'}</p>`;
                     statusEl.style.background = '#f0fdf4';
                     statusEl.style.borderColor = '#bbf7d0';
                     otpSection.classList.add('hidden');
                 } else if (status.hasSession) {
-                    statusEl.innerHTML = `<p style="font-size: 13px; color: var(--warning); font-weight: 600;">⏳ Session Expired</p><p style="font-size: 12px; color: var(--text-secondary);">Email: ${status.email}</p>`;
+                    statusEl.innerHTML = `<p style="font-size: 13px; color: var(--warning); font-weight: 600;">⏳ Session Expired</p><p style="font-size: 12px; color: var(--text-secondary);">Email: ${status.email || '-'}</p>`;
                     statusEl.style.background = '#fffbeb';
                     statusEl.style.borderColor = '#fcd34d';
                     otpSection.classList.remove('hidden');
                 } else {
-                    statusEl.innerHTML = `<p style="font-size: 13px; color: var(--failed); font-weight: 600;">❌ No Session</p><p style="font-size: 12px; color: var(--text-secondary);">Click "Initiate Session" to start.</p>`;
+                    statusEl.innerHTML = `<p style="font-size: 13px; color: var(--failed); font-weight: 600;">❌ No Session</p><p style="font-size: 12px; color: var(--text-secondary);">Click "Initiate Session" to start. OTP will be sent to the email above.</p>`;
                     statusEl.style.background = '#fef2f2';
                     statusEl.style.borderColor = '#fecaca';
                     otpSection.classList.add('hidden');
@@ -1087,6 +1096,27 @@
                 }
             } catch (e) {
                 alert('Error saving settings: ' + e.message);
+            }
+        }
+
+        async function savePajEmail() {
+            const emailInput = document.getElementById('paj-email-input');
+            const email = emailInput.value.trim();
+            if (!email) { alert('Please enter an email'); return; }
+            try {
+                const res = await fetch('/api/admin/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': adminKey },
+                    body: JSON.stringify({ paj_email: email })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('PAJ email updated to: ' + email);
+                } else {
+                    alert(data.error || 'Failed to save email');
+                }
+            } catch (e) {
+                alert('Error saving email: ' + e.message);
             }
         }
 

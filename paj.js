@@ -10,9 +10,19 @@ try {
 }
 
 const PAJ_API_KEY = process.env.PAJ_API_KEY;
-const PAJ_EMAIL = process.env.PAJ_EMAIL || 'paj@usevelcro.com';
 const PAJ_ENV = process.env.PAJ_ENV || 'production';
 const SESSION_PATH = path.join(__dirname, 'paj-session.json');
+const SETTINGS_PATH = path.join(__dirname, 'settings.json');
+
+function getPajEmail() {
+  try {
+    if (fs.existsSync(SETTINGS_PATH)) {
+      const settings = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf8'));
+      if (settings.paj_email) return settings.paj_email;
+    }
+  } catch (err) {}
+  return process.env.PAJ_EMAIL || 'paj@usevelcro.com';
+}
 
 // Initialize PAJ SDK environment
 if (pajSdk) {
@@ -88,8 +98,9 @@ async function initiateSession() {
     throw new Error('PAJ SDK not available or API key missing');
   }
   try {
-    const result = await pajSdk.initiate(PAJ_EMAIL, PAJ_API_KEY);
-    return { success: true, email: PAJ_EMAIL, message: 'OTP sent to email' };
+    const email = getPajEmail();
+    const result = await pajSdk.initiate(email, PAJ_API_KEY);
+    return { success: true, email, message: 'OTP sent to email' };
   } catch (err) {
     throw new Error('PAJ initiate failed: ' + err.message);
   }
@@ -108,7 +119,7 @@ async function verifySession(otp) {
       browser: 'Node.js',
       ip: '127.0.0.1'
     };
-    const result = await pajSdk.verify(PAJ_EMAIL, otp, device, PAJ_API_KEY);
+    const result = await pajSdk.verify(getPajEmail(), otp, device, PAJ_API_KEY);
     const session = {
       token: result.token,
       recipient: result.recipient,
@@ -205,7 +216,7 @@ function getSessionStatus() {
   return {
     hasSession: !!session,
     isValid: isSessionValid(session),
-    email: PAJ_EMAIL,
+    email: getPajEmail(),
     expiresAt: session?.expiresAt || null
   };
 }
