@@ -489,6 +489,7 @@
 <body>
 
     <!-- Auth Overlay -->
+    <div id="auth-overlay">
         <div class="auth-card">
             <img src="Velcro_logo.png" alt="Velcro">
             <h2>Admin Login</h2>
@@ -933,8 +934,9 @@
         function logout() { localStorage.removeItem('velcro_admin_key'); location.reload(); }
 
         window.onload = () => {
+            const overlay = document.getElementById('auth-overlay');
             if (adminKey) {
-                document.getElementById('auth-overlay').style.display = 'none';
+                if (overlay) overlay.style.display = 'none';
                 fetchData();
                 setInterval(fetchData, 60000);
             }
