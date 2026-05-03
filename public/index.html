@@ -711,7 +711,7 @@
           <!-- Preview -->
           <div id="sell-preview" class="hidden text-center">
             <p class="text-xs text-gray-500">You'll send <span id="sell-preview-crypto" class="font-bold text-gray-900">--</span> and receive <span id="sell-preview-fiat" class="font-bold text-gray-900">--</span></p>
-            <p id="sell-fee-subtext" class="text-[10px] text-gray-400 mt-1">Includes 0.5% platform fee</p>
+
           </div>
 
           <!-- Action Button -->
@@ -742,15 +742,15 @@
                 <p class="text-xl font-bold text-gray-900"><span id="sell-confirm-amount">0.00</span> <span
                     id="sell-confirm-asset">USDT</span></p>
               </div>
-              <div
-                class="bg-white rounded-xl border border-gray-200 p-4 mb-3 text-left cursor-pointer hover:bg-gray-50 transition-colors group"
-                onclick="copyAddress('sell-wallet-address')" title="Click to copy">
-                <div class="flex items-center justify-between mb-1">
-                  <p class="text-xs text-gray-500">Wallet Address</p>
-                  <i data-lucide="copy"
-                    class="w-3.5 h-3.5 text-gray-400 group-hover:text-velcro-green transition-colors"></i>
+              <div class="bg-white rounded-xl border border-gray-200 p-4 mb-3 text-left">
+                <p class="text-xs text-gray-500 mb-2">Wallet Address</p>
+                <div class="flex items-center gap-2">
+                  <code class="text-sm font-mono text-gray-900 break-all flex-1" id="sell-wallet-address">-</code>
+                  <button onclick="copyAddress('sell-wallet-address')" title="Copy address"
+                    class="shrink-0 p-2 bg-gray-100 hover:bg-velcro-green/20 border border-gray-200 rounded-lg transition-colors text-gray-500 hover:text-velcro-navy">
+                    <i data-lucide="copy" class="w-4 h-4"></i>
+                  </button>
                 </div>
-                <code class="text-sm font-mono text-gray-900 break-all block" id="sell-wallet-address">-</code>
               </div>
               <div class="bg-white rounded-xl border border-gray-200 p-3 mb-3 text-left">
                 <p class="text-xs text-gray-500 mb-1">Reference</p>
@@ -762,11 +762,6 @@
                 <div id="sell-qr-code" class="w-40 h-40 mx-auto rounded-lg flex items-center justify-center bg-white"></div>
                 <p class="text-[10px] text-gray-400 mt-1">Scan with your crypto wallet app</p>
               </div>
-              <button onclick="copyAddress('sell-wallet-address')"
-                class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-xl text-sm font-medium transition-colors inline-flex items-center justify-center gap-2">
-                <i data-lucide="copy" class="w-4 h-4"></i>
-                Copy Address
-              </button>
             </div>
 
             <!-- Status Tracker -->
@@ -811,9 +806,13 @@
                 <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg opacity-50" id="status-3">
                   <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center"><i
                       data-lucide="refresh-cw" class="w-4 h-4 text-gray-500"></i></div>
-                  <div>
+                  <div class="flex-1">
                     <p class="text-sm font-medium text-gray-500">Processing payout</p>
                   </div>
+                  <button id="status-3-confirm" onclick="confirmProcessing('sell')" class="hidden text-xs bg-white border border-gray-200 text-gray-600 px-2.5 py-1.5 rounded-lg hover:bg-gray-100 transition-colors font-medium shrink-0 inline-flex items-center gap-1">
+                    <span class="confirm-text">Confirm</span>
+                    <span class="confirm-loader hidden"><svg class="animate-spin w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></span>
+                  </button>
                 </div>
                 <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg opacity-50" id="status-4">
                   <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center"><i
@@ -969,7 +968,7 @@
           <!-- Preview -->
           <div id="buy-preview" class="hidden text-center">
             <p class="text-xs text-gray-500">You'll pay <span id="buy-preview-fiat" class="font-bold text-gray-900">--</span> and receive <span id="buy-preview-crypto" class="font-bold text-gray-900">--</span></p>
-            <p id="sell-fee-subtext" class="text-[10px] text-gray-400 mt-1">Includes 0.5% platform fee</p>
+
           </div>
 
           <!-- Action Button -->
@@ -1095,9 +1094,13 @@
                 <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg opacity-50" id="bstatus-3">
                   <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center"><i
                       data-lucide="refresh-cw" class="w-4 h-4 text-gray-500"></i></div>
-                  <div>
+                  <div class="flex-1">
                     <p class="text-sm font-medium text-gray-500">Processing crypto</p>
                   </div>
+                  <button id="bstatus-3-confirm" onclick="confirmProcessing('buy')" class="hidden text-xs bg-white border border-gray-200 text-gray-600 px-2.5 py-1.5 rounded-lg hover:bg-gray-100 transition-colors font-medium shrink-0 inline-flex items-center gap-1">
+                    <span class="confirm-text">Confirm</span>
+                    <span class="confirm-loader hidden"><svg class="animate-spin w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></span>
+                  </button>
                 </div>
                 <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg opacity-50" id="bstatus-4">
                   <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center"><i
@@ -1956,6 +1959,36 @@
       if (input) input.focus();
     }
 
+    async function confirmProcessing(type) {
+      const btn = document.getElementById((type === 'sell' ? '' : 'b') + 'status-3-confirm');
+      if (!btn) return;
+      const textSpan = btn.querySelector('.confirm-text');
+      const loaderSpan = btn.querySelector('.confirm-loader');
+      if (textSpan) textSpan.classList.add('hidden');
+      if (loaderSpan) loaderSpan.classList.remove('hidden');
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/confirm`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reference: currentReference })
+        });
+        const payload = await res.json();
+        if (res.ok) {
+          showToast('Confirmation sent! Refreshing status...', 'success');
+        } else {
+          showToast(payload.message || 'Confirmation failed', 'error');
+        }
+      } catch (err) {
+        showToast(err.message || 'Failed to confirm', 'error');
+      } finally {
+        if (textSpan) textSpan.classList.remove('hidden');
+        if (loaderSpan) loaderSpan.classList.add('hidden');
+        btn.disabled = false;
+      }
+    }
+
     async function confirmManual(type) {
       let hash = '';
       if (type === 'sell') {
@@ -2309,8 +2342,11 @@
           updateStatusUI(status, type);
           // Show blockchain explorer link for completed buy transactions
           if (type === 'buy' && status === 'COMPLETED') {
-            const explorerUrl = data.explorer_url || '';
-            const txHash = data.hash || '';
+            const explorerUrl = data.explorer_url || currentTxDetails.explorerUrl || '';
+            const txHash = data.hash || currentTxDetails.hash || '';
+            // Store for future use
+            if (txHash) currentTxDetails.hash = txHash;
+            if (explorerUrl) currentTxDetails.explorerUrl = explorerUrl;
             const explorerLink = document.getElementById('buy-explorer-link');
             const statusDetail = document.getElementById('buy-status-detail');
             if (explorerLink) {
@@ -2332,6 +2368,9 @@
             if (status === 'COMPLETED') {
               showToast('Transaction Completed Successfully!', 'success');
               // Show success modal with transaction details
+              // Preserve hash/explorer from previous polls if current response lacks them
+              const txHash = data.hash || currentTxDetails.hash || '';
+              const txExplorer = data.explorer_url || currentTxDetails.explorerUrl || '';
               const modalData = {
                 reference: currentTxDetails.reference || data.reference || '',
                 amount: currentTxDetails.amount,
@@ -2342,9 +2381,12 @@
                 asset: currentTxDetails.asset || currentBuyAsset || currentSellAsset,
                 network: currentTxDetails.network || currentBuyNetwork || currentSellNetwork,
                 walletAddress: currentTxDetails.walletAddress || data.wallet_address || '',
-                explorerUrl: data.explorer_url || '',
-                hash: data.hash || ''
+                explorerUrl: txExplorer,
+                hash: txHash
               };
+              // Update currentTxDetails so it's available for next use
+              currentTxDetails.hash = txHash;
+              currentTxDetails.explorerUrl = txExplorer;
               setTimeout(() => {
                 showSuccessModal(type, modalData);
               }, 1500);
@@ -2379,6 +2421,7 @@
         document.getElementById(prefix + 'status-3'),
         document.getElementById(prefix + 'status-4')
       ];
+      const stepIcons = ['clock', 'search', 'refresh-cw', 'check-circle'];
       const statusMap = {
         'AWAITING_DEPOSIT': 1, 'PENDING': 1, 'INITIATED': 1,
         'DETECTED': 2, 'CONFIRMED': 2, 'RECEIVED': 2, 'VERIFIED': 2,
@@ -2393,7 +2436,6 @@
         if (!el) return;
         const targetStep = idx + 1;
         const iconContainer = el.querySelector('div[class*="rounded-full"]');
-        const icon = iconContainer ? iconContainer.querySelector('i, svg') : null;
         const titleEl = el.querySelector('.text-sm');
 
         if (targetStep === step) {
@@ -2403,30 +2445,36 @@
           if (iconContainer) {
             iconContainer.classList.remove('bg-gray-200');
             iconContainer.classList.add('bg-amber-100');
-          }
-          if (icon) {
-            icon.classList.remove('text-gray-500');
-            icon.classList.add('text-amber-600');
+            // Restore original icon
+            iconContainer.innerHTML = `<i data-lucide="${stepIcons[idx]}" class="w-4 h-4 text-amber-600"></i>`;
           }
           if (titleEl) {
             titleEl.classList.remove('text-gray-500');
             titleEl.classList.add('text-amber-700');
           }
+          // Show confirm button on step 3 when processing
+          const confirmBtn = document.getElementById(prefix + 'status-3-confirm');
+          if (confirmBtn && targetStep === 3) {
+            confirmBtn.classList.remove('hidden');
+          }
         } else if (targetStep < step) {
-          // COMPLETED steps — green styling
+          // COMPLETED steps — green styling + tick icon
           el.classList.remove('opacity-50', 'bg-gray-50', 'bg-amber-50');
           el.classList.add('bg-green-50');
           if (iconContainer) {
             iconContainer.classList.remove('bg-gray-200', 'bg-amber-100');
             iconContainer.classList.add('bg-green-100');
-          }
-          if (icon) {
-            icon.classList.remove('text-gray-500', 'text-amber-600');
-            icon.classList.add('text-green-600');
+            // Replace with tick icon
+            iconContainer.innerHTML = `<svg class="w-4 h-4 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
           }
           if (titleEl) {
             titleEl.classList.remove('text-gray-500', 'text-amber-700');
             titleEl.classList.add('text-green-700');
+          }
+          // Hide confirm button on step 3 if passed
+          const confirmBtn = document.getElementById(prefix + 'status-3-confirm');
+          if (confirmBtn && targetStep === 3) {
+            confirmBtn.classList.add('hidden');
           }
         } else {
           // FUTURE steps — inactive styling
@@ -2435,17 +2483,21 @@
           if (iconContainer) {
             iconContainer.classList.remove('bg-amber-100', 'bg-green-100');
             iconContainer.classList.add('bg-gray-200');
-          }
-          if (icon) {
-            icon.classList.remove('text-amber-600', 'text-green-600');
-            icon.classList.add('text-gray-500');
+            // Restore original icon
+            iconContainer.innerHTML = `<i data-lucide="${stepIcons[idx]}" class="w-4 h-4 text-gray-500"></i>`;
           }
           if (titleEl) {
             titleEl.classList.remove('text-amber-700', 'text-green-700');
             titleEl.classList.add('text-gray-500');
           }
+          // Hide confirm button on step 3 if not reached
+          const confirmBtn = document.getElementById(prefix + 'status-3-confirm');
+          if (confirmBtn && targetStep === 3) {
+            confirmBtn.classList.add('hidden');
+          }
         }
       });
+      safeLucideInit();
     }
 
     function copyAddress(elementId) {
@@ -2660,8 +2712,11 @@
         detailEl.textContent = data.walletAddress ? `${data.walletAddress.slice(0, 8)}...${data.walletAddress.slice(-8)}` : '-';
         
         // Show blockchain explorer link if available
-        if (data.explorerUrl || data.hash) {
-          explorerLink.href = data.explorerUrl || getExplorerUrl(data.hash, data.network);
+        const explorerUrl = data.explorerUrl || currentTxDetails.explorerUrl || '';
+        const txHash = data.hash || currentTxDetails.hash || '';
+        const txNetwork = data.network || currentTxDetails.network || currentBuyNetwork || '';
+        if (explorerUrl || txHash) {
+          explorerLink.href = explorerUrl || getExplorerUrl(txHash, txNetwork);
           explorerLink.classList.remove('hidden');
         } else {
           explorerLink.classList.add('hidden');
