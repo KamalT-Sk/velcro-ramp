@@ -713,7 +713,7 @@
               </div>
               <div class="flex flex-row sm:flex-col items-center sm:items-end gap-2 shrink-0 w-full sm:w-auto">
                 <div class="custom-select" id="sell-asset-wrap">
-                  <div class="asset-pill" onclick="toggleDropdown('sell-asset-options')">
+                  <div class="asset-pill" onclick="openSellAssetPicker()">
                     <div class="flex items-center gap-1.5" id="sell-asset-display">
                       <span class="text-gray-400 text-sm">Select</span>
                     </div>
@@ -721,23 +721,6 @@
                       stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
                       <path d="m6 9 6 6 6-6" />
                     </svg>
-                  </div>
-                  <div class="custom-select-options" id="sell-asset-options">
-                    <div class="custom-option" onclick="selectSellAsset('USDT', '/logos/usdt.png', 'Tether')">
-                      <img src="/logos/usdt.png" class="w-6 h-6" alt="USDT">
-                      <span class="font-medium">USDT</span>
-                      <span class="text-gray-400 text-xs">Tether</span>
-                    </div>
-                    <div class="custom-option" onclick="selectSellAsset('USDC', '/logos/usdc.png', 'USD Coin')">
-                      <img src="/logos/usdc.png" class="w-6 h-6" alt="USDC">
-                      <span class="font-medium">USDC</span>
-                      <span class="text-gray-400 text-xs">USD Coin</span>
-                    </div>
-                    <div class="custom-option" onclick="selectSellAsset('CNGN', '/logos/cngn.png?v=2', 'Naira Token')">
-                      <img src="/logos/cngn.png?v=2" class="w-6 h-6" alt="CNGN">
-                      <span class="font-medium">CNGN</span>
-                      <span class="text-gray-400 text-xs">Naira Token</span>
-                    </div>
                   </div>
                 </div>
                 <div class="custom-select">
@@ -1033,70 +1016,6 @@
                       stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
                       <path d="m6 9 6 6 6-6" />
                     </svg>
-                  </div>
-                  <!-- Asset Picker Modal -->
-                  <div class="asset-picker-modal" id="buy-asset-options">
-                    <div class="asset-picker-backdrop" onclick="closeBuyAssetPicker()"></div>
-                    <div class="asset-picker-sheet">
-                      <div class="asset-picker-header">
-                        <button class="asset-picker-back" onclick="closeBuyAssetPicker()" aria-label="Back">
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                        </button>
-                        <h3>Select Crypto Currency</h3>
-                      </div>
-                      <div class="asset-picker-search">
-                        <div class="asset-picker-search-wrap">
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                          <input type="text" id="buy-asset-search" placeholder="Search Crypto" oninput="filterBuyAssets()" autocomplete="off">
-                        </div>
-                      </div>
-                      <div class="asset-picker-list" id="buy-asset-list">
-                        <div class="asset-picker-divider">Stablecoins</div>
-                        <div class="asset-picker-item" data-symbol="USDT" data-name="Tether" onclick="selectBuyAsset('USDT', '/logos/usdt.png', 'Tether', 'switch')">
-                          <img src="/logos/usdt.png" class="asset-picker-logo" alt="USDT">
-                          <div class="asset-picker-info">
-                            <div class="asset-picker-symbol">USDT</div>
-                            <div class="asset-picker-name">Tether</div>
-                          </div>
-                        </div>
-                        <div class="asset-picker-item" data-symbol="USDC" data-name="USD Coin" onclick="selectBuyAsset('USDC', '/logos/usdc.png', 'USD Coin', 'switch')">
-                          <img src="/logos/usdc.png" class="asset-picker-logo" alt="USDC">
-                          <div class="asset-picker-info">
-                            <div class="asset-picker-symbol">USDC</div>
-                            <div class="asset-picker-name">USD Coin</div>
-                          </div>
-                        </div>
-                        <div class="asset-picker-item" data-symbol="CNGN" data-name="Naira Token" onclick="selectBuyAsset('CNGN', '/logos/cngn.png?v=2', 'Naira Token', 'switch')">
-                          <img src="/logos/cngn.png?v=2" class="asset-picker-logo" alt="CNGN">
-                          <div class="asset-picker-info">
-                            <div class="asset-picker-symbol">CNGN</div>
-                            <div class="asset-picker-name">Naira Token</div>
-                          </div>
-                        </div>
-                        <div class="asset-picker-divider">Solana</div>
-                        <div class="asset-picker-item" data-symbol="SOL" data-name="Solana" onclick="selectBuyAsset('SOL', '/logos/solana.png', 'Solana', 'paj')">
-                          <img src="/logos/solana.png" class="asset-picker-logo" alt="SOL">
-                          <div class="asset-picker-info">
-                            <div class="asset-picker-symbol">SOL</div>
-                            <div class="asset-picker-name">Solana</div>
-                          </div>
-                        </div>
-                        <div class="asset-picker-item" data-symbol="JUP" data-name="Jupiter" onclick="selectBuyAsset('JUP', '/logos/jup.png', 'Jupiter', 'paj')">
-                          <div class="asset-picker-logo" style="background: linear-gradient(135deg, #ec4899, #9333ea); display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 700;">J</div>
-                          <div class="asset-picker-info">
-                            <div class="asset-picker-symbol">JUP</div>
-                            <div class="asset-picker-name">Jupiter</div>
-                          </div>
-                        </div>
-                        <div class="asset-picker-item" data-symbol="USDG" data-name="Global Dollar" onclick="selectBuyAsset('USDG', '/logos/usdg.png', 'Global Dollar', 'paj')">
-                          <img src="/logos/usdg.png" class="asset-picker-logo" alt="USDG">
-                          <div class="asset-picker-info">
-                            <div class="asset-picker-symbol">USDG</div>
-                            <div class="asset-picker-name">Global Dollar</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </div>
                 <div class="custom-select">
@@ -1546,8 +1465,8 @@
         document.getElementById('buy-amount-step').classList.remove('opacity-50', 'pointer-events-none');
 
         // Mark options selected
-        document.querySelectorAll('#sell-asset-options .custom-option').forEach(o => {
-          if (o.textContent.includes('USDT')) o.classList.add('selected');
+        document.querySelectorAll('#sell-asset-list .asset-picker-item').forEach(o => {
+          if (o.dataset.symbol === 'USDT') o.classList.add('selected');
         });
         document.querySelectorAll('#buy-asset-list .asset-picker-item').forEach(o => {
           if (o.dataset.symbol === 'USDT') o.classList.add('selected');
@@ -2003,6 +1922,50 @@
       });
     }
 
+    function openSellAssetPicker() {
+      const modal = document.getElementById('sell-asset-options');
+      const searchInput = document.getElementById('sell-asset-search');
+      if (searchInput) { searchInput.value = ''; filterSellAssets(); }
+      // Highlight current selection
+      document.querySelectorAll('#sell-asset-list .asset-picker-item').forEach(item => {
+        item.classList.toggle('selected', item.dataset.symbol === currentSellAsset);
+      });
+      if (modal) {
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+      if (searchInput) setTimeout(() => searchInput.focus(), 100);
+    }
+
+    function closeSellAssetPicker() {
+      const modal = document.getElementById('sell-asset-options');
+      if (modal) modal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function filterSellAssets() {
+      const term = document.getElementById('sell-asset-search').value.trim().toLowerCase();
+      const items = document.querySelectorAll('#sell-asset-list .asset-picker-item');
+      const dividers = document.querySelectorAll('#sell-asset-list .asset-picker-divider');
+      items.forEach(item => {
+        const symbol = (item.dataset.symbol || '').toLowerCase();
+        const name = (item.dataset.name || '').toLowerCase();
+        item.style.display = (!term || symbol.includes(term) || name.includes(term)) ? '' : 'none';
+      });
+      // Hide dividers if all items below them are hidden
+      dividers.forEach(div => {
+        let next = div.nextElementSibling;
+        let anyVisible = false;
+        while (next && !next.classList.contains('asset-picker-divider')) {
+          if (next.classList.contains('asset-picker-item') && next.style.display !== 'none') {
+            anyVisible = true; break;
+          }
+          next = next.nextElementSibling;
+        }
+        div.style.display = anyVisible ? '' : 'none';
+      });
+    }
+
     function switchTab(tab) {
       const indicator = document.getElementById('tab-indicator');
       const sellTab = document.getElementById('tab-sell');
@@ -2043,14 +2006,15 @@
         <span class="font-bold text-sm sm:text-base">${symbol}</span>
         <span class="text-gray-400 text-[10px] hidden sm:inline ml-1">${name}</span>
       `;
-      document.getElementById('sell-asset-options').classList.remove('open');
+      closeSellAssetPicker();
       document.getElementById('sell-currency-prefix').textContent = symbol === 'CNGN' ? '₦' : '$';
       safeSetText('sell-asset-name', symbol);
       safeSetText('sell-confirm-asset', symbol);
       safeSetSrc('sell-confirm-asset-img', logo);
-      document.querySelectorAll('#sell-asset-options .custom-option').forEach(o => o.classList.remove('selected'));
-      event.currentTarget.classList.add('selected');
-      document.getElementById('sell-asset-options').classList.remove('open');
+      document.querySelectorAll('#sell-asset-list .asset-picker-item').forEach(o => o.classList.remove('selected'));
+      document.querySelectorAll('#sell-asset-list .asset-picker-item').forEach(o => {
+        if (o.dataset.symbol === symbol) o.classList.add('selected');
+      });
       document.getElementById('sell-network-wrap').classList.remove('opacity-50', 'pointer-events-none');
       currentSwitchAsset = getSwitchAsset(currentSellAsset, currentSellNetwork);
       if (currentSwitchAsset) fetchRate();
@@ -2069,7 +2033,7 @@
       safeSetSrc('sell-confirm-network-img', logo);
       document.querySelectorAll('#sell-network-options .custom-option').forEach(o => o.classList.remove('selected'));
       event.currentTarget.classList.add('selected');
-      document.getElementById('sell-network-options').classList.remove('open');
+      closeAllDropdowns();
       document.getElementById('sell-amount-step').classList.remove('opacity-50', 'pointer-events-none');
       currentSwitchAsset = getSwitchAsset(currentSellAsset, currentSellNetwork);
       if (currentSwitchAsset) fetchRate();
@@ -2081,7 +2045,7 @@
       document.getElementById('sell-bank-display').innerHTML = `<span class="font-medium text-gray-900">${name}</span>`;
       document.querySelectorAll('#sell-bank-options .custom-option').forEach(o => o.classList.remove('selected'));
       event.currentTarget.classList.add('selected');
-      document.getElementById('sell-bank-options').classList.remove('open');
+      closeAllDropdowns();
       validateAccount();
       updateStepIndicators('OFFRAMP');
     }
@@ -2209,7 +2173,7 @@
       safeSetSrc('buy-confirm-network-img', logo);
       document.querySelectorAll('#buy-network-options .custom-option').forEach(o => o.classList.remove('selected'));
       event.currentTarget.classList.add('selected');
-      document.getElementById('buy-network-options').classList.remove('open');
+      closeAllDropdowns();
       document.getElementById('buy-amount-step').classList.remove('opacity-50', 'pointer-events-none');
       currentSwitchAsset = getSwitchAsset(currentBuyAsset, currentBuyNetwork);
       if (currentSwitchAsset) fetchRate();
@@ -3296,6 +3260,115 @@
     }
 
   </script>
+
+  <!-- Sell Asset Picker Modal -->
+  <div class="asset-picker-modal" id="sell-asset-options">
+    <div class="asset-picker-backdrop" onclick="closeSellAssetPicker()"></div>
+    <div class="asset-picker-sheet">
+      <div class="asset-picker-header">
+        <button class="asset-picker-back" onclick="closeSellAssetPicker()" aria-label="Back">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <h3>Select Crypto Currency</h3>
+      </div>
+      <div class="asset-picker-search">
+        <div class="asset-picker-search-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="sell-asset-search" placeholder="Search Crypto" oninput="filterSellAssets()" autocomplete="off">
+        </div>
+      </div>
+      <div class="asset-picker-list" id="sell-asset-list">
+        <div class="asset-picker-divider">Stablecoins</div>
+        <div class="asset-picker-item" data-symbol="USDT" data-name="Tether" onclick="selectSellAsset('USDT', '/logos/usdt.png', 'Tether')">
+          <img src="/logos/usdt.png" class="asset-picker-logo" alt="USDT">
+          <div class="asset-picker-info">
+            <div class="asset-picker-symbol">USDT</div>
+            <div class="asset-picker-name">Tether</div>
+          </div>
+        </div>
+        <div class="asset-picker-item" data-symbol="USDC" data-name="USD Coin" onclick="selectSellAsset('USDC', '/logos/usdc.png', 'USD Coin')">
+          <img src="/logos/usdc.png" class="asset-picker-logo" alt="USDC">
+          <div class="asset-picker-info">
+            <div class="asset-picker-symbol">USDC</div>
+            <div class="asset-picker-name">USD Coin</div>
+          </div>
+        </div>
+        <div class="asset-picker-item" data-symbol="CNGN" data-name="Naira Token" onclick="selectSellAsset('CNGN', '/logos/cngn.png?v=2', 'Naira Token')">
+          <img src="/logos/cngn.png?v=2" class="asset-picker-logo" alt="CNGN">
+          <div class="asset-picker-info">
+            <div class="asset-picker-symbol">CNGN</div>
+            <div class="asset-picker-name">Naira Token</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Buy Asset Picker Modal (moved to root to escape stacking context) -->
+  <div class="asset-picker-modal" id="buy-asset-options">
+    <div class="asset-picker-backdrop" onclick="closeBuyAssetPicker()"></div>
+    <div class="asset-picker-sheet">
+      <div class="asset-picker-header">
+        <button class="asset-picker-back" onclick="closeBuyAssetPicker()" aria-label="Back">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <h3>Select Crypto Currency</h3>
+      </div>
+      <div class="asset-picker-search">
+        <div class="asset-picker-search-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" id="buy-asset-search" placeholder="Search Crypto" oninput="filterBuyAssets()" autocomplete="off">
+        </div>
+      </div>
+      <div class="asset-picker-list" id="buy-asset-list">
+        <div class="asset-picker-divider">Stablecoins</div>
+        <div class="asset-picker-item" data-symbol="USDT" data-name="Tether" onclick="selectBuyAsset('USDT', '/logos/usdt.png', 'Tether', 'switch')">
+          <img src="/logos/usdt.png" class="asset-picker-logo" alt="USDT">
+          <div class="asset-picker-info">
+            <div class="asset-picker-symbol">USDT</div>
+            <div class="asset-picker-name">Tether</div>
+          </div>
+        </div>
+        <div class="asset-picker-item" data-symbol="USDC" data-name="USD Coin" onclick="selectBuyAsset('USDC', '/logos/usdc.png', 'USD Coin', 'switch')">
+          <img src="/logos/usdc.png" class="asset-picker-logo" alt="USDC">
+          <div class="asset-picker-info">
+            <div class="asset-picker-symbol">USDC</div>
+            <div class="asset-picker-name">USD Coin</div>
+          </div>
+        </div>
+        <div class="asset-picker-item" data-symbol="CNGN" data-name="Naira Token" onclick="selectBuyAsset('CNGN', '/logos/cngn.png?v=2', 'Naira Token', 'switch')">
+          <img src="/logos/cngn.png?v=2" class="asset-picker-logo" alt="CNGN">
+          <div class="asset-picker-info">
+            <div class="asset-picker-symbol">CNGN</div>
+            <div class="asset-picker-name">Naira Token</div>
+          </div>
+        </div>
+        <div class="asset-picker-divider">Solana</div>
+        <div class="asset-picker-item" data-symbol="SOL" data-name="Solana" onclick="selectBuyAsset('SOL', '/logos/solana.png', 'Solana', 'paj')">
+          <img src="/logos/solana.png" class="asset-picker-logo" alt="SOL">
+          <div class="asset-picker-info">
+            <div class="asset-picker-symbol">SOL</div>
+            <div class="asset-picker-name">Solana</div>
+          </div>
+        </div>
+        <div class="asset-picker-item" data-symbol="JUP" data-name="Jupiter" onclick="selectBuyAsset('JUP', '/logos/jup.png', 'Jupiter', 'paj')">
+          <div class="asset-picker-logo" style="background: linear-gradient(135deg, #ec4899, #9333ea); display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 700;">J</div>
+          <div class="asset-picker-info">
+            <div class="asset-picker-symbol">JUP</div>
+            <div class="asset-picker-name">Jupiter</div>
+          </div>
+        </div>
+        <div class="asset-picker-item" data-symbol="USDG" data-name="Global Dollar" onclick="selectBuyAsset('USDG', '/logos/usdg.png', 'Global Dollar', 'paj')">
+          <img src="/logos/usdg.png" class="asset-picker-logo" alt="USDG">
+          <div class="asset-picker-info">
+            <div class="asset-picker-symbol">USDG</div>
+            <div class="asset-picker-name">Global Dollar</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 
 </html>
