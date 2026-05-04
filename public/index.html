@@ -1621,13 +1621,17 @@
       try {
         const ids = 'solana,jupiter-exchange-solana,usd-coin';
         const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`, { cache: 'default' });
-        if (!res.ok) return;
+        if (!res.ok) throw new Error('CoinGecko response not ok');
         const data = await res.json();
         PAJ_TOKEN_PRICES['SOL'] = data['solana']?.usd || 0;
         PAJ_TOKEN_PRICES['JUP'] = data['jupiter-exchange-solana']?.usd || 0;
         PAJ_TOKEN_PRICES['USDG'] = data['usd-coin']?.usd || 1;
       } catch (e) {
         console.log('Token price fetch failed:', e.message);
+        // Fallback prices if CoinGecko is unavailable
+        if (!PAJ_TOKEN_PRICES['SOL']) PAJ_TOKEN_PRICES['SOL'] = 150;
+        if (!PAJ_TOKEN_PRICES['JUP']) PAJ_TOKEN_PRICES['JUP'] = 0.80;
+        if (!PAJ_TOKEN_PRICES['USDG']) PAJ_TOKEN_PRICES['USDG'] = 1;
       }
     }
 
@@ -1646,8 +1650,10 @@
         if (!res.ok) throw new Error('Failed to fetch PAJ rate');
         const payload = await res.json();
         const data = payload.data || {};
-        const onrampRate = data.onramp?.rate ?? data.onramp;
-        if (onrampRate && typeof onrampRate === 'number') {
+        console.log('PAJ rate response:', data);
+        const rawRate = data.onramp?.rate ?? data.onramp;
+        const onrampRate = Number(rawRate);
+        if (!Number.isNaN(onrampRate) && onrampRate > 0) {
           currentRate.paj = onrampRate;
         }
         // Fetch token prices and compute approximate token rates (no session needed)
@@ -1655,6 +1661,7 @@
         if (currentBuyAsset && currentProvider === 'paj') {
           const approxRate = computePajTokenRate(currentBuyAsset);
           currentRate.buy = approxRate > 0 ? approxRate : 0;
+          console.log('PAJ computed rate:', currentRate.buy, 'token prices:', PAJ_TOKEN_PRICES);
         }
         updateNavRate();
         updateRateDisplays();
@@ -1690,12 +1697,10 @@
         }
       }
       if (buyRateEl) {
-        if (currentBuyAsset && currentRate.buy) {
-          if (currentProvider === 'paj' && currentRate.paj) {
-            buyRateEl.innerHTML = `${pulse}Rate: $1 on ${currentBuyAsset} = ${formatCurrency(currentRate.paj)}`;
-          } else {
-            buyRateEl.innerHTML = `${pulse}Rate: 1 ${currentBuyAsset} = ${formatCurrency(currentRate.buy)}`;
-          }
+        if (currentProvider === 'paj' && currentRate.paj) {
+          buyRateEl.innerHTML = `${pulse}Rate: $1 on ${currentBuyAsset} = ${formatCurrency(currentRate.paj)}`;
+        } else if (currentBuyAsset && currentRate.buy) {
+          buyRateEl.innerHTML = `${pulse}Rate: 1 ${currentBuyAsset} = ${formatCurrency(currentRate.buy)}`;
         } else {
           buyRateEl.innerHTML = `${pulse}Rate: --`;
         }
