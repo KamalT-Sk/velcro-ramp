@@ -2157,7 +2157,7 @@
       }
     }
 
-    function selectBuyAsset(symbol, logo, name, provider) {
+    async function selectBuyAsset(symbol, logo, name, provider) {
       currentBuyAsset = symbol;
       currentProvider = provider || 'switch';
       document.getElementById('buy-asset-display').innerHTML = `
@@ -2181,14 +2181,14 @@
         netWrap.classList.add('opacity-50', 'pointer-events-none');
         netWrap.style.display = 'none';
         document.getElementById('buy-network-display').innerHTML = '<img src="/logos/solana.png" class="w-5 h-5 rounded-full"><span class="font-medium text-sm">Solana</span>';
-        fetchPajRate();
+        await fetchPajRate();
       } else {
         // Show network selector for Switch assets
         const netWrap = document.getElementById('buy-network-wrap');
         netWrap.style.display = '';
         netWrap.classList.remove('opacity-50', 'pointer-events-none');
         currentSwitchAsset = getSwitchAsset(currentBuyAsset, currentBuyNetwork);
-        if (currentSwitchAsset) fetchRate();
+        if (currentSwitchAsset) await fetchRate();
       }
       calculateBuy();
       updateStepIndicators('ONRAMP');
