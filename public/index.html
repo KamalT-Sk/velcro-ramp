@@ -1646,8 +1646,8 @@
         if (!res.ok) throw new Error('Failed to fetch PAJ rate');
         const payload = await res.json();
         const data = payload.data || {};
-        const onrampRate = data.onramp?.rate;
-        if (onrampRate) {
+        const onrampRate = data.onramp?.rate ?? data.onramp;
+        if (onrampRate && typeof onrampRate === 'number') {
           currentRate.paj = onrampRate;
         }
         // Fetch token prices and compute approximate token rates (no session needed)
