@@ -43,7 +43,7 @@ const PAJ_ASSETS = [
     name: 'Solana',
     mint: 'So11111111111111111111111111111111111111112',
     chain: 'SOLANA',
-    logo: 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png'
+    logo: '/logos/solana.png'
   },
   {
     id: 'jup',
@@ -51,7 +51,7 @@ const PAJ_ASSETS = [
     name: 'Jupiter',
     mint: 'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN',
     chain: 'SOLANA',
-    logo: 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN/logo.png'
+    logo: '/logos/jup.png'
   },
   {
     id: 'usdg',
@@ -59,7 +59,7 @@ const PAJ_ASSETS = [
     name: 'USDC',
     mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
     chain: 'SOLANA',
-    logo: 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png'
+    logo: '/logos/usdg.png'
   }
 ];
 

@@ -299,6 +299,183 @@
       background: #f0fdf4;
     }
 
+    /* ─── Asset Picker Modal (PAJ-style) ─── */
+    .asset-picker-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      justify-content: flex-end;
+      flex-direction: column;
+    }
+    .asset-picker-modal.open {
+      display: flex;
+    }
+    .asset-picker-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+    .asset-picker-sheet {
+      position: relative;
+      background: #fff;
+      border-radius: 20px 20px 0 0;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
+    }
+    .asset-picker-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 20px;
+      position: relative;
+      border-bottom: 1px solid #f3f4f6;
+      flex-shrink: 0;
+    }
+    .asset-picker-header h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #111827;
+      margin: 0;
+    }
+    .asset-picker-back {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #f3f4f6;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #374151;
+    }
+    .asset-picker-back:hover {
+      background: #e5e7eb;
+    }
+    .asset-picker-search {
+      padding: 12px 20px 4px;
+      flex-shrink: 0;
+    }
+    .asset-picker-search-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f3f4f6;
+      border-radius: 12px;
+      padding: 10px 14px;
+    }
+    .asset-picker-search-wrap input {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 15px;
+      width: 100%;
+      padding: 0;
+      margin: 0;
+      color: #111827;
+    }
+    .asset-picker-search-wrap input::placeholder {
+      color: #9ca3af;
+    }
+    .asset-picker-list {
+      overflow-y: auto;
+      padding: 8px 0 24px;
+      flex: 1;
+    }
+    .asset-picker-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 20px;
+      cursor: pointer;
+      transition: background 0.12s;
+      border-bottom: 1px solid #f9fafb;
+    }
+    .asset-picker-item:hover {
+      background: #f9fafb;
+    }
+    .asset-picker-item.selected {
+      background: #f0fdf4;
+    }
+    .asset-picker-item:last-child {
+      border-bottom: none;
+    }
+    .asset-picker-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .asset-picker-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .asset-picker-symbol {
+      font-size: 15px;
+      font-weight: 600;
+      color: #111827;
+      line-height: 1.3;
+    }
+    .asset-picker-name {
+      font-size: 13px;
+      color: #9ca3af;
+      line-height: 1.3;
+    }
+    .asset-picker-badge {
+      font-size: 11px;
+      font-weight: 500;
+      color: #9ca3af;
+      background: #f3f4f6;
+      padding: 4px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .asset-picker-divider {
+      padding: 6px 20px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: #fafafa;
+    }
+
+    /* Desktop: center card */
+    @media (min-width: 641px) {
+      .asset-picker-modal {
+        align-items: center;
+        justify-content: center;
+      }
+      .asset-picker-sheet {
+        width: 100%;
+        max-width: 420px;
+        border-radius: 20px;
+        max-height: 600px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      @keyframes scaleIn {
+        from { opacity: 0; transform: scale(0.96); }
+        to { opacity: 1; transform: scale(1); }
+      }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
     #sell-network-display img,
     #buy-network-display img {
       width: 24px;
@@ -848,7 +1025,7 @@
               </div>
               <div class="flex flex-row sm:flex-col items-center sm:items-end gap-2 shrink-0 w-full sm:w-auto">
                 <div class="custom-select" id="buy-asset-wrap">
-                  <div class="asset-pill" onclick="toggleDropdown('buy-asset-options')">
+                  <div class="asset-pill" onclick="openBuyAssetPicker()">
                     <div class="flex items-center gap-1.5" id="buy-asset-display">
                       <span class="text-gray-400 text-sm">Select</span>
                     </div>
@@ -857,31 +1034,68 @@
                       <path d="m6 9 6 6 6-6" />
                     </svg>
                   </div>
-                  <div class="custom-select-options" id="buy-asset-options">
-                    <div class="custom-option" onclick="selectBuyAsset('USDT', '/logos/usdt.png', 'Tether', 'switch')">
-                      <img src="/logos/usdt.png" class="w-6 h-6" alt="USDT"><span class="font-medium">USDT</span><span
-                        class="text-gray-400 text-xs">Tether</span>
-                    </div>
-                    <div class="custom-option" onclick="selectBuyAsset('USDC', '/logos/usdc.png', 'USD Coin', 'switch')">
-                      <img src="/logos/usdc.png" class="w-6 h-6" alt="USDC"><span class="font-medium">USDC</span><span
-                        class="text-gray-400 text-xs">USD Coin</span>
-                    </div>
-                    <div class="custom-option" onclick="selectBuyAsset('CNGN', '/logos/cngn.png?v=2', 'Naira Token', 'switch')">
-                      <img src="/logos/cngn.png?v=2" class="w-6 h-6" alt="CNGN"><span
-                        class="font-medium">CNGN</span><span class="text-gray-400 text-xs">Naira Token</span>
-                    </div>
-                    <div class="border-t border-gray-100 my-1"></div>
-                    <div class="custom-option" onclick="selectBuyAsset('SOL', '/logos/solana.png', 'Solana', 'paj')">
-                      <img src="/logos/solana.png" class="w-6 h-6" alt="SOL"><span class="font-medium">SOL</span><span
-                        class="text-gray-400 text-xs">Solana</span>
-                    </div>
-                    <div class="custom-option" onclick="selectBuyAsset('JUP', '/logos/jup.png', 'Jupiter', 'paj')">
-                      <div class="w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white text-[8px] font-bold shrink-0">J</div>
-                      <span class="font-medium">JUP</span><span class="text-gray-400 text-xs">Jupiter</span>
-                    </div>
-                    <div class="custom-option" onclick="selectBuyAsset('USDG', '/logos/usdc.png', 'USDC', 'paj')">
-                      <img src="/logos/usdc.png" class="w-6 h-6" alt="USDG"><span class="font-medium">USDG</span><span
-                        class="text-gray-400 text-xs">USDC on Solana</span>
+                  <!-- Asset Picker Modal -->
+                  <div class="asset-picker-modal" id="buy-asset-options">
+                    <div class="asset-picker-backdrop" onclick="closeBuyAssetPicker()"></div>
+                    <div class="asset-picker-sheet">
+                      <div class="asset-picker-header">
+                        <button class="asset-picker-back" onclick="closeBuyAssetPicker()" aria-label="Back">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                        </button>
+                        <h3>Select Crypto Currency</h3>
+                      </div>
+                      <div class="asset-picker-search">
+                        <div class="asset-picker-search-wrap">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                          <input type="text" id="buy-asset-search" placeholder="Search Crypto" oninput="filterBuyAssets()" autocomplete="off">
+                        </div>
+                      </div>
+                      <div class="asset-picker-list" id="buy-asset-list">
+                        <div class="asset-picker-divider">Stablecoins</div>
+                        <div class="asset-picker-item" data-symbol="USDT" data-name="Tether" onclick="selectBuyAsset('USDT', '/logos/usdt.png', 'Tether', 'switch')">
+                          <img src="/logos/usdt.png" class="asset-picker-logo" alt="USDT">
+                          <div class="asset-picker-info">
+                            <div class="asset-picker-symbol">USDT</div>
+                            <div class="asset-picker-name">Tether</div>
+                          </div>
+                        </div>
+                        <div class="asset-picker-item" data-symbol="USDC" data-name="USD Coin" onclick="selectBuyAsset('USDC', '/logos/usdc.png', 'USD Coin', 'switch')">
+                          <img src="/logos/usdc.png" class="asset-picker-logo" alt="USDC">
+                          <div class="asset-picker-info">
+                            <div class="asset-picker-symbol">USDC</div>
+                            <div class="asset-picker-name">USD Coin</div>
+                          </div>
+                        </div>
+                        <div class="asset-picker-item" data-symbol="CNGN" data-name="Naira Token" onclick="selectBuyAsset('CNGN', '/logos/cngn.png?v=2', 'Naira Token', 'switch')">
+                          <img src="/logos/cngn.png?v=2" class="asset-picker-logo" alt="CNGN">
+                          <div class="asset-picker-info">
+                            <div class="asset-picker-symbol">CNGN</div>
+                            <div class="asset-picker-name">Naira Token</div>
+                          </div>
+                        </div>
+                        <div class="asset-picker-divider">Solana</div>
+                        <div class="asset-picker-item" data-symbol="SOL" data-name="Solana" onclick="selectBuyAsset('SOL', '/logos/solana.png', 'Solana', 'paj')">
+                          <img src="/logos/solana.png" class="asset-picker-logo" alt="SOL">
+                          <div class="asset-picker-info">
+                            <div class="asset-picker-symbol">SOL</div>
+                            <div class="asset-picker-name">Solana</div>
+                          </div>
+                        </div>
+                        <div class="asset-picker-item" data-symbol="JUP" data-name="Jupiter" onclick="selectBuyAsset('JUP', '/logos/jup.png', 'Jupiter', 'paj')">
+                          <div class="asset-picker-logo" style="background: linear-gradient(135deg, #ec4899, #9333ea); display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 700;">J</div>
+                          <div class="asset-picker-info">
+                            <div class="asset-picker-symbol">JUP</div>
+                            <div class="asset-picker-name">Jupiter</div>
+                          </div>
+                        </div>
+                        <div class="asset-picker-item" data-symbol="USDG" data-name="Global Dollar" onclick="selectBuyAsset('USDG', '/logos/usdg.png', 'Global Dollar', 'paj')">
+                          <img src="/logos/usdg.png" class="asset-picker-logo" alt="USDG">
+                          <div class="asset-picker-info">
+                            <div class="asset-picker-symbol">USDG</div>
+                            <div class="asset-picker-name">Global Dollar</div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1336,8 +1550,11 @@
         document.getElementById('buy-amount-step').classList.remove('opacity-50', 'pointer-events-none');
 
         // Mark options selected
-        document.querySelectorAll('#sell-asset-options .custom-option, #buy-asset-options .custom-option').forEach(o => {
+        document.querySelectorAll('#sell-asset-options .custom-option').forEach(o => {
           if (o.textContent.includes('USDT')) o.classList.add('selected');
+        });
+        document.querySelectorAll('#buy-asset-list .asset-picker-item').forEach(o => {
+          if (o.dataset.symbol === 'USDT') o.classList.add('selected');
         });
         document.querySelectorAll('#sell-network-options .custom-option, #buy-network-options .custom-option').forEach(o => {
           if (o.textContent.includes('Solana')) o.classList.add('selected');
@@ -1484,6 +1701,31 @@
       }
     }
 
+    const PAJ_TOKEN_PRICES = {};
+
+    async function fetchPajTokenPrices() {
+      try {
+        const ids = 'solana,jupiter-exchange-solana,usd-coin';
+        const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`, { cache: 'default' });
+        if (!res.ok) return;
+        const data = await res.json();
+        PAJ_TOKEN_PRICES['SOL'] = data['solana']?.usd || 0;
+        PAJ_TOKEN_PRICES['JUP'] = data['jupiter-exchange-solana']?.usd || 0;
+        PAJ_TOKEN_PRICES['USDG'] = data['usd-coin']?.usd || 1;
+      } catch (e) {
+        console.log('Token price fetch failed:', e.message);
+      }
+    }
+
+    function computePajTokenRate(asset) {
+      const pajRate = currentRate.paj || 0;
+      const tokenUsd = PAJ_TOKEN_PRICES[asset] || 0;
+      if (pajRate > 0 && tokenUsd > 0) {
+        return pajRate * tokenUsd;
+      }
+      return 0;
+    }
+
     async function fetchPajRate() {
       try {
         const res = await fetch(`${API_BASE}/api/paj/rate`);
@@ -1492,9 +1734,13 @@
         const data = payload.data || {};
         const onrampRate = data.onramp?.rate;
         if (onrampRate) {
-          // PAJ rate is USD->NGN, we need to convert to crypto rate
-          // Store PAJ USD/NGN rate and fetch token value for precise calculation
           currentRate.paj = onrampRate;
+        }
+        // Fetch token prices and compute approximate token rates (no session needed)
+        await fetchPajTokenPrices();
+        if (currentBuyAsset && currentProvider === 'paj') {
+          const approxRate = computePajTokenRate(currentBuyAsset);
+          if (approxRate > 0) currentRate.buy = approxRate;
         }
         updateNavRate();
         updateRateDisplays();
@@ -1703,8 +1949,54 @@
         const p = o.closest('.custom-select');
         if (p) p.style.zIndex = '';
       });
+      document.querySelectorAll('.asset-picker-modal').forEach(o => o.classList.remove('open'));
+      document.body.style.overflow = '';
       const backdrop = document.getElementById('dropdown-backdrop');
       if (backdrop) backdrop.classList.remove('active');
+    }
+
+    function openBuyAssetPicker() {
+      const modal = document.getElementById('buy-asset-options');
+      const searchInput = document.getElementById('buy-asset-search');
+      if (searchInput) { searchInput.value = ''; filterBuyAssets(); }
+      // Highlight current selection
+      document.querySelectorAll('#buy-asset-list .asset-picker-item').forEach(item => {
+        item.classList.toggle('selected', item.dataset.symbol === currentBuyAsset);
+      });
+      if (modal) {
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+      if (searchInput) setTimeout(() => searchInput.focus(), 100);
+    }
+
+    function closeBuyAssetPicker() {
+      const modal = document.getElementById('buy-asset-options');
+      if (modal) modal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function filterBuyAssets() {
+      const term = document.getElementById('buy-asset-search').value.trim().toLowerCase();
+      const items = document.querySelectorAll('#buy-asset-list .asset-picker-item');
+      const dividers = document.querySelectorAll('#buy-asset-list .asset-picker-divider');
+      items.forEach(item => {
+        const symbol = (item.dataset.symbol || '').toLowerCase();
+        const name = (item.dataset.name || '').toLowerCase();
+        item.style.display = (!term || symbol.includes(term) || name.includes(term)) ? '' : 'none';
+      });
+      // Hide dividers if all items below them are hidden
+      dividers.forEach(div => {
+        let next = div.nextElementSibling;
+        let anyVisible = false;
+        while (next && !next.classList.contains('asset-picker-divider')) {
+          if (next.classList.contains('asset-picker-item') && next.style.display !== 'none') {
+            anyVisible = true; break;
+          }
+          next = next.nextElementSibling;
+        }
+        div.style.display = anyVisible ? '' : 'none';
+      });
     }
 
     function switchTab(tab) {
@@ -1873,17 +2165,15 @@
         <span class="font-bold text-sm sm:text-base">${symbol}</span>
         <span class="text-gray-400 text-[10px] hidden sm:inline ml-1">${name}</span>
       `;
-      // Close dropdown and remove backdrop/blur
-      document.getElementById('buy-asset-options').classList.remove('open');
-      document.getElementById('dropdown-backdrop').classList.remove('active');
-      document.body.style.overflow = '';
-      document.querySelectorAll('#buy-asset-options .custom-option').forEach(o => o.classList.remove('selected'));
+      // Close modal picker
+      closeBuyAssetPicker();
+      document.querySelectorAll('#buy-asset-list .asset-picker-item').forEach(o => o.classList.remove('selected'));
       if (event && event.currentTarget) event.currentTarget.classList.add('selected');
-      
+
       document.getElementById('buy-amount-label').textContent = symbol;
       safeSetText('buy-confirm-asset', symbol);
       safeSetSrc('buy-confirm-asset-img', logo);
-      
+
       if (currentProvider === 'paj') {
         currentBuyNetwork = 'solana';
         // Hide network selector for PAJ (always Solana)
@@ -1975,14 +2265,30 @@
       const amount = parseFloat(document.getElementById('buy-amount').value) || 0;
       validateBuyLimit(amount);
 
-      // PAJ provider uses different rate calculation
+      // PAJ provider: try exact value from PAJ API (needs session), fallback to rate approx
       if (currentProvider === 'paj') {
         document.getElementById('buy-receive').value = '';
         document.getElementById('buy-preview').classList.add('hidden');
         if (amount > 0) {
-          // Debounce PAJ value fetch
           if (pajValueTimeout) clearTimeout(pajValueTimeout);
-          pajValueTimeout = setTimeout(() => fetchPajValue(amount), 400);
+          pajValueTimeout = setTimeout(async () => {
+            const exact = await fetchPajValue(amount);
+            if (exact === null) {
+              // Fallback: approximate using CoinGecko price * PAJ rate
+              const rate = Number(currentRate.buy);
+              if (!Number.isNaN(rate) && rate > 0) {
+                const effectiveAmount = amount * (1 - currentFee / 100);
+                const receive = effectiveAmount / rate;
+                document.getElementById('buy-receive').value = receive.toFixed(4);
+                const preview = document.getElementById('buy-preview');
+                const previewFiat = document.getElementById('buy-preview-fiat');
+                const previewCrypto = document.getElementById('buy-preview-crypto');
+                previewFiat.textContent = `₦${amount.toLocaleString()}`;
+                previewCrypto.textContent = `${receive.toFixed(4)} ${currentBuyAsset}`;
+                preview.classList.remove('hidden');
+              }
+            }
+          }, 400);
         }
         updateStepIndicators('ONRAMP');
         return;
@@ -2020,7 +2326,7 @@
 
     async function fetchPajValue(fiatAmount) {
       const mint = PAJ_MINTS[currentBuyAsset];
-      if (!mint) return;
+      if (!mint) return null;
       try {
         const res = await fetch(`${API_BASE}/api/paj/value`, {
           method: 'POST',
@@ -2039,10 +2345,12 @@
           previewFiat.textContent = `₦${fiatAmount.toLocaleString()}`;
           previewCrypto.textContent = `${tokenAmount.toFixed(4)} ${currentBuyAsset}`;
           preview.classList.remove('hidden');
+          return tokenAmount;
         }
       } catch (err) {
         console.log('PAJ value fetch failed:', err.message);
       }
+      return null;
     }
 
     function calculateBuyFromCrypto() {
