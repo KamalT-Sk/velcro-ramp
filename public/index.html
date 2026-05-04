@@ -2756,7 +2756,10 @@
         document.getElementById('buy-bank-name').textContent = deposit.bank_name || data.bank_name || '-';
         document.getElementById('buy-account-number').textContent = deposit.account_number || data.account_number || '-';
         document.getElementById('buy-account-name').textContent = 'Velcro(switchLabsLtd. checkout)';
-        document.getElementById('buy-rate-used').textContent = currentRate.buy ? (currentProvider === 'paj' && currentRate.paj ? `$1 on ${currentBuyAsset} = ${formatCurrency(currentRate.paj)}` : `1 ${currentBuyAsset} = ${formatCurrency(currentRate.buy)}`) : '-';
+        const buyRateUsedEl = document.getElementById('buy-rate-used');
+        if (buyRateUsedEl) {
+          buyRateUsedEl.textContent = currentRate.buy ? (currentProvider === 'paj' && currentRate.paj ? `$1 on ${currentBuyAsset} = ${formatCurrency(currentRate.paj)}` : `1 ${currentBuyAsset} = ${formatCurrency(currentRate.buy)}`) : '-';
+        }
         document.getElementById('buy-reference').textContent = data.reference || '-';
         currentReference = data.reference || '';
         document.getElementById('buy-generated-account').classList.remove('hidden');
