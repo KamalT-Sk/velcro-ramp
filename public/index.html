@@ -1736,7 +1736,7 @@
         await fetchPajTokenPrices();
         if (currentBuyAsset && currentProvider === 'paj') {
           const approxRate = computePajTokenRate(currentBuyAsset);
-          if (approxRate > 0) currentRate.buy = approxRate;
+          currentRate.buy = approxRate > 0 ? approxRate : 0;
         }
         updateNavRate();
         updateRateDisplays();
@@ -1752,7 +1752,11 @@
       const asset = isSell ? currentSellAsset : currentBuyAsset;
       const rate = isSell ? currentRate.sell : currentRate.buy;
       if (ratePill && asset && rate) {
-        ratePill.textContent = `1 ${asset} = ${formatCurrency(rate)}`;
+        if (!isSell && currentProvider === 'paj' && currentRate.paj) {
+          ratePill.textContent = `$1 = ${formatCurrency(currentRate.paj)}`;
+        } else {
+          ratePill.textContent = `1 ${asset} = ${formatCurrency(rate)}`;
+        }
       }
     }
 
@@ -1769,7 +1773,11 @@
       }
       if (buyRateEl) {
         if (currentBuyAsset && currentRate.buy) {
-          buyRateEl.innerHTML = `${pulse}Rate: 1 ${currentBuyAsset} = ${formatCurrency(currentRate.buy)}`;
+          if (currentProvider === 'paj' && currentRate.paj) {
+            buyRateEl.innerHTML = `${pulse}Rate: $1 on ${currentBuyAsset} = ${formatCurrency(currentRate.paj)}`;
+          } else {
+            buyRateEl.innerHTML = `${pulse}Rate: 1 ${currentBuyAsset} = ${formatCurrency(currentRate.buy)}`;
+          }
         } else {
           buyRateEl.innerHTML = `${pulse}Rate: --`;
         }
@@ -2177,6 +2185,7 @@
         netWrap.classList.add('opacity-50', 'pointer-events-none');
         netWrap.style.display = 'none';
         document.getElementById('buy-network-display').innerHTML = '<img src="/logos/solana.png" class="w-5 h-5 rounded-full"><span class="font-medium text-sm">Solana</span>';
+        currentRate.buy = 0; // reset to avoid stale switch rate
         await fetchPajRate();
       } else {
         // Show network selector for Switch assets
@@ -2761,7 +2770,7 @@
         document.getElementById('buy-bank-name').textContent = deposit.bank_name || data.bank_name || '-';
         document.getElementById('buy-account-number').textContent = deposit.account_number || data.account_number || '-';
         document.getElementById('buy-account-name').textContent = 'Velcro(switchLabsLtd. checkout)';
-        document.getElementById('buy-rate-used').textContent = currentRate.buy ? `1 ${currentBuyAsset} = ${formatCurrency(currentRate.buy)}` : '-';
+        document.getElementById('buy-rate-used').textContent = currentRate.buy ? (currentProvider === 'paj' && currentRate.paj ? `$1 on ${currentBuyAsset} = ${formatCurrency(currentRate.paj)}` : `1 ${currentBuyAsset} = ${formatCurrency(currentRate.buy)}`) : '-';
         document.getElementById('buy-reference').textContent = data.reference || '-';
         currentReference = data.reference || '';
         document.getElementById('buy-generated-account').classList.remove('hidden');
