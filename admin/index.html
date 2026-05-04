@@ -1066,14 +1066,25 @@
             setTimeout(() => el.classList.add('hidden'), 6000);
         }
 
-        function setPajStatus(state, title, sub, iconName) {
+        function formatDate(d) {
+            if (!d) return '';
+            const date = new Date(d);
+            if (isNaN(date.getTime())) return '';
+            return date.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function setPajStatus(state, title, sub, iconName, expiresAt) {
             const statusEl = document.getElementById('paj-session-status');
             const iconWrap = document.getElementById('paj-status-icon');
             const titleEl = document.getElementById('paj-status-title');
             const subEl = document.getElementById('paj-status-sub');
 
             titleEl.innerText = title;
-            subEl.innerText = sub || '';
+            let subtitle = sub || '';
+            if (state === 'active' && expiresAt) {
+                subtitle += (subtitle ? ' · ' : '') + 'Expires ' + formatDate(expiresAt);
+            }
+            subEl.innerText = subtitle;
             iconWrap.innerHTML = `<i data-lucide="${iconName}" style="width: 20px; height: 20px; color: white;"></i>`;
 
             if (state === 'active') {
@@ -1102,17 +1113,22 @@
                 const data = await res.json();
                 const status = data.data || {};
                 const otpSection = document.getElementById('paj-otp-section');
+                const initiateBtn = document.getElementById('paj-initiate-btn');
 
                 if (status.isValid) {
-                    setPajStatus('active', 'Session Active', `Email: ${status.email || '-'}`, 'check');
+                    setPajStatus('active', 'Session Active', `Email: ${status.email || '-'}`, 'check', status.expiresAt);
                     otpSection.classList.add('hidden');
+                    initiateBtn.innerHTML = '<i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i><span>Re-initiate</span>';
                 } else if (status.hasSession) {
-                    setPajStatus('expired', 'Session Expired', `Email: ${status.email || '-'} — Re-verify to continue`, 'clock');
+                    setPajStatus('expired', 'Session Expired', `Email: ${status.email || '-'} — Re-verify to continue`, 'clock', status.expiresAt);
                     otpSection.classList.remove('hidden');
+                    initiateBtn.innerHTML = '<i data-lucide="send" style="width: 16px; height: 16px;"></i><span>Initiate Session</span>';
                 } else {
                     setPajStatus('inactive', 'No Active Session', 'Click Initiate to receive an OTP', 'shield-alert');
                     otpSection.classList.add('hidden');
+                    initiateBtn.innerHTML = '<i data-lucide="send" style="width: 16px; height: 16px;"></i><span>Initiate Session</span>';
                 }
+                if (window.lucide) lucide.createIcons();
             } catch (e) {
                 setPajStatus('error', 'Connection Error', 'Could not reach PAJ service', 'wifi-off');
                 console.error('PAJ session fetch failed:', e);
