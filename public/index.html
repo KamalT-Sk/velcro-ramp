@@ -2251,31 +2251,27 @@
       const amount = parseFloat(document.getElementById('buy-amount').value) || 0;
       validateBuyLimit(amount);
 
-      // PAJ provider: try exact value from PAJ API (needs session), fallback to rate approx
+      // PAJ provider: display approximate immediately, then fetch exact PAJ value
       if (currentProvider === 'paj') {
-        document.getElementById('buy-receive').value = '';
-        document.getElementById('buy-preview').classList.add('hidden');
-        if (amount > 0) {
-          if (pajValueTimeout) clearTimeout(pajValueTimeout);
-          pajValueTimeout = setTimeout(async () => {
-            const exact = await fetchPajValue(amount);
-            if (exact === null) {
-              // Fallback: approximate using CoinGecko price * PAJ rate
-              const rate = Number(currentRate.buy);
-              if (!Number.isNaN(rate) && rate > 0) {
-                const receive = amount / rate;
-                document.getElementById('buy-receive').value = receive.toFixed(4);
-                const preview = document.getElementById('buy-preview');
-                const previewFiat = document.getElementById('buy-preview-fiat');
-                const previewCrypto = document.getElementById('buy-preview-crypto');
-                previewFiat.textContent = `₦${amount.toLocaleString()}`;
-                const usdValue = currentRate.paj ? (amount / currentRate.paj).toFixed(2) : '0.00';
-                previewCrypto.textContent = `$${usdValue} of ${currentBuyAsset}`;
-                preview.classList.remove('hidden');
-              }
-            }
-          }, 400);
+        const pajRate = currentRate.paj || 0;
+        const tokenUsd = PAJ_TOKEN_PRICES[currentBuyAsset] || 0;
+        if (pajRate > 0 && tokenUsd > 0 && amount > 0) {
+          const usdValue = amount / pajRate;
+          const tokenAmount = usdValue / tokenUsd;
+          document.getElementById('buy-receive').value = tokenAmount.toFixed(4);
+          const preview = document.getElementById('buy-preview');
+          const previewFiat = document.getElementById('buy-preview-fiat');
+          const previewCrypto = document.getElementById('buy-preview-crypto');
+          previewFiat.textContent = `₦${amount.toLocaleString()}`;
+          previewCrypto.textContent = `$${usdValue.toFixed(2)} of ${currentBuyAsset}`;
+          preview.classList.remove('hidden');
+        } else {
+          document.getElementById('buy-receive').value = '';
+          document.getElementById('buy-preview').classList.add('hidden');
         }
+        // Fetch exact PAJ value in background (may refine the display)
+        if (pajValueTimeout) clearTimeout(pajValueTimeout);
+        pajValueTimeout = setTimeout(() => fetchPajValue(amount), 400);
         updateStepIndicators('ONRAMP');
         return;
       }
@@ -2321,17 +2317,18 @@
         if (!res.ok) throw new Error('Failed to fetch PAJ value');
         const payload = await res.json();
         const data = payload.data || {};
-        const tokenAmount = data.amount;
-        if (tokenAmount !== undefined) {
+        // PAJ returns input amount in `data.amount` (echo) — use tokenRate for exact calc
+        const tokenRate = data.tokenRate;
+        if (tokenRate && tokenRate > 0) {
+          const tokenAmount = fiatAmount / tokenRate;
           document.getElementById('buy-receive').value = tokenAmount.toFixed(4);
-          const preview = document.getElementById('buy-preview');
-          const previewFiat = document.getElementById('buy-preview-fiat');
-          const previewCrypto = document.getElementById('buy-preview-crypto');
-          previewFiat.textContent = `₦${fiatAmount.toLocaleString()}`;
-          const usdValue = currentRate.paj ? (fiatAmount / currentRate.paj).toFixed(2) : '0.00';
-          previewCrypto.textContent = `$${usdValue} of ${currentBuyAsset}`;
-          preview.classList.remove('hidden');
           return tokenAmount;
+        }
+        // Fallback: only use amount if it's clearly a token amount (much smaller than fiat)
+        const amount = data.amount;
+        if (amount !== undefined && amount < fiatAmount * 0.1) {
+          document.getElementById('buy-receive').value = amount.toFixed(4);
+          return amount;
         }
       } catch (err) {
         console.log('PAJ value fetch failed:', err.message);
