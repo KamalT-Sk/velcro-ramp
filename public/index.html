@@ -1030,7 +1030,7 @@
                   </div>
                   <span class="text-[10px] text-gray-400 font-medium tracking-wide">Choose Asset</span>
                 </div>
-                <div class="flex flex-col items-center sm:items-end gap-0.5">
+                <div class="flex flex-col items-center sm:items-end gap-0.5" id="buy-network-col">
                   <div class="custom-select">
                     <div class="network-pill opacity-50 pointer-events-none" id="buy-network-wrap"
                       onclick="toggleDropdown('buy-network-options')">
@@ -2161,17 +2161,17 @@
 
       if (currentProvider === 'paj') {
         currentBuyNetwork = 'solana';
-        // Hide network selector for PAJ (always Solana)
-        const netWrap = document.getElementById('buy-network-wrap');
-        netWrap.classList.add('opacity-50', 'pointer-events-none');
-        netWrap.style.display = 'none';
+        // Hide network selector column for PAJ (always Solana)
+        const netCol = document.getElementById('buy-network-col');
+        if (netCol) netCol.style.display = 'none';
         document.getElementById('buy-network-display').innerHTML = '<img src="/logos/solana.png" class="w-5 h-5 rounded-full"><span class="font-medium text-sm">Solana</span>';
         currentRate.buy = 0; // reset to avoid stale switch rate
         await fetchPajRate();
       } else {
-        // Show network selector for Switch assets
+        // Show network selector column for Switch assets
+        const netCol = document.getElementById('buy-network-col');
+        if (netCol) netCol.style.display = '';
         const netWrap = document.getElementById('buy-network-wrap');
-        netWrap.style.display = '';
         netWrap.classList.remove('opacity-50', 'pointer-events-none');
         currentSwitchAsset = getSwitchAsset(currentBuyAsset, currentBuyNetwork);
         if (currentSwitchAsset) await fetchRate();
