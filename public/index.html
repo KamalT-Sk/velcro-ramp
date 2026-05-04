@@ -737,7 +737,7 @@
                         <path d="m6 9 6 6 6-6" />
                       </svg>
                     </div>
-                  <div class="custom-select-options" id="sell-network-options">
+                    <div class="custom-select-options" id="sell-network-options">
                     <div class="custom-option" onclick="selectSellNetwork('solana', '/logos/solana.png', 'Solana')">
                       <img src="/logos/solana.png" class="w-6 h-6" alt="Solana"><span class="font-medium">Solana</span>
                     </div>
@@ -765,6 +765,7 @@
                       <img src="/logos/tron.png" class="w-6 h-6" alt="Tron"><span class="font-medium">Tron</span>
                     </div>
                   </div>
+                  </div>
                   <span class="text-[10px] text-gray-400 font-medium tracking-wide">Choose Blockchain</span>
                 </div>
               </div>
@@ -784,13 +785,15 @@
 
           <!-- You'll Receive Panel -->
           <div id="sell-receive-panel" class="input-panel">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-2">
+            <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
               <span class="text-sm text-gray-500 font-medium">You'll receive</span>
-              <span
-                class="text-[10px] sm:text-xs font-semibold text-gray-700 flex items-center gap-1.5 bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-full"
-                id="sell-rate-display"><span class="w-2 h-2 rounded-full bg-green-500 live-pulse"></span>Rate: --</span>
-              <span id="sell-rate-timer" class="hidden text-[10px] text-amber-600 font-medium"></span>
-              <span id="sell-fee-badge" class="text-[10px] text-gray-400 font-medium">0.5% fee</span>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span
+                  class="text-[10px] sm:text-xs font-semibold text-gray-700 flex items-center gap-1.5 bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-full"
+                  id="sell-rate-display"><span class="w-2 h-2 rounded-full bg-green-500 live-pulse"></span>Rate: --</span>
+                <span id="sell-rate-timer" class="hidden text-[10px] text-amber-600 font-medium"></span>
+                <span id="sell-fee-badge" class="text-[10px] text-gray-400 font-medium">0.5% fee</span>
+              </div>
             </div>
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div class="flex items-center gap-2 flex-1 min-w-0">
@@ -997,12 +1000,14 @@
 
           <!-- You'll Receive Panel -->
           <div id="buy-receive-panel" class="input-panel">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-2">
+            <div class="flex items-center justify-between mb-3 gap-2 flex-wrap">
               <span class="text-sm text-gray-500 font-medium">You'll receive</span>
-              <span
-                class="text-[10px] sm:text-xs font-semibold text-gray-700 flex items-center gap-1.5 bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-full"
-                id="buy-rate-display"><span class="w-2 h-2 rounded-full bg-green-500 live-pulse"></span>Rate: --</span>
-              <span id="buy-rate-timer" class="hidden text-[10px] text-amber-600 font-medium"></span>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span
+                  class="text-[10px] sm:text-xs font-semibold text-gray-700 flex items-center gap-1.5 bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-full"
+                  id="buy-rate-display"><span class="w-2 h-2 rounded-full bg-green-500 live-pulse"></span>Rate: --</span>
+                <span id="buy-rate-timer" class="hidden text-[10px] text-amber-600 font-medium"></span>
+              </div>
             </div>
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div class="flex items-center gap-2 flex-1 min-w-0">
@@ -1036,7 +1041,7 @@
                         <path d="m6 9 6 6 6-6" />
                       </svg>
                     </div>
-                  <div class="custom-select-options" id="buy-network-options">
+                    <div class="custom-select-options" id="buy-network-options">
                     <div class="custom-option" onclick="selectBuyNetwork('solana', '/logos/solana.png', 'Solana')">
                       <img src="/logos/solana.png" class="w-6 h-6" alt="Solana"><span class="font-medium">Solana</span>
                     </div>
@@ -1063,6 +1068,7 @@
                     <div class="custom-option" onclick="selectBuyNetwork('tron', '/logos/tron.png', 'Tron')">
                       <img src="/logos/tron.png" class="w-6 h-6" alt="Tron"><span class="font-medium">Tron</span>
                     </div>
+                  </div>
                   </div>
                   <span class="text-[10px] text-gray-400 font-medium tracking-wide">Choose Blockchain</span>
                 </div>
