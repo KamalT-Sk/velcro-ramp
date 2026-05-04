@@ -143,9 +143,9 @@ async function getSessionToken() {
   throw new Error('PAJ session expired. Please initiate and verify OTP via admin dashboard.');
 }
 
-// Get PAJ rates
+// Get PAJ rates (public endpoint, no API key needed)
 async function getPajRate() {
-  if (!pajSdk || !PAJ_API_KEY) {
+  if (!pajSdk) {
     throw new Error('PAJ SDK not available');
   }
   try {
