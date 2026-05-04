@@ -711,28 +711,32 @@
                 <input type="number" id="sell-amount" placeholder="0.00" min="0" step="0.01" oninput="calculateSell()"
                   class="display-input text-2xl sm:text-3xl font-bold text-gray-900 bg-transparent outline-none w-full p-0 border-none focus:ring-0 amount-input placeholder-gray-300">
               </div>
-              <div class="flex flex-row sm:flex-col items-center sm:items-end gap-2 shrink-0 w-full sm:w-auto">
-                <div class="custom-select" id="sell-asset-wrap">
-                  <div class="asset-pill" onclick="openSellAssetPicker()">
-                    <div class="flex items-center gap-1.5" id="sell-asset-display">
-                      <span class="text-gray-400 text-sm">Select</span>
+              <div class="flex flex-row sm:flex-col items-start sm:items-end gap-2 shrink-0 w-full sm:w-auto">
+                <div class="flex flex-col items-center sm:items-end gap-0.5">
+                  <div class="custom-select" id="sell-asset-wrap">
+                    <div class="asset-pill" onclick="openSellAssetPicker()">
+                      <div class="flex items-center gap-1.5" id="sell-asset-display">
+                        <span class="text-gray-400 text-sm">Select</span>
+                      </div>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
+                        <path d="m6 9 6 6 6-6" />
+                      </svg>
                     </div>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                      stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
-                      <path d="m6 9 6 6 6-6" />
-                    </svg>
                   </div>
+                  <span class="text-[10px] text-gray-400 font-medium tracking-wide">Choose Asset</span>
                 </div>
-                <div class="custom-select">
-                  <div class="network-pill opacity-50 pointer-events-none" id="sell-network-wrap"
-                    onclick="toggleDropdown('sell-network-options')">
-                    <span id="sell-network-display" class="flex items-center gap-1.5 text-gray-400 text-sm">Select
-                      Network</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                      stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
-                      <path d="m6 9 6 6 6-6" />
-                    </svg>
-                  </div>
+                <div class="flex flex-col items-center sm:items-end gap-0.5">
+                  <div class="custom-select">
+                    <div class="network-pill opacity-50 pointer-events-none" id="sell-network-wrap"
+                      onclick="toggleDropdown('sell-network-options')">
+                      <span id="sell-network-display" class="flex items-center gap-1.5 text-gray-400 text-sm">Select
+                        Network</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
+                        <path d="m6 9 6 6 6-6" />
+                      </svg>
+                    </div>
                   <div class="custom-select-options" id="sell-network-options">
                     <div class="custom-option" onclick="selectSellNetwork('solana', '/logos/solana.png', 'Solana')">
                       <img src="/logos/solana.png" class="w-6 h-6" alt="Solana"><span class="font-medium">Solana</span>
@@ -761,6 +765,7 @@
                       <img src="/logos/tron.png" class="w-6 h-6" alt="Tron"><span class="font-medium">Tron</span>
                     </div>
                   </div>
+                  <span class="text-[10px] text-gray-400 font-medium tracking-wide">Choose Blockchain</span>
                 </div>
               </div>
             </div>
@@ -1005,28 +1010,32 @@
                   oninput="calculateBuyFromCrypto()"
                   class="display-input text-2xl sm:text-3xl font-bold text-gray-900 bg-transparent outline-none w-full p-0 border-none focus:ring-0 amount-input placeholder-gray-300">
               </div>
-              <div class="flex flex-row sm:flex-col items-center sm:items-end gap-2 shrink-0 w-full sm:w-auto">
-                <div class="custom-select" id="buy-asset-wrap">
-                  <div class="asset-pill" onclick="openBuyAssetPicker()">
-                    <div class="flex items-center gap-1.5" id="buy-asset-display">
-                      <span class="text-gray-400 text-sm">Select</span>
+              <div class="flex flex-row sm:flex-col items-start sm:items-end gap-2 shrink-0 w-full sm:w-auto">
+                <div class="flex flex-col items-center sm:items-end gap-0.5">
+                  <div class="custom-select" id="buy-asset-wrap">
+                    <div class="asset-pill" onclick="openBuyAssetPicker()">
+                      <div class="flex items-center gap-1.5" id="buy-asset-display">
+                        <span class="text-gray-400 text-sm">Select</span>
+                      </div>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
+                        <path d="m6 9 6 6 6-6" />
+                      </svg>
                     </div>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                      stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
-                      <path d="m6 9 6 6 6-6" />
-                    </svg>
                   </div>
+                  <span class="text-[10px] text-gray-400 font-medium tracking-wide">Choose Asset</span>
                 </div>
-                <div class="custom-select">
-                  <div class="network-pill opacity-50 pointer-events-none" id="buy-network-wrap"
-                    onclick="toggleDropdown('buy-network-options')">
-                    <span id="buy-network-display" class="flex items-center gap-1.5 text-gray-400 text-sm">Select
-                      Network</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                      stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
-                      <path d="m6 9 6 6 6-6" />
-                    </svg>
-                  </div>
+                <div class="flex flex-col items-center sm:items-end gap-0.5">
+                  <div class="custom-select">
+                    <div class="network-pill opacity-50 pointer-events-none" id="buy-network-wrap"
+                      onclick="toggleDropdown('buy-network-options')">
+                      <span id="buy-network-display" class="flex items-center gap-1.5 text-gray-400 text-sm">Select
+                        Network</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
+                        <path d="m6 9 6 6 6-6" />
+                      </svg>
+                    </div>
                   <div class="custom-select-options" id="buy-network-options">
                     <div class="custom-option" onclick="selectBuyNetwork('solana', '/logos/solana.png', 'Solana')">
                       <img src="/logos/solana.png" class="w-6 h-6" alt="Solana"><span class="font-medium">Solana</span>
@@ -1055,6 +1064,7 @@
                       <img src="/logos/tron.png" class="w-6 h-6" alt="Tron"><span class="font-medium">Tron</span>
                     </div>
                   </div>
+                  <span class="text-[10px] text-gray-400 font-medium tracking-wide">Choose Blockchain</span>
                 </div>
               </div>
             </div>
