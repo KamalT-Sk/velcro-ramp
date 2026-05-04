@@ -998,7 +998,6 @@
                 class="text-[10px] sm:text-xs font-semibold text-gray-700 flex items-center gap-1.5 bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-full"
                 id="buy-rate-display"><span class="w-2 h-2 rounded-full bg-green-500 live-pulse"></span>Rate: --</span>
               <span id="buy-rate-timer" class="hidden text-[10px] text-amber-600 font-medium"></span>
-              <span id="sell-fee-badge" class="text-[10px] text-gray-400 font-medium">0.5% fee</span>
             </div>
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div class="flex items-center gap-2 flex-1 min-w-0">
@@ -2246,8 +2245,7 @@
               // Fallback: approximate using CoinGecko price * PAJ rate
               const rate = Number(currentRate.buy);
               if (!Number.isNaN(rate) && rate > 0) {
-                const effectiveAmount = amount * (1 - currentFee / 100);
-                const receive = effectiveAmount / rate;
+                const receive = amount / rate;
                 document.getElementById('buy-receive').value = receive.toFixed(4);
                 const preview = document.getElementById('buy-preview');
                 const previewFiat = document.getElementById('buy-preview-fiat');
@@ -2271,8 +2269,7 @@
         updateStepIndicators('ONRAMP');
         return;
       }
-      const effectiveAmount = amount * (1 - currentFee / 100);
-      const receive = effectiveAmount / rate;
+      const receive = amount / rate;
       if (Number.isNaN(receive)) {
         document.getElementById('buy-receive').value = '';
         document.getElementById('buy-preview').classList.add('hidden');
@@ -2326,8 +2323,7 @@
 
     function calculateBuyFromCrypto() {
       const crypto = parseFloat(document.getElementById('buy-receive').value) || 0;
-      const ngnBeforeFee = crypto * currentRate.buy;
-      const ngn = ngnBeforeFee / (1 - currentFee / 100);
+      const ngn = crypto * currentRate.buy;
       document.getElementById('buy-amount').value = ngn.toFixed(2);
       validateBuyLimit(ngn);
     }
@@ -3352,7 +3348,7 @@
           </div>
         </div>
         <div class="asset-picker-item" data-symbol="JUP" data-name="Jupiter" onclick="selectBuyAsset('JUP', '/logos/jup.png', 'Jupiter', 'paj')">
-          <div class="asset-picker-logo" style="background: linear-gradient(135deg, #ec4899, #9333ea); display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 700;">J</div>
+          <img src="/logos/jup.png" class="asset-picker-logo" alt="JUP">
           <div class="asset-picker-info">
             <div class="asset-picker-symbol">JUP</div>
             <div class="asset-picker-name">Jupiter</div>
